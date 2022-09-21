@@ -15,18 +15,18 @@
  limitations under the License.
 -->
 
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-                                    xmlns:tools="http://schemas.android.com/tools"
-                                    xmlns:cardview="http://schemas.android.com/apk/res-auto"
-                                    cardview:cardUseCompatPadding="true"
-                                    cardview:cardPreventCornerOverlap="false"
-                                    android:foreground="?selectableItemBackground"
-                                    android:focusable="false"
-                                    android:clickable="false"
-                                    android:layout_marginLeft="5dp"
-                                    android:layout_marginRight="5dp"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content">
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+                                   xmlns:tools="http://schemas.android.com/tools"
+                                   xmlns:cardview="http://schemas.android.com/apk/res-auto"
+                                   cardview:cardUseCompatPadding="true"
+                                   cardview:cardPreventCornerOverlap="false"
+                                   android:foreground="?selectableItemBackground"
+                                   android:focusable="false"
+                                   android:clickable="false"
+                                   android:layout_marginLeft="5dp"
+                                   android:layout_marginRight="5dp"
+                                   android:layout_width="match_parent"
+                                   android:layout_height="wrap_content">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -90,4 +90,4 @@
             tools:text="Sat, 04 July"
             android:maxLines="1" />
     </RelativeLayout>
-</android.support.v7.widget.CardView>
+</androidx.cardview.widget.CardView>

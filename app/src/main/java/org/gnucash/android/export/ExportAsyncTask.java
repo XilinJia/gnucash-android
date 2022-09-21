@@ -27,8 +27,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v4.content.FileProvider;
+import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -373,50 +373,53 @@ public class ExportAsyncTask extends AsyncTask<ExportParams, Void, Boolean> {
         }
     }
 
-    private void moveExportToOwnCloud() throws Exporter.ExporterException {
-        Log.i(TAG, "Copying exported file to ownCloud");
+    private void moveExportToOwnCloud() throws Exporter.ExporterException {}
 
-        SharedPreferences mPrefs = mContext.getSharedPreferences(mContext.getString(R.string.owncloud_pref), Context.MODE_PRIVATE);
-
-        Boolean mOC_sync = mPrefs.getBoolean(mContext.getString(R.string.owncloud_sync), false);
-
-        if (!mOC_sync) {
-            throw new Exporter.ExporterException(mExportParams, "ownCloud not enabled.");
-        }
-
-        String mOC_server = mPrefs.getString(mContext.getString(R.string.key_owncloud_server), null);
-        String mOC_username = mPrefs.getString(mContext.getString(R.string.key_owncloud_username), null);
-        String mOC_password = mPrefs.getString(mContext.getString(R.string.key_owncloud_password), null);
-        String mOC_dir = mPrefs.getString(mContext.getString(R.string.key_owncloud_dir), null);
-
-        Uri serverUri = Uri.parse(mOC_server);
-        OwnCloudClient mClient = OwnCloudClientFactory.createOwnCloudClient(serverUri, this.mContext, true);
-        mClient.setCredentials(
-                OwnCloudCredentialsFactory.newBasicCredentials(mOC_username, mOC_password)
-        );
-
-        if (mOC_dir.length() != 0) {
-            RemoteOperationResult dirResult = new CreateRemoteFolderOperation(
-                    mOC_dir, true).execute(mClient);
-            if (!dirResult.isSuccess()) {
-                Log.w(TAG, "Error creating folder (it may happen if it already exists): "
-                           + dirResult.getLogMessage());
-            }
-        }
-        for (String exportedFilePath : mExportedFiles) {
-            String remotePath = mOC_dir + FileUtils.PATH_SEPARATOR + stripPathPart(exportedFilePath);
-            String mimeType = mExporter.getExportMimeType();
-
-            RemoteOperationResult result = new UploadRemoteFileOperation(
-                    exportedFilePath, remotePath, mimeType,
-                    getFileLastModifiedTimestamp(exportedFilePath))
-                    .execute(mClient);
-            if (!result.isSuccess())
-                throw new Exporter.ExporterException(mExportParams, result.getLogMessage());
-
-            new File(exportedFilePath).delete();
-        }
-    }
+    //  by XJ
+//    private void moveExportToOwnCloud0() throws Exporter.ExporterException {
+//        Log.i(TAG, "Copying exported file to ownCloud");
+//
+//        SharedPreferences mPrefs = mContext.getSharedPreferences(mContext.getString(R.string.owncloud_pref), Context.MODE_PRIVATE);
+//
+//        Boolean mOC_sync = mPrefs.getBoolean(mContext.getString(R.string.owncloud_sync), false);
+//
+//        if (!mOC_sync) {
+//            throw new Exporter.ExporterException(mExportParams, "ownCloud not enabled.");
+//        }
+//
+//        String mOC_server = mPrefs.getString(mContext.getString(R.string.key_owncloud_server), null);
+//        String mOC_username = mPrefs.getString(mContext.getString(R.string.key_owncloud_username), null);
+//        String mOC_password = mPrefs.getString(mContext.getString(R.string.key_owncloud_password), null);
+//        String mOC_dir = mPrefs.getString(mContext.getString(R.string.key_owncloud_dir), null);
+//
+//        Uri serverUri = Uri.parse(mOC_server);
+//        OwnCloudClient mClient = OwnCloudClientFactory.createOwnCloudClient(serverUri, this.mContext, true);
+//        mClient.setCredentials(
+//                OwnCloudCredentialsFactory.newBasicCredentials(mOC_username, mOC_password)
+//        );
+//
+//        if (mOC_dir.length() != 0) {
+//            RemoteOperationResult dirResult = new CreateRemoteFolderOperation(
+//                    mOC_dir, true).execute(mClient);
+//            if (!dirResult.isSuccess()) {
+//                Log.w(TAG, "Error creating folder (it may happen if it already exists): "
+//                           + dirResult.getLogMessage());
+//            }
+//        }
+//        for (String exportedFilePath : mExportedFiles) {
+//            String remotePath = mOC_dir + FileUtils.PATH_SEPARATOR + stripPathPart(exportedFilePath);
+//            String mimeType = mExporter.getExportMimeType();
+//
+//            RemoteOperationResult result = new UploadRemoteFileOperation(
+//                    exportedFilePath, remotePath, mimeType,
+//                    getFileLastModifiedTimestamp(exportedFilePath))
+//                    .execute(mClient);
+//            if (!result.isSuccess())
+//                throw new Exporter.ExporterException(mExportParams, result.getLogMessage());
+//
+//            new File(exportedFilePath).delete();
+//        }
+//    }
 
     private static String getFileLastModifiedTimestamp(String path) {
         Long timeStampLong = new File(path).lastModified() / 1000;

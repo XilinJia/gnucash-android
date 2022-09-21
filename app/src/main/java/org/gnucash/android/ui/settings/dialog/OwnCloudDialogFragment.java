@@ -5,10 +5,10 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.preference.CheckBoxPreference;
-import android.support.v7.preference.Preference;
+import androidx.fragment.app.DialogFragment;
+import androidx.core.content.ContextCompat;
+import androidx.preference.CheckBoxPreference;
+import androidx.preference.Preference;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -156,73 +156,76 @@ public class OwnCloudDialogFragment extends DialogFragment {
         dismiss();
     }
 
-    private void checkData() {
-        mServerError.setVisibility(View.GONE);
-        mUsernameError.setVisibility(View.GONE);
-        mDirError.setVisibility(View.GONE);
+    private void checkData() {}
 
-        mOC_server = mServer.getText().toString().trim();
-        mOC_username = mUsername.getText().toString().trim();
-        mOC_password = mPassword.getText().toString().trim();
-        mOC_dir = mDir.getText().toString().trim();
-
-        Uri serverUri = Uri.parse(mOC_server);
-        OwnCloudClient mClient = OwnCloudClientFactory.createOwnCloudClient(serverUri, mContext, true);
-        mClient.setCredentials(
-                OwnCloudCredentialsFactory.newBasicCredentials(mOC_username, mOC_password)
-        );
-
-        final Handler mHandler = new Handler();
-
-        OnRemoteOperationListener listener = new OnRemoteOperationListener() {
-            @Override
-            public void onRemoteOperationFinish(RemoteOperation caller, RemoteOperationResult result) {
-                if (!result.isSuccess()) {
-                    Log.e("OC", result.getLogMessage(), result.getException());
-
-                    if (caller instanceof GetRemoteStatusOperation) {
-                        mServerError.setTextColor(ContextCompat.getColor(getContext(), R.color.debit_red));
-                        mServerError.setText(getString(R.string.owncloud_server_invalid));
-                        mServerError.setVisibility(View.VISIBLE);
-
-                    } else if (caller instanceof GetRemoteUserInfoOperation &&
-                            mServerError.getText().toString().equals(getString(R.string.owncloud_server_ok))) {
-                        mUsernameError.setTextColor(ContextCompat.getColor(getContext(), R.color.debit_red));
-                        mUsernameError.setText(getString(R.string.owncloud_user_invalid));
-                        mUsernameError.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    if (caller instanceof GetRemoteStatusOperation) {
-                        mServerError.setTextColor(ContextCompat.getColor(getContext(), R.color.theme_primary));
-                        mServerError.setText(getString(R.string.owncloud_server_ok));
-                        mServerError.setVisibility(View.VISIBLE);
-                    } else if (caller instanceof GetRemoteUserInfoOperation) {
-                        mUsernameError.setTextColor(ContextCompat.getColor(getContext(), R.color.theme_primary));
-                        mUsernameError.setText(getString(R.string.owncloud_user_ok));
-                        mUsernameError.setVisibility(View.VISIBLE);
-                    }
-                }
-                saveButton();
-            }
-        };
-
-        GetRemoteStatusOperation g = new GetRemoteStatusOperation(mContext);
-        g.execute(mClient, listener, mHandler);
-
-        GetRemoteUserInfoOperation gu = new GetRemoteUserInfoOperation();
-        gu.execute(mClient, listener, mHandler);
-
-        if (FileUtils.isValidPath(mOC_dir, false)) {
-            mDirError.setTextColor(ContextCompat.getColor(getContext(), R.color.theme_primary));
-            mDirError.setText(getString(R.string.owncloud_dir_ok));
-            mDirError.setVisibility(View.VISIBLE);
-        } else {
-            mDirError.setTextColor(ContextCompat.getColor(getContext(), R.color.debit_red));
-            mDirError.setText(getString(R.string.owncloud_dir_invalid));
-            mDirError.setVisibility(View.VISIBLE);
-        }
-        saveButton();
-    }
+    //  by XJ
+//    private void checkData0() {
+//        mServerError.setVisibility(View.GONE);
+//        mUsernameError.setVisibility(View.GONE);
+//        mDirError.setVisibility(View.GONE);
+//
+//        mOC_server = mServer.getText().toString().trim();
+//        mOC_username = mUsername.getText().toString().trim();
+//        mOC_password = mPassword.getText().toString().trim();
+//        mOC_dir = mDir.getText().toString().trim();
+//
+//        Uri serverUri = Uri.parse(mOC_server);
+//        OwnCloudClient mClient = OwnCloudClientFactory.createOwnCloudClient(serverUri, mContext, true);
+//        mClient.setCredentials(
+//                OwnCloudCredentialsFactory.newBasicCredentials(mOC_username, mOC_password)
+//        );
+//
+//        final Handler mHandler = new Handler();
+//
+//        OnRemoteOperationListener listener = new OnRemoteOperationListener() {
+//            @Override
+//            public void onRemoteOperationFinish(RemoteOperation caller, RemoteOperationResult result) {
+//                if (!result.isSuccess()) {
+//                    Log.e("OC", result.getLogMessage(), result.getException());
+//
+//                    if (caller instanceof GetRemoteStatusOperation) {
+//                        mServerError.setTextColor(ContextCompat.getColor(getContext(), R.color.debit_red));
+//                        mServerError.setText(getString(R.string.owncloud_server_invalid));
+//                        mServerError.setVisibility(View.VISIBLE);
+//
+//                    } else if (caller instanceof GetRemoteUserInfoOperation &&
+//                            mServerError.getText().toString().equals(getString(R.string.owncloud_server_ok))) {
+//                        mUsernameError.setTextColor(ContextCompat.getColor(getContext(), R.color.debit_red));
+//                        mUsernameError.setText(getString(R.string.owncloud_user_invalid));
+//                        mUsernameError.setVisibility(View.VISIBLE);
+//                    }
+//                } else {
+//                    if (caller instanceof GetRemoteStatusOperation) {
+//                        mServerError.setTextColor(ContextCompat.getColor(getContext(), R.color.theme_primary));
+//                        mServerError.setText(getString(R.string.owncloud_server_ok));
+//                        mServerError.setVisibility(View.VISIBLE);
+//                    } else if (caller instanceof GetRemoteUserInfoOperation) {
+//                        mUsernameError.setTextColor(ContextCompat.getColor(getContext(), R.color.theme_primary));
+//                        mUsernameError.setText(getString(R.string.owncloud_user_ok));
+//                        mUsernameError.setVisibility(View.VISIBLE);
+//                    }
+//                }
+//                saveButton();
+//            }
+//        };
+//
+//        GetRemoteStatusOperation g = new GetRemoteStatusOperation(mContext);
+//        g.execute(mClient, listener, mHandler);
+//
+//        GetRemoteUserInfoOperation gu = new GetRemoteUserInfoOperation();
+//        gu.execute(mClient, listener, mHandler);
+//
+//        if (FileUtils.isValidPath(mOC_dir, false)) {
+//            mDirError.setTextColor(ContextCompat.getColor(getContext(), R.color.theme_primary));
+//            mDirError.setText(getString(R.string.owncloud_dir_ok));
+//            mDirError.setVisibility(View.VISIBLE);
+//        } else {
+//            mDirError.setTextColor(ContextCompat.getColor(getContext(), R.color.debit_red));
+//            mDirError.setText(getString(R.string.owncloud_dir_invalid));
+//            mDirError.setVisibility(View.VISIBLE);
+//        }
+//        saveButton();
+//    }
 
     /**
      * Binds click listeners for the dialog buttons

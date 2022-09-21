@@ -2,6 +2,19 @@
 <img src="https://travis-ci.org/codinguser/gnucash-android.svg?branch=develop" alt="Travis build status" />
 </a>
 
+---------------------------------------------------
+This fork is updated to SDK 33, Gradle 7.5.1, Androidx, and all dependencies to current.
+
+Due to compile errors, at the moment a couple OwnCloud functionalities are disabled.  Also, a couple 
+routines under androidTest module are turned off.
+
+There is an issue of duplicate class regarding apache common-logging when build apk.  At the moment,
+I manually removed the class from external library org.slf4j:jcl-over-slf4j:1.7.36
+
+The debug app runs fine so far on my phone.
+
+---------------------------------------------------
+
 # Introduction
 
 GnuCash Android is a companion expense-tracker application for GnuCash (desktop) designed for Android.

@@ -14,10 +14,10 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<android.support.v4.widget.SlidingPaneLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/slidingpane_layout">
+<androidx.slidingpanelayout.widget.SlidingPaneLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                     android:orientation="vertical" android:layout_width="match_parent"
+                                                     android:layout_height="match_parent"
+                                                     android:id="@+id/slidingpane_layout">
 
     <fragment android:name="org.gnucash.android.ui.settings.PreferenceHeadersFragment"
         android:tag="PreferenceHeadersFragment"
@@ -30,4 +30,4 @@
         android:layout_width="match_parent"
         android:layout_weight="1"
         android:layout_height="match_parent" />
-</android.support.v4.widget.SlidingPaneLayout>
+</androidx.slidingpanelayout.widget.SlidingPaneLayout>
