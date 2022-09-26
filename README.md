@@ -14,6 +14,8 @@ are collected at one's build environment, if anyone clones this package, he need
 
 The debug app runs fine so far on my phone.
 
+2022-09-26: models codes converted to Kotlin
+
 ---------------------------------------------------
 
 # Introduction
