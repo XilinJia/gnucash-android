@@ -39,12 +39,14 @@ public class Budget extends BaseModel {
     private String mDescription;
     private Recurrence mRecurrence;
     private long mNumberOfPeriods; //default to 12 periods per year
-    private List<BudgetAmount> mBudgetAmounts = new ArrayList<>();
+    private List<BudgetAmount> mBudgetAmounts;
 
     /**
      * Default constructor
      */
     public Budget(){
+        this.mNumberOfPeriods = 12;
+        this.mBudgetAmounts = new ArrayList<>();
         //nothing to see here, move along
     }
 
@@ -55,10 +57,14 @@ public class Budget extends BaseModel {
      */
     public Budget(@NonNull String name){
         this.mName = name;
+        this.mNumberOfPeriods = 12;
+        this.mBudgetAmounts = new ArrayList<>();
     }
 
     public Budget(@NonNull String name, @NonNull Recurrence recurrence){
         this.mName = name;
+        this.mNumberOfPeriods = 12;
+        this.mBudgetAmounts = new ArrayList<>();
         this.mRecurrence = recurrence;
     }
 
