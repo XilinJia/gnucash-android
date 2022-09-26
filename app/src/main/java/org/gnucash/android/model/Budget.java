@@ -38,7 +38,7 @@ public class Budget extends BaseModel {
     private String mName;
     private String mDescription;
     private Recurrence mRecurrence;
-    private long mNumberOfPeriods = 12; //default to 12 periods per year
+    private long mNumberOfPeriods; //default to 12 periods per year
     private List<BudgetAmount> mBudgetAmounts = new ArrayList<>();
 
     /**
