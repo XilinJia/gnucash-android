@@ -153,15 +153,15 @@ public class BudgetFormFragment extends Fragment implements RecurrencePickerDial
      * @param budget Budget to use to initialize the views
      */
     private void initViews(Budget budget){
-        mBudgetNameInput.setText(budget.getName());
-        mDescriptionInput.setText(budget.getDescription());
+        mBudgetNameInput.setText(budget.getMName());
+        mDescriptionInput.setText(budget.getMDescription());
 
-        String recurrenceRuleString = budget.getRecurrence().getRuleString();
+        String recurrenceRuleString = budget.getMRecurrence().ruleString();
         mRecurrenceRule = recurrenceRuleString;
         mEventRecurrence.parse(recurrenceRuleString);
-        mRecurrenceInput.setText(budget.getRecurrence().getRepeatString());
+        mRecurrenceInput.setText(budget.getMRecurrence().repeatString());
 
-        mBudgetAmounts = (ArrayList<BudgetAmount>) budget.getCompactedBudgetAmounts();
+        mBudgetAmounts = (ArrayList<BudgetAmount>) budget.compactedBudgetAmounts();
         toggleAmountInputVisibility();
     }
 
@@ -244,18 +244,18 @@ public class BudgetFormFragment extends Fragment implements RecurrencePickerDial
         if (mBudget == null){
             mBudget = new Budget(name);
         } else {
-            mBudget.setName(name);
+            mBudget.setMName(name);
         }
 
         // TODO: 22.10.2015 set the period num of the budget amount
         extractBudgetAmounts();
-        mBudget.setBudgetAmounts(mBudgetAmounts);
+        mBudget.setMBudgetAmounts(mBudgetAmounts);
 
-        mBudget.setDescription(mDescriptionInput.getText().toString().trim());
+        mBudget.setMDescription(mDescriptionInput.getText().toString().trim());
 
         Recurrence recurrence = RecurrenceParser.parse(mEventRecurrence);
-        recurrence.setPeriodStart(new Timestamp(mStartDate.getTimeInMillis()));
-        mBudget.setRecurrence(recurrence);
+        recurrence.setMPeriodStart(new Timestamp(mStartDate.getTimeInMillis()));
+        mBudget.setMRecurrence(recurrence);
 
         mBudgetsDbAdapter.addRecord(mBudget, DatabaseAdapter.UpdateMethod.insert);
         getActivity().finish();
@@ -354,8 +354,8 @@ public class BudgetFormFragment extends Fragment implements RecurrencePickerDial
             mBudgetAmountLayout.setVisibility(View.VISIBLE);
             if (!mBudgetAmounts.isEmpty()) {
                 BudgetAmount budgetAmount = mBudgetAmounts.get(0);
-                mBudgetAmountInput.setValue(budgetAmount.getAmount().asBigDecimal());
-                mBudgetAccountSpinner.setSelection(mAccountsCursorAdapter.getPosition(budgetAmount.getAccountUID()));
+                mBudgetAmountInput.setValue(budgetAmount.getMAmount().asBigDecimal());
+                mBudgetAccountSpinner.setSelection(mAccountsCursorAdapter.getPosition(budgetAmount.getMAccountUID()));
             }
         }
     }

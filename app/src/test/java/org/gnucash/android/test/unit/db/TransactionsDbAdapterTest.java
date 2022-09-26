@@ -66,27 +66,27 @@ public class TransactionsDbAdapterTest {
 		mAccountsDbAdapter.addRecord(bravoAccount);
 		mAccountsDbAdapter.addRecord(alphaAccount);
 
-		mTestSplit = new Split(new Money(BigDecimal.TEN, DEFAULT_CURRENCY), alphaAccount.getUID());
+		mTestSplit = new Split(new Money(BigDecimal.TEN, DEFAULT_CURRENCY), alphaAccount.getMUID());
 	}
 
 	@Test
 	public void testTransactionsAreTimeSorted(){
 		Transaction t1 = new Transaction("T800");
-		t1.setTime(System.currentTimeMillis() - 10000);
-		Split split = new Split(Money.getZeroInstance(), alphaAccount.getUID());
+		t1.setMTimestamp(System.currentTimeMillis() - 10000);
+		Split split = new Split(Money.getSDefaultZero(), alphaAccount.getMUID());
 		t1.addSplit(split);
-		t1.addSplit(split.createPair(bravoAccount.getUID()));
+		t1.addSplit(split.createPair(bravoAccount.getMUID()));
 
 		Transaction t2 = new Transaction( "T1000");
-		t2.setTime(System.currentTimeMillis());
-		Split split2 = new Split(new Money("23.50", DEFAULT_CURRENCY.getCurrencyCode()), bravoAccount.getUID());
+		t2.setMTimestamp(System.currentTimeMillis());
+		Split split2 = new Split(new Money("23.50", DEFAULT_CURRENCY.getMMnemonic()), bravoAccount.getMUID());
 		t2.addSplit(split2);
-		t2.addSplit(split2.createPair(alphaAccount.getUID()));
+		t2.addSplit(split2.createPair(alphaAccount.getMUID()));
 
 		mTransactionsDbAdapter.addRecord(t1);
 		mTransactionsDbAdapter.addRecord(t2);
 
-		List<Transaction> transactionsList = mTransactionsDbAdapter.getAllTransactionsForAccount(alphaAccount.getUID());
+		List<Transaction> transactionsList = mTransactionsDbAdapter.getAllTransactionsForAccount(alphaAccount.getMUID());
 		assertThat(transactionsList).contains(t2, Index.atIndex(0));
 		assertThat(transactionsList).contains(t1, Index.atIndex(1));
 	}
@@ -94,53 +94,53 @@ public class TransactionsDbAdapterTest {
 	@Test
 	public void deletingTransactionsShouldDeleteSplits(){
 		Transaction transaction = new Transaction("");
-		Split split = new Split(Money.getZeroInstance(), alphaAccount.getUID());
+		Split split = new Split(Money.getSDefaultZero(), alphaAccount.getMUID());
 		transaction.addSplit(split);
 		mTransactionsDbAdapter.addRecord(transaction);
 
-		assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getUID())).hasSize(1);
+		assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getMUID())).hasSize(1);
 
-		mTransactionsDbAdapter.deleteRecord(transaction.getUID());
-		assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getUID())).hasSize(0);
+		mTransactionsDbAdapter.deleteRecord(transaction.getMUID());
+		assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getMUID())).hasSize(0);
 	}
 
 	@Test
 	public void shouldBalanceTransactionsOnSave(){
 		Transaction transaction = new Transaction("Auto balance");
 		Split split = new Split(new Money(BigDecimal.TEN, DEFAULT_CURRENCY),
-				alphaAccount.getUID());
+				alphaAccount.getMUID());
 
 		transaction.addSplit(split);
 
 		mTransactionsDbAdapter.addRecord(transaction);
 
-		Transaction trn = mTransactionsDbAdapter.getRecord(transaction.getUID());
-		assertThat(trn.getSplits()).hasSize(2);
+		Transaction trn = mTransactionsDbAdapter.getRecord(transaction.getMUID());
+		assertThat(trn.getMSplitList()).hasSize(2);
 
 		String imbalanceAccountUID = mAccountsDbAdapter.getImbalanceAccountUID(Commodity.getInstance(Money.DEFAULT_CURRENCY_CODE));
-		assertThat(trn.getSplits()).extracting("mAccountUID").contains(imbalanceAccountUID);
+		assertThat(trn.getMSplitList()).extracting("mAccountUID").contains(imbalanceAccountUID);
 	}
 
 	@Test
 	public void testComputeBalance(){
 		Transaction transaction = new Transaction("Compute");
-		Money firstSplitAmount = new Money("4.99", DEFAULT_CURRENCY.getCurrencyCode());
-		Split split = new Split(firstSplitAmount, alphaAccount.getUID());
+		Money firstSplitAmount = new Money("4.99", DEFAULT_CURRENCY.getMMnemonic());
+		Split split = new Split(firstSplitAmount, alphaAccount.getMUID());
 		transaction.addSplit(split);
-		Money secondSplitAmount = new Money("3.50", DEFAULT_CURRENCY.getCurrencyCode());
-		split = new Split(secondSplitAmount, bravoAccount.getUID());
+		Money secondSplitAmount = new Money("3.50", DEFAULT_CURRENCY.getMMnemonic());
+		split = new Split(secondSplitAmount, bravoAccount.getMUID());
 		transaction.addSplit(split);
 
 		mTransactionsDbAdapter.addRecord(transaction);
 
 		//balance is negated because the CASH account has inverse normal balance
-		transaction = mTransactionsDbAdapter.getRecord(transaction.getUID());
-		Money savedBalance = transaction.getBalance(alphaAccount.getUID());
+		transaction = mTransactionsDbAdapter.getRecord(transaction.getMUID());
+		Money savedBalance = transaction.computeBalance(alphaAccount.getMUID());
 		assertThat(savedBalance).isEqualTo(firstSplitAmount.negate());
 
-		savedBalance = transaction.getBalance(bravoAccount.getUID());
-		assertThat(savedBalance.getNumerator()).isEqualTo(secondSplitAmount.negate().getNumerator());
-		assertThat(savedBalance.getCommodity()).isEqualTo(secondSplitAmount.getCommodity());
+		savedBalance = transaction.computeBalance(bravoAccount.getMUID());
+		assertThat(savedBalance.numerator()).isEqualTo(secondSplitAmount.negate().numerator());
+		assertThat(savedBalance.getMCommodity()).isEqualTo(secondSplitAmount.getMCommodity());
 	}
 
 	@After

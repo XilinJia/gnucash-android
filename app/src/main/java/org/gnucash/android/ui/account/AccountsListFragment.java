@@ -244,7 +244,7 @@ public class AccountsListFragment extends Fragment implements
      */
     public void tryDeleteAccount(long rowId) {
         Account acc = mAccountsDbAdapter.getRecord(rowId);
-        if (acc.getTransactionCount() > 0 || mAccountsDbAdapter.getSubAccountCount(acc.getUID()) > 0) {
+        if (acc.getTransactionCount() > 0 || mAccountsDbAdapter.getSubAccountCount(acc.getMUID()) > 0) {
             showConfirmationDialog(rowId);
         } else {
             BackupManager.backupActiveBook();
@@ -526,8 +526,8 @@ public class AccountsListFragment extends Fragment implements
             //TODO: include fetch only active budgets
             if (budgets.size() == 1){
                 Budget budget = budgets.get(0);
-                Money balance = mAccountsDbAdapter.getAccountBalance(accountUID, budget.getStartofCurrentPeriod(), budget.getEndOfCurrentPeriod());
-                double budgetProgress = balance.divide(budget.getAmount(accountUID)).asBigDecimal().doubleValue() * 100;
+                Money balance = mAccountsDbAdapter.getAccountBalance(accountUID, budget.startofCurrentPeriod(), budget.endOfCurrentPeriod());
+                double budgetProgress = balance.divide(budget.amount(accountUID)).asBigDecimal().doubleValue() * 100;
 
                 holder.budgetIndicator.setVisibility(View.VISIBLE);
                 holder.budgetIndicator.setProgress((int) budgetProgress);

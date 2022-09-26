@@ -206,10 +206,10 @@ public class CashFlowLineChartFragment extends BaseReportFragment {
     private List<Entry> getEntryList(AccountType accountType) {
         List<String> accountUIDList = new ArrayList<>();
         for (Account account : mAccountsDbAdapter.getSimpleAccountList()) {
-            if (account.getAccountType() == accountType
+            if (account.getMAccountType() == accountType
                     && !account.isPlaceholderAccount()
-                    && account.getCommodity().equals(mCommodity)) {
-                accountUIDList.add(account.getUID());
+                    && account.getMCommodity().equals(mCommodity)) {
+                accountUIDList.add(account.getMUID());
             }
         }
 
@@ -275,8 +275,8 @@ public class CashFlowLineChartFragment extends BaseReportFragment {
         TransactionsDbAdapter dbAdapter = TransactionsDbAdapter.getInstance();
         for (Iterator<AccountType> iter = accountTypeList.iterator(); iter.hasNext();) {
             AccountType type = iter.next();
-            long earliest = dbAdapter.getTimestampOfEarliestTransaction(type, mCommodity.getCurrencyCode());
-            long latest = dbAdapter.getTimestampOfLatestTransaction(type, mCommodity.getCurrencyCode());
+            long earliest = dbAdapter.getTimestampOfEarliestTransaction(type, mCommodity.getMMnemonic());
+            long latest = dbAdapter.getTimestampOfLatestTransaction(type, mCommodity.getMMnemonic());
             if (earliest > 0 && latest > 0) {
                 mEarliestTimestampsMap.put(type, earliest);
                 mLatestTimestampsMap.put(type, latest);

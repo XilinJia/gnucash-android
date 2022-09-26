@@ -46,13 +46,13 @@ public class AccountCreator extends BroadcastReceiver {
         Bundle args = intent.getExtras();
 
         Account account = new Account(args.getString(Intent.EXTRA_TITLE));
-        account.setParentUID(args.getString(Account.EXTRA_PARENT_UID));
+        account.setMParentAccountUID(args.getString(Account.EXTRA_PARENT_UID));
 
         String currencyCode = args.getString(Account.EXTRA_CURRENCY_CODE);
         if (currencyCode != null) {
             Commodity commodity = Commodity.getInstance(currencyCode);
             if (commodity != null) {
-                account.setCommodity(commodity);
+                account.setMCommodity(commodity);
             } else {
                 throw new IllegalArgumentException("Commodity with '" + currencyCode
                                         + "' currency code not found in the database");
@@ -61,7 +61,7 @@ public class AccountCreator extends BroadcastReceiver {
 
         String uid = args.getString(Intent.EXTRA_UID);
         if (uid != null)
-            account.setUID(uid);
+            account.setMUID(uid);
 
         AccountsDbAdapter.getInstance().addRecord(account, DatabaseAdapter.UpdateMethod.insert);
     }

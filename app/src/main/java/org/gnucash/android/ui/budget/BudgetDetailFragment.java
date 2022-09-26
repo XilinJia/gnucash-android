@@ -117,15 +117,15 @@ public class BudgetDetailFragment extends Fragment implements Refreshable {
 
     private void bindViews(){
         Budget budget = mBudgetsDbAdapter.getRecord(mBudgetUID);
-        mBudgetNameTextView.setText(budget.getName());
+        mBudgetNameTextView.setText(budget.getMName());
 
-        String description = budget.getDescription();
+        String description = budget.getMDescription();
         if (description != null && !description.isEmpty())
             mBudgetDescriptionTextView.setText(description);
         else {
             mBudgetDescriptionTextView.setVisibility(View.GONE);
         }
-        mBudgetRecurrence.setText(budget.getRecurrence().getRepeatString());
+        mBudgetRecurrence.setText(budget.getMRecurrence().repeatString());
 
         mRecyclerView.setAdapter(new BudgetAmountAdapter());
     }
@@ -191,7 +191,7 @@ public class BudgetDetailFragment extends Fragment implements Refreshable {
 
         public BudgetAmountAdapter(){
             mBudget = mBudgetsDbAdapter.getRecord(mBudgetUID);
-            mBudgetAmounts = mBudget.getCompactedBudgetAmounts();
+            mBudgetAmounts = mBudget.compactedBudgetAmounts();
         }
 
         @Override
@@ -203,14 +203,14 @@ public class BudgetDetailFragment extends Fragment implements Refreshable {
         @Override
         public void onBindViewHolder(BudgetAmountViewHolder holder, final int position) {
             BudgetAmount budgetAmount = mBudgetAmounts.get(position);
-            Money projectedAmount = budgetAmount.getAmount();
+            Money projectedAmount = budgetAmount.getMAmount();
             AccountsDbAdapter accountsDbAdapter = AccountsDbAdapter.getInstance();
 
-            holder.budgetAccount.setText(accountsDbAdapter.getAccountFullName(budgetAmount.getAccountUID()));
+            holder.budgetAccount.setText(accountsDbAdapter.getAccountFullName(budgetAmount.getMAccountUID()));
             holder.budgetAmount.setText(projectedAmount.formattedString());
 
-            Money spentAmount = accountsDbAdapter.getAccountBalance(budgetAmount.getAccountUID(),
-                    mBudget.getStartofCurrentPeriod(), mBudget.getEndOfCurrentPeriod());
+            Money spentAmount = accountsDbAdapter.getAccountBalance(budgetAmount.getMAccountUID(),
+                    mBudget.startofCurrentPeriod(), mBudget.endOfCurrentPeriod());
 
             holder.budgetSpent.setText(spentAmount.abs().formattedString());
             holder.budgetLeft.setText(projectedAmount.subtract(spentAmount.abs()).formattedString());
@@ -218,7 +218,7 @@ public class BudgetDetailFragment extends Fragment implements Refreshable {
             double budgetProgress = 0;
             if (projectedAmount.asDouble() != 0){
                 budgetProgress = spentAmount.asBigDecimal().divide(projectedAmount.asBigDecimal(),
-                        spentAmount.getCommodity().getSmallestFractionDigits(),
+                        spentAmount.getMCommodity().smallestFractionDigits(),
                         RoundingMode.HALF_EVEN).doubleValue();
             }
 
@@ -232,7 +232,7 @@ public class BudgetDetailFragment extends Fragment implements Refreshable {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getActivity(), TransactionsActivity.class);
-                    intent.putExtra(UxArgument.SELECTED_ACCOUNT_UID, mBudgetAmounts.get(position).getAccountUID());
+                    intent.putExtra(UxArgument.SELECTED_ACCOUNT_UID, mBudgetAmounts.get(position).getMAccountUID());
                     startActivityForResult(intent, 0x10);
                 }
             });
@@ -252,34 +252,34 @@ public class BudgetDetailFragment extends Fragment implements Refreshable {
             List<String> xVals = new ArrayList<>();
 
             //todo: refactor getNumberOfPeriods into budget
-            int budgetPeriods = (int) mBudget.getNumberOfPeriods();
+            int budgetPeriods = (int) mBudget.getMNumberOfPeriods();
             budgetPeriods = budgetPeriods == 0 ? 12 : budgetPeriods;
-            int periods = mBudget.getRecurrence().getNumberOfPeriods(budgetPeriods); //// FIXME: 15.08.2016 why do we need number of periods
+            int periods = mBudget.getMRecurrence().numberOfPeriods(budgetPeriods); //// FIXME: 15.08.2016 why do we need number of periods
 
             for (int periodNum = 1; periodNum <= periods; periodNum++) {
-                BigDecimal amount = accountsDbAdapter.getAccountBalance(budgetAmount.getAccountUID(),
-                        mBudget.getStartOfPeriod(periodNum), mBudget.getEndOfPeriod(periodNum))
+                BigDecimal amount = accountsDbAdapter.getAccountBalance(budgetAmount.getMAccountUID(),
+                        mBudget.startOfPeriod(periodNum), mBudget.endOfPeriod(periodNum))
                         .asBigDecimal();
 
                 if (amount.equals(BigDecimal.ZERO))
                     continue;
 
                 barEntries.add(new BarEntry(amount.floatValue(), periodNum));
-                xVals.add(mBudget.getRecurrence().getTextOfCurrentPeriod(periodNum));
+                xVals.add(mBudget.getMRecurrence().textOfCurrentPeriod(periodNum));
             }
 
-            String label = accountsDbAdapter.getAccountName(budgetAmount.getAccountUID());
+            String label = accountsDbAdapter.getAccountName(budgetAmount.getMAccountUID());
             BarDataSet barDataSet = new BarDataSet(barEntries, label);
 
             BarData barData = new BarData(xVals, barDataSet);
-            LimitLine limitLine = new LimitLine(budgetAmount.getAmount().asBigDecimal().floatValue());
+            LimitLine limitLine = new LimitLine(budgetAmount.getMAmount().asBigDecimal().floatValue());
             limitLine.setLineWidth(2f);
             limitLine.setLineColor(Color.RED);
 
 
             barChart.setData(barData);
             barChart.getAxisLeft().addLimitLine(limitLine);
-            BigDecimal maxValue = budgetAmount.getAmount().add(budgetAmount.getAmount().multiply(new BigDecimal("0.2"))).asBigDecimal();
+            BigDecimal maxValue = budgetAmount.getMAmount().add(budgetAmount.getMAmount().multiply(new BigDecimal("0.2"))).asBigDecimal();
             barChart.getAxisLeft().setAxisMaxValue(maxValue.floatValue());
             barChart.animateX(1000);
             barChart.setAutoScaleMinMaxEnabled(true);

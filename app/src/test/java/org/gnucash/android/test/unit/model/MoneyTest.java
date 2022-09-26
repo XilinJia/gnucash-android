@@ -56,14 +56,14 @@ public class MoneyTest{
 		
 		Money temp = new Money(amount, CURRENCY_CODE);
 		assertThat("12.25").isEqualTo(temp.toPlainString());
-		assertThat(temp.getNumerator()).isEqualTo(1225L);
-		assertThat(temp.getDenominator()).isEqualTo(100L);
+		assertThat(temp.numerator()).isEqualTo(1225L);
+		assertThat(temp.denominator()).isEqualTo(100L);
 
 		Commodity commodity = Commodity.getInstance(CURRENCY_CODE);
 		temp = new Money(BigDecimal.TEN, commodity);
 		
 		assertEquals("10.00", temp.asBigDecimal().toPlainString()); //decimal places for EUR currency
-		assertEquals(commodity, temp.getCommodity());
+		assertEquals(commodity, temp.getMCommodity());
 		assertThat("10").isNotEqualTo(temp.asBigDecimal().toPlainString());
 	}
 
@@ -133,19 +133,19 @@ public class MoneyTest{
 	@Test
 	public void testFractionParts(){
 		Money money = new Money("14.15", "USD");
-		assertThat(money.getNumerator()).isEqualTo(1415L);
-		assertThat(money.getDenominator()).isEqualTo(100L);
+		assertThat(money.numerator()).isEqualTo(1415L);
+		assertThat(money.denominator()).isEqualTo(100L);
 
 		money = new Money("125", "JPY");
-		assertThat(money.getNumerator()).isEqualTo(125L);
-		assertThat(money.getDenominator()).isEqualTo(1L);
+		assertThat(money.numerator()).isEqualTo(125L);
+		assertThat(money.denominator()).isEqualTo(1L);
 	}
 
 	@Test
 	public void nonMatchingCommodityFraction_shouldThrowException(){
 		Money money = new Money("12.345", "JPY");
-		assertThat(money.getNumerator()).isEqualTo(12L);
-		assertThat(money.getDenominator()).isEqualTo(1);
+		assertThat(money.numerator()).isEqualTo(12L);
+		assertThat(money.denominator()).isEqualTo(1);
 	}
 
 	@Test
@@ -171,7 +171,7 @@ public class MoneyTest{
 	public void validateImmutability(){
 		assertEquals(mHashcode, mMoneyInEur.hashCode());
 		assertEquals(amountString, mMoneyInEur.toPlainString());
-		assertEquals(CURRENCY_CODE, mMoneyInEur.getCommodity().getCurrencyCode());
+		assertEquals(CURRENCY_CODE, mMoneyInEur.getMCommodity().getMMnemonic());
 	}
 	
 }

@@ -159,18 +159,18 @@ public class StackedBarChartFragment extends BaseReportFragment {
             }
             List<Float> stack = new ArrayList<>();
             for (Account account : mAccountsDbAdapter.getSimpleAccountList()) {
-                if (account.getAccountType() == mAccountType
+                if (account.getMAccountType() == mAccountType
                         && !account.isPlaceholderAccount()
-                        && account.getCommodity().equals(mCommodity)) {
+                        && account.getMCommodity().equals(mCommodity)) {
 
                     double balance = mAccountsDbAdapter.getAccountsBalance(
-                            Collections.singletonList(account.getUID()), start, end).asDouble();
+                            Collections.singletonList(account.getMUID()), start, end).asDouble();
                     if (balance != 0) {
                         stack.add((float) balance);
 
-                        String accountName = account.getName();
+                        String accountName = account.getMName();
                         while (labels.contains(accountName)) {
-                            if (!accountToColorMap.containsKey(account.getUID())) {
+                            if (!accountToColorMap.containsKey(account.getMUID())) {
                                 for (String label : labels) {
                                     if (label.equals(accountName)) {
                                         accountName += " ";
@@ -182,20 +182,20 @@ public class StackedBarChartFragment extends BaseReportFragment {
                         }
                         labels.add(accountName);
 
-                        if (!accountToColorMap.containsKey(account.getUID())) {
+                        if (!accountToColorMap.containsKey(account.getMUID())) {
                             Integer color;
                             if (mUseAccountColor) {
-                                color = (account.getColor() != Account.DEFAULT_COLOR)
-                                        ? account.getColor()
+                                color = (account.getMColor() != Account.DEFAULT_COLOR)
+                                        ? account.getMColor()
                                         : COLORS[accountToColorMap.size() % COLORS.length];
                             } else {
                                 color = COLORS[accountToColorMap.size() % COLORS.length];
                             }
-                            accountToColorMap.put(account.getUID(), color);
+                            accountToColorMap.put(account.getMUID(), color);
                         }
-                        colors.add(accountToColorMap.get(account.getUID()));
+                        colors.add(accountToColorMap.get(account.getMUID()));
 
-                        Log.d(TAG, mAccountType + tmpDate.toString(" MMMM yyyy ") + account.getName() + " = " + stack.get(stack.size() - 1));
+                        Log.d(TAG, mAccountType + tmpDate.toString(" MMMM yyyy ") + account.getMName() + " = " + stack.get(stack.size() - 1));
                     }
                 }
             }
@@ -242,7 +242,7 @@ public class StackedBarChartFragment extends BaseReportFragment {
      */
     private LocalDate getStartDate(AccountType accountType) {
         TransactionsDbAdapter adapter = TransactionsDbAdapter.getInstance();
-        String code = mCommodity.getCurrencyCode();
+        String code = mCommodity.getMMnemonic();
         LocalDate startDate;
         if (mReportPeriodStart == -1) {
             startDate = new LocalDate(adapter.getTimestampOfEarliestTransaction(accountType, code));
@@ -261,7 +261,7 @@ public class StackedBarChartFragment extends BaseReportFragment {
      */
     private LocalDate getEndDate(AccountType accountType) {
         TransactionsDbAdapter adapter = TransactionsDbAdapter.getInstance();
-        String code = mCommodity.getCurrencyCode();
+        String code = mCommodity.getMMnemonic();
         LocalDate endDate;
         if (mReportPeriodEnd == -1) {
             endDate = new LocalDate(adapter.getTimestampOfLatestTransaction(accountType, code));

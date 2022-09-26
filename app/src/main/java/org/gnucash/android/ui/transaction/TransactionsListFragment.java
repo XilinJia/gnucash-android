@@ -297,8 +297,8 @@ public class TransactionsListFragment extends Fragment implements
 
 				if (splits.size() == 2 && splits.get(0).isPairOf(splits.get(1))) {
 					for (Split split : splits) {
-						if (!split.getAccountUID().equals(mAccountUID)) {
-							text = AccountsDbAdapter.getInstance().getFullyQualifiedAccountName(split.getAccountUID());
+						if (!split.getMAccountUID().equals(mAccountUID)) {
+							text = AccountsDbAdapter.getInstance().getFullyQualifiedAccountName(split.getMAccountUID());
 							break;
 						}
 					}
@@ -364,7 +364,7 @@ public class TransactionsListFragment extends Fragment implements
 					case R.id.context_menu_duplicate_transaction:
 						Transaction transaction = mTransactionsDbAdapter.getRecord(transactionId);
 						Transaction duplicate = new Transaction(transaction, true);
-						duplicate.setTime(System.currentTimeMillis());
+						duplicate.setMTimestamp(System.currentTimeMillis());
 						mTransactionsDbAdapter.addRecord(duplicate, DatabaseAdapter.UpdateMethod.insert);
 						refresh();
 						return true;

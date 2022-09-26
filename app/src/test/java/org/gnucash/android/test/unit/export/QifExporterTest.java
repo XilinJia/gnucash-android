@@ -64,7 +64,7 @@ public class QifExporterTest {
         Book testBook = new Book("testRootAccountUID");
         booksDbAdapter.addRecord(testBook);
         DatabaseHelper databaseHelper =
-                new DatabaseHelper(GnuCashApplication.getAppContext(), testBook.getUID());
+                new DatabaseHelper(GnuCashApplication.getAppContext(), testBook.getMUID());
         mDb = databaseHelper.getWritableDatabase();
     }
 
@@ -91,7 +91,7 @@ public class QifExporterTest {
 
         Account account = new Account("Basic Account");
         Transaction transaction = new Transaction("One transaction");
-        transaction.addSplit(new Split(Money.createZeroInstance("EUR"),account.getUID()));
+        transaction.addSplit(new Split(Money.createZeroInstance("EUR"),account.getMUID()));
         account.addTransaction(transaction);
 
         accountsDbAdapter.addRecord(account);
@@ -120,14 +120,14 @@ public class QifExporterTest {
 
         Account account = new Account("Basic Account", Commodity.getInstance("EUR"));
         Transaction transaction = new Transaction("One transaction");
-        transaction.addSplit(new Split(Money.createZeroInstance("EUR"),account.getUID()));
+        transaction.addSplit(new Split(Money.createZeroInstance("EUR"),account.getMUID()));
         account.addTransaction(transaction);
         accountsDbAdapter.addRecord(account);
 
         Account foreignAccount = new Account("US Konto", Commodity.getInstance("USD"));
         Transaction multiCulti = new Transaction("Multicurrency");
-        Split split = new Split(new Money("12", "USD"), new Money("15", "EUR"), foreignAccount.getUID());
-        Split split2 = split.createPair(account.getUID());
+        Split split = new Split(new Money("12", "USD"), new Money("15", "EUR"), foreignAccount.getMUID());
+        Split split2 = split.createPair(account.getMUID());
         multiCulti.addSplit(split);
         multiCulti.addSplit(split2);
         foreignAccount.addTransaction(multiCulti);
@@ -160,9 +160,9 @@ public class QifExporterTest {
 
         Account account = new Account("Basic Account");
         Transaction transaction = new Transaction("One transaction");
-        transaction.addSplit(new Split(Money.createZeroInstance("EUR"), account.getUID()));
-        transaction.setDescription(expectedDescription);
-        transaction.setNote(expectedMemo);
+        transaction.addSplit(new Split(Money.createZeroInstance("EUR"), account.getMUID()));
+        transaction.setMDescription(expectedDescription);
+        transaction.setMNotes(expectedMemo);
         account.addTransaction(transaction);
 
         accountsDbAdapter.addRecord(account);

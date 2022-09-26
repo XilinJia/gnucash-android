@@ -37,26 +37,26 @@ public class ScheduledActionDbAdapterTest {
 
     public void shouldFetchOnlyEnabledScheduledActions(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
-        scheduledAction.setRecurrence(new Recurrence(PeriodType.MONTH));
-        scheduledAction.setEnabled(false);
+        scheduledAction.setMRecurrence(new Recurrence(PeriodType.MONTH));
+        scheduledAction.setMIsEnabled(false);
 
         mScheduledActionDbAdapter.addRecord(scheduledAction);
 
         scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
-        scheduledAction.setRecurrence(new Recurrence(PeriodType.WEEK));
+        scheduledAction.setMRecurrence(new Recurrence(PeriodType.WEEK));
         mScheduledActionDbAdapter.addRecord(scheduledAction);
 
         assertThat(mScheduledActionDbAdapter.getAllRecords()).hasSize(2);
 
         List<ScheduledAction> enabledActions = mScheduledActionDbAdapter.getAllEnabledScheduledActions();
         assertThat(enabledActions).hasSize(1);
-        assertThat(enabledActions.get(0).getRecurrence().getPeriodType()).isEqualTo(PeriodType.WEEK);
+        assertThat(enabledActions.get(0).getMRecurrence().getMPeriodType()).isEqualTo(PeriodType.WEEK);
     }
 
     @Test(expected = NullPointerException.class) //no recurrence is set
     public void everyScheduledActionShouldHaveRecurrence(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
-        scheduledAction.setActionUID(BaseModel.generateUID());
+        scheduledAction.setMActionUID(BaseModel.generateUID());
         mScheduledActionDbAdapter.addRecord(scheduledAction);
     }
 
@@ -65,61 +65,61 @@ public class ScheduledActionDbAdapterTest {
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
         PeriodType periodType = PeriodType.MONTH;
         Recurrence recurrence = new Recurrence(periodType);
-        recurrence.setMultiplier(2);
-        scheduledAction.setRecurrence(recurrence);
-        scheduledAction.setTotalPlannedExecutionCount(4);
+        recurrence.setMMultiplier(2);
+        scheduledAction.setMRecurrence(recurrence);
+        scheduledAction.setMTotalFrequency(4);
         Resources res = GnuCashApplication.getAppContext().getResources();
         String repeatString = res.getQuantityString(R.plurals.label_every_x_months, 2, 2) + ", " +
                 res.getString(R.string.repeat_x_times, 4);
 
-        assertThat(scheduledAction.getRepeatString().trim()).isEqualTo(repeatString);
+        assertThat(scheduledAction.repeatString().trim()).isEqualTo(repeatString);
 
     }
 
     @Test
     public void testAddGetRecord() {
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
-        scheduledAction.setActionUID("Some UID");
-        scheduledAction.setAdvanceCreateDays(1);
-        scheduledAction.setAdvanceNotifyDays(2);
-        scheduledAction.setAutoCreate(true);
-        scheduledAction.setAutoNotify(true);
-        scheduledAction.setEnabled(true);
-        scheduledAction.setStartTime(11111);
-        scheduledAction.setEndTime(33333);
-        scheduledAction.setLastRun(22222);
-        scheduledAction.setExecutionCount(3);
-        scheduledAction.setRecurrence(new Recurrence(PeriodType.MONTH));
-        scheduledAction.setTag("QIF;SD_CARD;2016-06-25 12:56:07.175;false");
+        scheduledAction.setMActionUID("Some UID");
+        scheduledAction.setMAdvanceCreateDays(1);
+        scheduledAction.setMAdvanceNotifyDays(2);
+        scheduledAction.setMAutoCreate(true);
+        scheduledAction.setMAutoNotify(true);
+        scheduledAction.setMIsEnabled(true);
+        scheduledAction.setMStartTime(11111);
+        scheduledAction.setMEndDate(33333);
+        scheduledAction.setMLastRun(22222);
+        scheduledAction.setMExecutionCount(3);
+        scheduledAction.setMRecurrence(new Recurrence(PeriodType.MONTH));
+        scheduledAction.setMTag("QIF;SD_CARD;2016-06-25 12:56:07.175;false");
         mScheduledActionDbAdapter.addRecord(scheduledAction);
 
         ScheduledAction scheduledActionFromDb =
-                mScheduledActionDbAdapter.getRecord(scheduledAction.getUID());
-        assertThat(scheduledActionFromDb.getUID()).isEqualTo(
-                scheduledAction.getUID());
-        assertThat(scheduledActionFromDb.getActionUID()).isEqualTo(
-                scheduledAction.getActionUID());
-        assertThat(scheduledActionFromDb.getAdvanceCreateDays()).isEqualTo(
-                scheduledAction.getAdvanceCreateDays());
-        assertThat(scheduledActionFromDb.getAdvanceNotifyDays()).isEqualTo(
-                scheduledAction.getAdvanceNotifyDays());
+                mScheduledActionDbAdapter.getRecord(scheduledAction.getMUID());
+        assertThat(scheduledActionFromDb.getMUID()).isEqualTo(
+                scheduledAction.getMUID());
+        assertThat(scheduledActionFromDb.getMActionUID()).isEqualTo(
+                scheduledAction.getMActionUID());
+        assertThat(scheduledActionFromDb.getMAdvanceCreateDays()).isEqualTo(
+                scheduledAction.getMAdvanceCreateDays());
+        assertThat(scheduledActionFromDb.getMAdvanceNotifyDays()).isEqualTo(
+                scheduledAction.getMAdvanceNotifyDays());
         assertThat(scheduledActionFromDb.shouldAutoCreate()).isEqualTo(
                 scheduledAction.shouldAutoCreate());
         assertThat(scheduledActionFromDb.shouldAutoNotify()).isEqualTo(
                 scheduledAction.shouldAutoNotify());
         assertThat(scheduledActionFromDb.isEnabled()).isEqualTo(
                 scheduledAction.isEnabled());
-        assertThat(scheduledActionFromDb.getStartTime()).isEqualTo(
-                scheduledAction.getStartTime());
-        assertThat(scheduledActionFromDb.getEndTime()).isEqualTo(
-                scheduledAction.getEndTime());
-        assertThat(scheduledActionFromDb.getLastRunTime()).isEqualTo(
-                scheduledAction.getLastRunTime());
-        assertThat(scheduledActionFromDb.getExecutionCount()).isEqualTo(
-                scheduledAction.getExecutionCount());
-        assertThat(scheduledActionFromDb.getRecurrence()).isEqualTo(
-                scheduledAction.getRecurrence());
-        assertThat(scheduledActionFromDb.getTag()).isEqualTo(
-                scheduledAction.getTag());
+        assertThat(scheduledActionFromDb.getMStartTime()).isEqualTo(
+                scheduledAction.getMStartTime());
+        assertThat(scheduledActionFromDb.getMEndDate()).isEqualTo(
+                scheduledAction.getMEndDate());
+        assertThat(scheduledActionFromDb.getMLastRun()).isEqualTo(
+                scheduledAction.getMLastRun());
+        assertThat(scheduledActionFromDb.getMExecutionCount()).isEqualTo(
+                scheduledAction.getMExecutionCount());
+        assertThat(scheduledActionFromDb.getMRecurrence()).isEqualTo(
+                scheduledAction.getMRecurrence());
+        assertThat(scheduledActionFromDb.getMTag()).isEqualTo(
+                scheduledAction.getMTag());
     }
 }

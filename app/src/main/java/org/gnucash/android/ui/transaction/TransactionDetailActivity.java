@@ -104,8 +104,8 @@ public class TransactionDetailActivity extends PasscodeLockActivity {
             ButterKnife.bind(this, view);
 
             AccountsDbAdapter accountsDbAdapter = AccountsDbAdapter.getInstance();
-            accountName.setText(accountsDbAdapter.getAccountFullName(split.getAccountUID()));
-            Money quantity = split.getFormattedQuantity();
+            accountName.setText(accountsDbAdapter.getAccountFullName(split.getMAccountUID()));
+            Money quantity = split.formattedQuantity();
             TextView balanceView = quantity.isNegative() ? splitDebit : splitCredit;
             TransactionsActivity.displayBalance(balanceView, quantity);
         }
@@ -118,12 +118,12 @@ public class TransactionDetailActivity extends PasscodeLockActivity {
         TransactionsDbAdapter transactionsDbAdapter = TransactionsDbAdapter.getInstance();
         Transaction transaction = transactionsDbAdapter.getRecord(mTransactionUID);
 
-        mTransactionDescription.setText(transaction.getDescription());
+        mTransactionDescription.setText(transaction.getMDescription());
         mTransactionAccount.setText(getString(R.string.label_inside_account_with_name, AccountsDbAdapter.getInstance().getAccountFullName(mAccountUID)));
 
         AccountsDbAdapter accountsDbAdapter = AccountsDbAdapter.getInstance();
 
-        Money accountBalance = accountsDbAdapter.getAccountBalance(mAccountUID, -1, transaction.getTimeMillis());
+        Money accountBalance = accountsDbAdapter.getAccountBalance(mAccountUID, -1, transaction.getMTimestamp());
         TextView balanceTextView = accountBalance.isNegative() ? mDebitBalance : mCreditBalance;
         TransactionsActivity.displayBalance(balanceTextView, accountBalance);
 
@@ -131,9 +131,9 @@ public class TransactionDetailActivity extends PasscodeLockActivity {
         boolean useDoubleEntry = GnuCashApplication.isDoubleEntryEnabled();
         LayoutInflater inflater = LayoutInflater.from(this);
         int index = 0;
-        for (Split split : transaction.getSplits()) {
-            if (!useDoubleEntry && split.getAccountUID().equals(
-                    accountsDbAdapter.getImbalanceAccountUID(split.getValue().getCommodity()))) {
+        for (Split split : transaction.getMSplitList()) {
+            if (!useDoubleEntry && split.getMAccountUID().equals(
+                    accountsDbAdapter.getImbalanceAccountUID(split.getMValue().getMCommodity()))) {
                 //do now show imbalance accounts for single entry use case
                 continue;
             }
@@ -143,21 +143,21 @@ public class TransactionDetailActivity extends PasscodeLockActivity {
         }
 
 
-        Date trnDate = new Date(transaction.getTimeMillis());
+        Date trnDate = new Date(transaction.getMTimestamp());
         String timeAndDate = DateFormat.getDateInstance(DateFormat.FULL).format(trnDate);
         mTimeAndDate.setText(timeAndDate);
 
-        if (transaction.getScheduledActionUID() != null){
-            ScheduledAction scheduledAction = ScheduledActionDbAdapter.getInstance().getRecord(transaction.getScheduledActionUID());
-            mRecurrence.setText(scheduledAction.getRepeatString());
+        if (transaction.getMScheduledActionUID() != null){
+            ScheduledAction scheduledAction = ScheduledActionDbAdapter.getInstance().getRecord(transaction.getMScheduledActionUID());
+            mRecurrence.setText(scheduledAction.repeatString());
             findViewById(R.id.row_trn_recurrence).setVisibility(View.VISIBLE);
 
         } else {
             findViewById(R.id.row_trn_recurrence).setVisibility(View.GONE);
         }
 
-        if (transaction.getNote() != null && !transaction.getNote().isEmpty()){
-            mNotes.setText(transaction.getNote());
+        if (transaction.getMNotes() != null && !transaction.getMNotes().isEmpty()){
+            mNotes.setText(transaction.getMNotes());
             findViewById(R.id.row_trn_notes).setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.row_trn_notes).setVisibility(View.GONE);

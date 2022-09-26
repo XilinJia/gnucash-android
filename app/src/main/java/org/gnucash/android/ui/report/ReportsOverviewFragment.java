@@ -180,20 +180,20 @@ public class ReportsOverviewFragment extends BaseReportFragment {
         List<String> labels = new ArrayList<>();
         List<Integer> colors = new ArrayList<>();
         for (Account account : mAccountsDbAdapter.getSimpleAccountList()) {
-            if (account.getAccountType() == AccountType.EXPENSE
+            if (account.getMAccountType() == AccountType.EXPENSE
                     && !account.isPlaceholderAccount()
-                    && account.getCommodity().equals(mCommodity)) {
+                    && account.getMCommodity().equals(mCommodity)) {
 
                 long start = new LocalDate().minusMonths(2).dayOfMonth().withMinimumValue().toDate().getTime();
                 long end = new LocalDate().plusDays(1).toDate().getTime();
                 double balance = mAccountsDbAdapter.getAccountsBalance(
-                        Collections.singletonList(account.getUID()), start, end).asDouble();
+                        Collections.singletonList(account.getMUID()), start, end).asDouble();
                 if (balance > 0) {
                     dataSet.addEntry(new Entry((float) balance, dataSet.getEntryCount()));
-                    colors.add(account.getColor() != Account.DEFAULT_COLOR
-                            ? account.getColor()
+                    colors.add(account.getMColor() != Account.DEFAULT_COLOR
+                            ? account.getMColor()
                             : ReportsActivity.COLORS[(dataSet.getEntryCount() - 1) % ReportsActivity.COLORS.length]);
-                    labels.add(account.getName());
+                    labels.add(account.getMName());
                 }
             }
         }

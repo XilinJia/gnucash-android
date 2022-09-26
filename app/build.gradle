@@ -1,6 +1,7 @@
 import java.text.SimpleDateFormat
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 //apply plugin: 'io.fabric'
 
 def versionMajor = 2
@@ -22,6 +23,7 @@ static def gitSha() {
 android {
     compileSdkVersion 33
     buildToolsVersion '33.0.0'
+
     defaultConfig {
         applicationId "org.gnucash.android"
         testApplicationId 'org.gnucash.android.test'
@@ -37,7 +39,6 @@ android {
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner "org.gnucash.android.test.ui.util.GnucashAndroidTestRunner"
-
     }
 
     packagingOptions {
@@ -188,6 +189,7 @@ repositories{
     flatDir{
         dirs 'libs'
     }
+    mavenCentral()
 }
 
 dependencies {
@@ -228,7 +230,7 @@ dependencies {
     }
 
     implementation('com.crashlytics.sdk.android:crashlytics:2.10.1') {
-        transitive = true
+        transitive = true;
     }
 
     //  external library org.slf4j:jcl-over-slf4j:1.7.36
@@ -263,4 +265,6 @@ dependencies {
     }
 
     androidTestImplementation 'com.squareup.spoon:spoon-client:1.7.1'
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

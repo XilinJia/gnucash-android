@@ -271,7 +271,7 @@ public class TransactionFormFragment extends Fragment implements
     private void startTransferFunds() {
         Commodity fromCommodity = Commodity.getInstance((mTransactionsDbAdapter.getAccountCurrencyCode(mAccountUID)));
         long id = mTransferAccountSpinner.getSelectedItemId();
-        String targetCurrencyCode = mAccountsDbAdapter.getCurrencyCode(mAccountsDbAdapter.getUID(id));
+        String targetCurrencyCode = mAccountsDbAdapter.getMMnemonic(mAccountsDbAdapter.getUID(id));
 
         if (fromCommodity.equals(Commodity.getInstance(targetCurrencyCode))
                 || !mAmountEditText.isInputModified()
@@ -333,8 +333,8 @@ public class TransactionFormFragment extends Fragment implements
 
                 if (mSplitsList.size() == 2) { //when handling simple transfer to one account
                     for (Split split : mSplitsList) {
-                        if (!split.getAccountUID().equals(mAccountUID)) {
-                            split.setAccountUID(mAccountsDbAdapter.getUID(id));
+                        if (!split.getMAccountUID().equals(mAccountUID)) {
+                            split.setMAccountUID(mAccountsDbAdapter.getUID(id));
                         }
                         // else case is handled when saving the transactions
                     }
@@ -430,16 +430,16 @@ public class TransactionFormFragment extends Fragment implements
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 mTransaction = new Transaction(mTransactionsDbAdapter.getRecord(id), true);
-                mTransaction.setTime(System.currentTimeMillis());
+                mTransaction.setMTimestamp(System.currentTimeMillis());
                 //we check here because next method will modify it and we want to catch user-modification
                 boolean amountEntered = mAmountEditText.isInputModified();
                 initializeViewsWithTransaction();
-                List<Split> splitList = mTransaction.getSplits();
+                List<Split> splitList = mTransaction.getMSplitList();
                 boolean isSplitPair = splitList.size() == 2 && splitList.get(0).isPairOf(splitList.get(1));
                 if (isSplitPair){
                     mSplitsList.clear();
                     if (!amountEntered) //if user already entered an amount
-                        mAmountEditText.setValue(splitList.get(0).getValue().asBigDecimal());
+                        mAmountEditText.setValue(splitList.get(0).getMValue().asBigDecimal());
                 } else {
                     if (amountEntered){ //if user entered own amount, clear loaded splits and use the user value
                         mSplitsList.clear();
@@ -462,33 +462,33 @@ public class TransactionFormFragment extends Fragment implements
 	 * This method is called if the fragment is used for editing a transaction
 	 */
 	private void initializeViewsWithTransaction(){
-		mDescriptionEditText.setText(mTransaction.getDescription());
+		mDescriptionEditText.setText(mTransaction.getMDescription());
         mDescriptionEditText.setSelection(mDescriptionEditText.getText().length());
 
         mTransactionTypeSwitch.setAccountType(mAccountType);
-        mTransactionTypeSwitch.setChecked(mTransaction.getBalance(mAccountUID).isNegative());
+        mTransactionTypeSwitch.setChecked(mTransaction.computeBalance(mAccountUID).isNegative());
 
 		if (!mAmountEditText.isInputModified()){
             //when autocompleting, only change the amount if the user has not manually changed it already
-            mAmountEditText.setValue(mTransaction.getBalance(mAccountUID).asBigDecimal());
+            mAmountEditText.setValue(mTransaction.computeBalance(mAccountUID).asBigDecimal());
         }
-		mCurrencyTextView.setText(mTransaction.getCommodity().getSymbol());
-		mNotesEditText.setText(mTransaction.getNote());
-		mDateTextView.setText(DATE_FORMATTER.format(mTransaction.getTimeMillis()));
-		mTimeTextView.setText(TIME_FORMATTER.format(mTransaction.getTimeMillis()));
+		mCurrencyTextView.setText(mTransaction.getMCommodity().getSymbol());
+		mNotesEditText.setText(mTransaction.getMNotes());
+		mDateTextView.setText(DATE_FORMATTER.format(mTransaction.getMTimestamp()));
+		mTimeTextView.setText(TIME_FORMATTER.format(mTransaction.getMTimestamp()));
 		Calendar cal = GregorianCalendar.getInstance();
-		cal.setTimeInMillis(mTransaction.getTimeMillis());
+		cal.setTimeInMillis(mTransaction.getMTimestamp());
 		mDate = mTime = cal;
 
         //TODO: deep copy the split list. We need a copy so we can modify with impunity
-        mSplitsList = new ArrayList<>(mTransaction.getSplits());
+        mSplitsList = new ArrayList<>(mTransaction.getMSplitList());
         toggleAmountInputEntryMode(mSplitsList.size() <= 2);
 
         if (mSplitsList.size() == 2){
             for (Split split : mSplitsList) {
-                if (split.getAccountUID().equals(mAccountUID)) {
-                    if (!split.getQuantity().getCommodity().equals(mTransaction.getCommodity())){
-                        mSplitQuantity = split.getQuantity();
+                if (split.getMAccountUID().equals(mAccountUID)) {
+                    if (!split.getMQuantity().getMCommodity().equals(mTransaction.getMCommodity())){
+                        mSplitQuantity = split.getMQuantity();
                     }
                 }
             }
@@ -496,10 +496,10 @@ public class TransactionFormFragment extends Fragment implements
         //if there are more than two splits (which is the default for one entry), then
         //disable editing of the transfer account. User should open editor
         if (mSplitsList.size() == 2 && mSplitsList.get(0).isPairOf(mSplitsList.get(1))) {
-            for (Split split : mTransaction.getSplits()) {
+            for (Split split : mTransaction.getMSplitList()) {
                 //two splits, one belongs to this account and the other to another account
-                if (mUseDoubleEntry && !split.getAccountUID().equals(mAccountUID)) {
-                    setSelectedTransferAccount(mAccountsDbAdapter.getID(split.getAccountUID()));
+                if (mUseDoubleEntry && !split.getMAccountUID().equals(mAccountUID)) {
+                    setSelectedTransferAccount(mAccountsDbAdapter.getID(split.getMAccountUID()));
                 }
             }
         } else {
@@ -513,13 +513,13 @@ public class TransactionFormFragment extends Fragment implements
         Commodity commodity = Commodity.getInstance(currencyCode);
         mAmountEditText.setCommodity(commodity);
 
-        mSaveTemplateCheckbox.setChecked(mTransaction.isTemplate());
+        mSaveTemplateCheckbox.setChecked(mTransaction.getMIsTemplate());
         String scheduledActionUID = getArguments().getString(UxArgument.SCHEDULED_ACTION_UID);
         if (scheduledActionUID != null && !scheduledActionUID.isEmpty()) {
             ScheduledAction scheduledAction = ScheduledActionDbAdapter.getInstance().getRecord(scheduledActionUID);
-            mRecurrenceRule = scheduledAction.getRuleString();
+            mRecurrenceRule = scheduledAction.ruleString();
             mEventRecurrence.parse(mRecurrenceRule);
-            mRecurrenceTextView.setText(scheduledAction.getRepeatString());
+            mRecurrenceTextView.setText(scheduledAction.repeatString());
         }
     }
 
@@ -614,10 +614,10 @@ public class TransactionFormFragment extends Fragment implements
             BigDecimal enteredAmount = mAmountEditText.getValue();
             baseAmountString = enteredAmount.toPlainString();
         } else {
-            Money biggestAmount = Money.createZeroInstance(mTransaction.getCurrencyCode());
-            for (Split split : mTransaction.getSplits()) {
-                if (split.getValue().asBigDecimal().compareTo(biggestAmount.asBigDecimal()) > 0)
-                    biggestAmount = split.getValue();
+            Money biggestAmount = Money.createZeroInstance(mTransaction.getMMnemonic());
+            for (Split split : mTransaction.getMSplitList()) {
+                if (split.getMValue().asBigDecimal().compareTo(biggestAmount.asBigDecimal()) > 0)
+                    biggestAmount = split.getMValue();
             }
             baseAmountString = biggestAmount.toPlainString();
         }
@@ -717,7 +717,7 @@ public class TransactionFormFragment extends Fragment implements
         CommoditiesDbAdapter cmdtyDbAdapter = CommoditiesDbAdapter.getInstance();
 
         if (isMultiCurrencyTransaction()){ //if multi-currency transaction
-            String transferCurrencyCode = mAccountsDbAdapter.getCurrencyCode(transferAcctUID);
+            String transferCurrencyCode = mAccountsDbAdapter.getMMnemonic(transferAcctUID);
             String commodityUID = cmdtyDbAdapter.getCommodityUID(baseCurrencyCode);
             String targetCmdtyUID = cmdtyDbAdapter.getCommodityUID(transferCurrencyCode);
             
@@ -736,20 +736,20 @@ public class TransactionFormFragment extends Fragment implements
         // Try to preserve the other split attributes.
         if (mSplitsList.size() >= 2) {
             split1 = mSplitsList.get(0);
-            split1.setValue(value);
-            split1.setQuantity(value);
-            split1.setAccountUID(mAccountUID);
+            split1.setMValue(value);
+            split1.setMQuantity(value);
+            split1.setMAccountUID(mAccountUID);
 
             split2 = mSplitsList.get(1);
-            split2.setValue(value);
-            split2.setQuantity(quantity);
-            split2.setAccountUID(transferAcctUID);
+            split2.setMValue(value);
+            split2.setMQuantity(quantity);
+            split2.setMAccountUID(transferAcctUID);
         } else {
             split1 = new Split(value, mAccountUID);
             split2 = new Split(value, quantity, transferAcctUID);
         }
-        split1.setType(mTransactionTypeSwitch.getTransactionType());
-        split2.setType(mTransactionTypeSwitch.getTransactionType().invert());
+        split1.setMSplitType(mTransactionTypeSwitch.getTransactionType());
+        split2.setMSplitType(mTransactionTypeSwitch.getTransactionType().invert());
 
         List<Split> splitList = new ArrayList<>();
         splitList.add(split1);
@@ -769,7 +769,7 @@ public class TransactionFormFragment extends Fragment implements
             long transferAcctId = mTransferAccountSpinner.getSelectedItemId();
             transferAcctUID = mAccountsDbAdapter.getUID(transferAcctId);
         } else {
-            Commodity baseCommodity = mAccountsDbAdapter.getRecord(mAccountUID).getCommodity();
+            Commodity baseCommodity = mAccountsDbAdapter.getRecord(mAccountUID).getMCommodity();
             transferAcctUID = mAccountsDbAdapter.getOrCreateImbalanceAccountUID(baseCommodity);
         }
         return transferAcctUID;
@@ -795,11 +795,11 @@ public class TransactionFormFragment extends Fragment implements
         List<Split> splits = extractSplitsFromView();
 
         Transaction transaction = new Transaction(description);
-        transaction.setTime(cal.getTimeInMillis());
-        transaction.setCommodity(commodity);
-        transaction.setNote(notes);
-        transaction.setSplits(splits);
-        transaction.setExported(false); //not necessary as exports use timestamps now. Because, legacy
+        transaction.setMTimestamp(cal.getTimeInMillis());
+        transaction.setMCommodity(commodity);
+        transaction.setMNotes(notes);
+        transaction.setMSplitList(splits);
+        transaction.setMIsExported(false); //not necessary as exports use timestamps now. Because, legacy
 
         return transaction;
     }
@@ -825,7 +825,7 @@ public class TransactionFormFragment extends Fragment implements
 
         String transferAcctUID = mAccountsDbAdapter.getUID(mTransferAccountSpinner.getSelectedItemId());
         String currencyCode = mAccountsDbAdapter.getAccountCurrencyCode(mAccountUID);
-        String transferCurrencyCode = mAccountsDbAdapter.getCurrencyCode(transferAcctUID);
+        String transferCurrencyCode = mAccountsDbAdapter.getMMnemonic(transferAcctUID);
 
         return !currencyCode.equals(transferCurrencyCode);
     }
@@ -847,7 +847,7 @@ public class TransactionFormFragment extends Fragment implements
 
         Transaction transaction = extractTransactionFromView();
         if (mEditMode) { //if editing an existing transaction
-            transaction.setUID(mTransaction.getUID());
+            transaction.setMUID(mTransaction.getMUID());
         }
 
         mTransaction = transaction;
@@ -862,11 +862,11 @@ public class TransactionFormFragment extends Fragment implements
             if (mSaveTemplateCheckbox.isChecked()) {//template is automatically checked when a transaction is scheduled
                 if (!mEditMode) { //means it was new transaction, so a new template
                     Transaction templateTransaction = new Transaction(mTransaction, true);
-                    templateTransaction.setTemplate(true);
+                    templateTransaction.setMIsTemplate(true);
                     mTransactionsDbAdapter.addRecord(templateTransaction, DatabaseAdapter.UpdateMethod.replace);
-                    scheduleRecurringTransaction(templateTransaction.getUID());
+                    scheduleRecurringTransaction(templateTransaction.getMUID());
                 } else
-                    scheduleRecurringTransaction(mTransaction.getUID());
+                    scheduleRecurringTransaction(mTransaction.getMUID());
             } else {
                 String scheduledActionUID = getArguments().getString(UxArgument.SCHEDULED_ACTION_UID);
                 if (scheduledActionUID != null){ //we were editing a schedule and it was turned off
@@ -896,7 +896,7 @@ public class TransactionFormFragment extends Fragment implements
         Recurrence recurrence = RecurrenceParser.parse(mEventRecurrence);
 
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
-        scheduledAction.setRecurrence(recurrence);
+        scheduledAction.setMRecurrence(recurrence);
 
         String scheduledActionUID = getArguments().getString(UxArgument.SCHEDULED_ACTION_UID);
 
@@ -904,13 +904,13 @@ public class TransactionFormFragment extends Fragment implements
             if (recurrence == null){
                 scheduledActionDbAdapter.deleteRecord(scheduledActionUID);
             } else {
-                scheduledAction.setUID(scheduledActionUID);
+                scheduledAction.setMUID(scheduledActionUID);
                 scheduledActionDbAdapter.updateRecurrenceAttributes(scheduledAction);
                 Toast.makeText(getActivity(), R.string.toast_updated_transaction_recurring_schedule, Toast.LENGTH_SHORT).show();
             }
         } else {
             if (recurrence != null) {
-                scheduledAction.setActionUID(transactionUID);
+                scheduledAction.setMActionUID(transactionUID);
                 scheduledActionDbAdapter.addRecord(scheduledAction, DatabaseAdapter.UpdateMethod.replace);
                 Toast.makeText(getActivity(), R.string.toast_scheduled_recurring_transaction, Toast.LENGTH_SHORT).show();
             }

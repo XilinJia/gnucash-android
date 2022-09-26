@@ -40,59 +40,59 @@ public class ScheduledActionTest {
     public void settingStartTime_shouldSetRecurrenceStart(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
         long startTime = getTimeInMillis(2014, 8, 26);
-        scheduledAction.setStartTime(startTime);
-        assertThat(scheduledAction.getRecurrence()).isNull();
+        scheduledAction.setMStartTime(startTime);
+        assertThat(scheduledAction.getMRecurrence()).isNull();
 
         Recurrence recurrence = new Recurrence(PeriodType.MONTH);
-        assertThat(recurrence.getPeriodStart().getTime()).isNotEqualTo(startTime);
-        scheduledAction.setRecurrence(recurrence);
-        assertThat(recurrence.getPeriodStart().getTime()).isEqualTo(startTime);
+        assertThat(recurrence.getMPeriodStart().getTime()).isNotEqualTo(startTime);
+        scheduledAction.setMRecurrence(recurrence);
+        assertThat(recurrence.getMPeriodStart().getTime()).isEqualTo(startTime);
 
         long newStartTime = getTimeInMillis(2015, 6, 6);
-        scheduledAction.setStartTime(newStartTime);
-        assertThat(recurrence.getPeriodStart().getTime()).isEqualTo(newStartTime);
+        scheduledAction.setMStartTime(newStartTime);
+        assertThat(recurrence.getMPeriodStart().getTime()).isEqualTo(newStartTime);
     }
 
     @Test
     public void settingEndTime_shouldSetRecurrenceEnd(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
         long endTime = getTimeInMillis(2014, 8, 26);
-        scheduledAction.setEndTime(endTime);
-        assertThat(scheduledAction.getRecurrence()).isNull();
+        scheduledAction.setMEndDate(endTime);
+        assertThat(scheduledAction.getMRecurrence()).isNull();
 
         Recurrence recurrence = new Recurrence(PeriodType.MONTH);
-        assertThat(recurrence.getPeriodEnd()).isNull();
-        scheduledAction.setRecurrence(recurrence);
-        assertThat(recurrence.getPeriodEnd().getTime()).isEqualTo(endTime);
+        assertThat(recurrence.getMPeriodEnd()).isNull();
+        scheduledAction.setMRecurrence(recurrence);
+        assertThat(recurrence.getMPeriodEnd().getTime()).isEqualTo(endTime);
 
         long newEndTime = getTimeInMillis(2015, 6, 6);
-        scheduledAction.setEndTime(newEndTime);
-        assertThat(recurrence.getPeriodEnd().getTime()).isEqualTo(newEndTime);
+        scheduledAction.setMEndDate(newEndTime);
+        assertThat(recurrence.getMPeriodEnd().getTime()).isEqualTo(newEndTime);
     }
 
     @Test
     public void settingRecurrence_shouldSetScheduledActionStartTime(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
-        assertThat(scheduledAction.getStartTime()).isEqualTo(0);
+        assertThat(scheduledAction.getMStartTime()).isEqualTo(0);
 
         long startTime = getTimeInMillis(2014, 8, 26);
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setPeriodStart(new Timestamp(startTime));
-        scheduledAction.setRecurrence(recurrence);
-        assertThat(scheduledAction.getStartTime()).isEqualTo(startTime);
+        recurrence.setMPeriodStart(new Timestamp(startTime));
+        scheduledAction.setMRecurrence(recurrence);
+        assertThat(scheduledAction.getMStartTime()).isEqualTo(startTime);
     }
 
     @Test
     public void settingRecurrence_shouldSetEndTime(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
-        assertThat(scheduledAction.getStartTime()).isEqualTo(0);
+        assertThat(scheduledAction.getMStartTime()).isEqualTo(0);
 
         long endTime = getTimeInMillis(2017, 8, 26);
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setPeriodEnd(new Timestamp(endTime));
-        scheduledAction.setRecurrence(recurrence);
+        recurrence.setMPeriodEnd(new Timestamp(endTime));
+        scheduledAction.setMRecurrence(recurrence);
 
-        assertThat(scheduledAction.getEndTime()).isEqualTo(endTime);
+        assertThat(scheduledAction.getMEndDate()).isEqualTo(endTime);
     }
 
     /**
@@ -105,14 +105,14 @@ public class ScheduledActionTest {
         PeriodType periodType = PeriodType.MONTH;
 
         Recurrence recurrence = new Recurrence(periodType);
-        recurrence.setMultiplier(2);
+        recurrence.setMMultiplier(2);
         DateTime startDate = new DateTime(2015, 8, 15, 12, 0);
-        recurrence.setPeriodStart(new Timestamp(startDate.getMillis()));
-        scheduledAction.setRecurrence(recurrence);
+        recurrence.setMPeriodStart(new Timestamp(startDate.getMillis()));
+        scheduledAction.setMRecurrence(recurrence);
 
         assertThat(scheduledAction.computeNextCountBasedScheduledExecutionTime()).isEqualTo(startDate.getMillis());
 
-        scheduledAction.setExecutionCount(3);
+        scheduledAction.setMExecutionCount(3);
         DateTime expectedTime = new DateTime(2016, 2, 15, 12, 0);
         assertThat(scheduledAction.computeNextCountBasedScheduledExecutionTime()).isEqualTo(expectedTime.getMillis());
     }
@@ -122,16 +122,16 @@ public class ScheduledActionTest {
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
         PeriodType periodType = PeriodType.WEEK;
         Recurrence recurrence = new Recurrence(periodType);
-        recurrence.setMultiplier(2);
-        scheduledAction.setRecurrence(recurrence);
+        recurrence.setMMultiplier(2);
+        scheduledAction.setMRecurrence(recurrence);
         DateTime startDate = new DateTime(2016, 6, 6, 9, 0);
-        scheduledAction.setStartTime(startDate.getMillis());
+        scheduledAction.setMStartTime(startDate.getMillis());
 
-        assertThat(scheduledAction.getTimeOfLastSchedule()).isEqualTo(-1L);
+        assertThat(scheduledAction.timeOfLastSchedule()).isEqualTo(-1L);
 
-        scheduledAction.setExecutionCount(3);
+        scheduledAction.setMExecutionCount(3);
         DateTime expectedDate = new DateTime(2016, 7, 4, 9, 0);
-        assertThat(scheduledAction.getTimeOfLastSchedule()).isEqualTo(expectedDate.getMillis());
+        assertThat(scheduledAction.timeOfLastSchedule()).isEqualTo(expectedDate.getMillis());
 
     }
 
@@ -147,10 +147,10 @@ public class ScheduledActionTest {
     public void multiDayOfWeekWeeklyActions_shouldBeDueOnEachDayOfWeekSet() {
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setByDays(Arrays.asList(Calendar.MONDAY, Calendar.THURSDAY));
-        scheduledAction.setRecurrence(recurrence);
-        scheduledAction.setStartTime(new DateTime(2016, 6, 6, 9, 0).getMillis());
-        scheduledAction.setLastRun(new DateTime(2017, 4, 17, 9, 0).getMillis()); // Monday
+        recurrence.byDays(Arrays.asList(Calendar.MONDAY, Calendar.THURSDAY));
+        scheduledAction.setMRecurrence(recurrence);
+        scheduledAction.setMStartTime(new DateTime(2016, 6, 6, 9, 0).getMillis());
+        scheduledAction.setMLastRun(new DateTime(2017, 4, 17, 9, 0).getMillis()); // Monday
 
         long expectedNextDueDate = new DateTime(2017, 4, 20, 9, 0).getMillis(); // Thursday
         assertThat(scheduledAction.computeNextTimeBasedScheduledExecutionTime())
@@ -165,11 +165,11 @@ public class ScheduledActionTest {
     public void weeklyActionsWithMultiplier_shouldBeDueOnTheDayOfWeekSet() {
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setMultiplier(2);
-        recurrence.setByDays(Collections.singletonList(Calendar.WEDNESDAY));
-        scheduledAction.setRecurrence(recurrence);
-        scheduledAction.setStartTime(new DateTime(2016, 6, 6, 9, 0).getMillis());
-        scheduledAction.setLastRun(new DateTime(2017, 4, 12, 9, 0).getMillis()); // Wednesday
+        recurrence.setMMultiplier(2);
+        recurrence.byDays(Collections.singletonList(Calendar.WEDNESDAY));
+        scheduledAction.setMRecurrence(recurrence);
+        scheduledAction.setMStartTime(new DateTime(2016, 6, 6, 9, 0).getMillis());
+        scheduledAction.setMLastRun(new DateTime(2017, 4, 12, 9, 0).getMillis()); // Wednesday
 
         // Wednesday, 2 weeks after the last run
         long expectedNextDueDate = new DateTime(2017, 4, 26, 9, 0).getMillis();
@@ -187,10 +187,10 @@ public class ScheduledActionTest {
     public void weeklyActionsWithoutDayOfWeekSet_shouldReturnDateInTheFuture() {
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setByDays(Collections.<Integer>emptyList());
-        scheduledAction.setRecurrence(recurrence);
-        scheduledAction.setStartTime(new DateTime(2016, 6, 6, 9, 0).getMillis());
-        scheduledAction.setLastRun(new DateTime(2017, 4, 12, 9, 0).getMillis());
+        recurrence.byDays(Collections.<Integer>emptyList());
+        scheduledAction.setMRecurrence(recurrence);
+        scheduledAction.setMStartTime(new DateTime(2016, 6, 6, 9, 0).getMillis());
+        scheduledAction.setMLastRun(new DateTime(2017, 4, 12, 9, 0).getMillis());
 
         long now = LocalDateTime.now().toDate().getTime();
         assertThat(scheduledAction.computeNextTimeBasedScheduledExecutionTime()).isGreaterThan(now);

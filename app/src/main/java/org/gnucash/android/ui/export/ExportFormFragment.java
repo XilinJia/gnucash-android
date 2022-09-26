@@ -328,9 +328,9 @@ public class ExportFormFragment extends Fragment implements
 
 		if (mRecurrenceRule != null) {
 			ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
-			scheduledAction.setRecurrence(RecurrenceParser.parse(mEventRecurrence));
-			scheduledAction.setTag(exportParameters.toCsv());
-			scheduledAction.setActionUID(BaseModel.generateUID());
+			scheduledAction.setMRecurrence(RecurrenceParser.parse(mEventRecurrence));
+			scheduledAction.setMTag(exportParameters.toCsv());
+			scheduledAction.setMActionUID(BaseModel.generateUID());
 			ScheduledActionDbAdapter.getInstance().addRecord(scheduledAction, DatabaseAdapter.UpdateMethod.insert);
 		}
 

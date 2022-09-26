@@ -59,7 +59,7 @@ public class OfxExporterTest {
         Book testBook = new Book("testRootAccountUID");
         booksDbAdapter.addRecord(testBook);
         DatabaseHelper databaseHelper =
-                new DatabaseHelper(GnuCashApplication.getAppContext(), testBook.getUID());
+                new DatabaseHelper(GnuCashApplication.getAppContext(), testBook.getMUID());
         mDb = databaseHelper.getWritableDatabase();
     }
 
@@ -86,7 +86,7 @@ public class OfxExporterTest {
 
         Account account = new Account("Basic Account");
         Transaction transaction = new Transaction("One transaction");
-        transaction.addSplit(new Split(Money.createZeroInstance("EUR"),account.getUID()));
+        transaction.addSplit(new Split(Money.createZeroInstance("EUR"),account.getMUID()));
         account.addTransaction(transaction);
 
         accountsDbAdapter.addRecord(account);

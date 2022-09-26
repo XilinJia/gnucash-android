@@ -68,11 +68,11 @@ public class RecurrenceDbAdapter extends DatabaseAdapter<Recurrence> {
         PeriodType periodType = PeriodType.valueOf(type);
 
         Recurrence recurrence = new Recurrence(periodType);
-        recurrence.setMultiplier((int) multiplier);
-        recurrence.setPeriodStart(Timestamp.valueOf(periodStart));
+        recurrence.setMMultiplier((int) multiplier);
+        recurrence.setMPeriodStart(Timestamp.valueOf(periodStart));
         if (periodEnd != null)
-            recurrence.setPeriodEnd(Timestamp.valueOf(periodEnd));
-        recurrence.setByDays(stringToByDays(byDays));
+            recurrence.setMPeriodEnd(Timestamp.valueOf(periodEnd));
+        recurrence.byDays(stringToByDays(byDays));
 
         populateBaseModelAttributes(cursor, recurrence);
 
@@ -82,16 +82,16 @@ public class RecurrenceDbAdapter extends DatabaseAdapter<Recurrence> {
     @Override
     protected @NonNull SQLiteStatement setBindings(@NonNull SQLiteStatement stmt, @NonNull final Recurrence recurrence) {
         stmt.clearBindings();
-        stmt.bindLong(1, recurrence.getMultiplier());
-        stmt.bindString(2, recurrence.getPeriodType().name());
-        if (!recurrence.getByDays().isEmpty())
-            stmt.bindString(3, byDaysToString(recurrence.getByDays()));
+        stmt.bindLong(1, recurrence.getMMultiplier());
+        stmt.bindString(2, recurrence.getMPeriodType().name());
+        if (!recurrence.byDays().isEmpty())
+            stmt.bindString(3, byDaysToString(recurrence.byDays()));
         //recurrence should always have a start date
-        stmt.bindString(4, recurrence.getPeriodStart().toString());
+        stmt.bindString(4, recurrence.getMPeriodStart().toString());
 
-        if (recurrence.getPeriodEnd() != null)
-            stmt.bindString(5, recurrence.getPeriodEnd().toString());
-        stmt.bindString(6, recurrence.getUID());
+        if (recurrence.getMPeriodEnd() != null)
+            stmt.bindString(5, recurrence.getMPeriodEnd().toString());
+        stmt.bindString(6, recurrence.getMUID());
 
         return stmt;
     }

@@ -149,24 +149,24 @@ public class PieChartFragment extends BaseReportFragment {
         List<String> labels = new ArrayList<>();
         List<Integer> colors = new ArrayList<>();
         for (Account account : mAccountsDbAdapter.getSimpleAccountList()) {
-            if (account.getAccountType() == mAccountType
+            if (account.getMAccountType() == mAccountType
                     && !account.isPlaceholderAccount()
-                    && account.getCommodity().equals(mCommodity)) {
+                    && account.getMCommodity().equals(mCommodity)) {
 
-                double balance = mAccountsDbAdapter.getAccountsBalance(Collections.singletonList(account.getUID()),
+                double balance = mAccountsDbAdapter.getAccountsBalance(Collections.singletonList(account.getMUID()),
                         mReportPeriodStart, mReportPeriodEnd).asDouble();
                 if (balance > 0) {
                     dataSet.addEntry(new Entry((float) balance, dataSet.getEntryCount()));
                     int color;
                     if (mUseAccountColor) {
-                        color = (account.getColor() != Account.DEFAULT_COLOR)
-                                ? account.getColor()
+                        color = (account.getMColor() != Account.DEFAULT_COLOR)
+                                ? account.getMColor()
                                 : ReportsActivity.COLORS[(dataSet.getEntryCount() - 1) % ReportsActivity.COLORS.length];
                     } else {
                         color = ReportsActivity.COLORS[(dataSet.getEntryCount() - 1) % ReportsActivity.COLORS.length];
                     }
                     colors.add(color);
-                    labels.add(account.getName());
+                    labels.add(account.getMName());
                 }
             }
         }

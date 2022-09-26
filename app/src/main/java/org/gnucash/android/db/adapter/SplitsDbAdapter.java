@@ -83,7 +83,7 @@ public class SplitsDbAdapter extends DatabaseAdapter<Split> {
         Log.d(LOG_TAG, "Replace transaction split in db");
         super.addRecord(split, updateMethod);
 
-        long transactionId = getTransactionID(split.getTransactionUID());
+        long transactionId = getTransactionID(split.getMTransactionUID());
         //when a split is updated, we want mark the transaction as not exported
         updateRecord(TransactionEntry.TABLE_NAME, transactionId,
                 TransactionEntry.COLUMN_EXPORTED, String.valueOf(0));
@@ -96,20 +96,20 @@ public class SplitsDbAdapter extends DatabaseAdapter<Split> {
     @Override
     protected @NonNull SQLiteStatement setBindings(@NonNull SQLiteStatement stmt, @NonNull final Split split) {
         stmt.clearBindings();
-        if (split.getMemo() != null) {
-            stmt.bindString(1, split.getMemo());
+        if (split.getMMemo() != null) {
+            stmt.bindString(1, split.getMMemo());
         }
-        stmt.bindString(2, split.getType().name());
-        stmt.bindLong(3, split.getValue().getNumerator());
-        stmt.bindLong(4, split.getValue().getDenominator());
-        stmt.bindLong(5, split.getQuantity().getNumerator());
-        stmt.bindLong(6, split.getQuantity().getDenominator());
-        stmt.bindString(7, split.getCreatedTimestamp().toString());
-        stmt.bindString(8, String.valueOf(split.getReconcileState()));
-        stmt.bindString(9, split.getReconcileDate().toString());
-        stmt.bindString(10, split.getAccountUID());
-        stmt.bindString(11, split.getTransactionUID());
-        stmt.bindString(12, split.getUID());
+        stmt.bindString(2, split.getMSplitType().name());
+        stmt.bindLong(3, split.getMValue().numerator());
+        stmt.bindLong(4, split.getMValue().denominator());
+        stmt.bindLong(5, split.getMQuantity().numerator());
+        stmt.bindLong(6, split.getMQuantity().denominator());
+        stmt.bindString(7, split.getMCreatedTimestamp().toString());
+        stmt.bindString(8, String.valueOf(split.getMReconcileState()));
+        stmt.bindString(9, split.getMReconcileDate().toString());
+        stmt.bindString(10, split.getMAccountUID());
+        stmt.bindString(11, split.getMTransactionUID());
+        stmt.bindString(12, split.getMUID());
 
         return stmt;
     }
@@ -137,14 +137,14 @@ public class SplitsDbAdapter extends DatabaseAdapter<Split> {
         Money quantity = new Money(quantityNum, quantityDenom, currencyCode);
 
         Split split = new Split(value, accountUID);
-        split.setQuantity(quantity);
+        split.setMQuantity(quantity);
         populateBaseModelAttributes(cursor, split);
-        split.setTransactionUID(transxUID);
-        split.setType(TransactionType.valueOf(typeName));
-        split.setMemo(memo);
-        split.setReconcileState(reconcileState.charAt(0));
+        split.setMTransactionUID(transxUID);
+        split.setMSplitType(TransactionType.valueOf(typeName));
+        split.setMMemo(memo);
+        split.setMReconcileState(reconcileState.charAt(0));
         if (reconcileDate != null && !reconcileDate.isEmpty())
-            split.setReconcileDate(TimestampHelper.getTimestampFromUtcString(reconcileDate));
+            split.setMReconcileDate(TimestampHelper.getTimestampFromUtcString(reconcileDate));
 
         return split;
     }
@@ -248,7 +248,7 @@ public class SplitsDbAdapter extends DatabaseAdapter<Split> {
                     }
                     BigDecimal amount = Money.getBigDecimal(amount_num, amount_denom);
                     BigDecimal amountConverted = amount.multiply(new BigDecimal(price.first))
-                            .divide(new BigDecimal(price.second), commodity.getSmallestFractionDigits(), BigDecimal.ROUND_HALF_EVEN);
+                            .divide(new BigDecimal(price.second), commodity.smallestFractionDigits(), BigDecimal.ROUND_HALF_EVEN);
                     total = total.add(new Money(amountConverted, commodity));
                     //Log.d(getClass().getName(), "currency " + commodity + " sub - total " + total);
                 }
@@ -401,7 +401,7 @@ public class SplitsDbAdapter extends DatabaseAdapter<Split> {
     @Override
     public boolean deleteRecord(long rowId) {
         Split split = getRecord(rowId);
-        String transactionUID = split.getTransactionUID();
+        String transactionUID = split.getMTransactionUID();
         boolean result = mDb.delete(SplitEntry.TABLE_NAME, SplitEntry._ID + "=" + rowId, null) > 0;
 
         if (!result) //we didn't delete for whatever reason, invalid rowId etc

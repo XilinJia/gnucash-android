@@ -50,10 +50,10 @@ public class AccountBalanceTask extends AsyncTask<String, Void, Money> {
         //if the view for which we are doing this job is dead, kill the job as well
         if (accountBalanceTextViewReference.get() == null){
             cancel(true);
-            return Money.getZeroInstance();
+            return Money.getSDefaultZero();
         }
 
-        Money balance = Money.getZeroInstance();
+        Money balance = Money.getSDefaultZero();
         try {
             balance = accountsDbAdapter.getAccountBalance(params[0], -1, -1);
         } catch (Exception ex) {

@@ -66,9 +66,9 @@ public class TransactionRecorder extends BroadcastReceiver {
 			currencyCode = Money.DEFAULT_CURRENCY_CODE;
 
         Transaction transaction = new Transaction(name);
-        transaction.setTime(System.currentTimeMillis());
-        transaction.setNote(note);
-        transaction.setCommodity(Commodity.getInstance(currencyCode));
+        transaction.setMTimestamp(System.currentTimeMillis());
+        transaction.setMNotes(note);
+        transaction.setMCommodity(Commodity.getInstance(currencyCode));
 
         //Parse deprecated args for compatibility. Transactions were bound to accounts, now only splits are
 		String accountUID = args.getString(Transaction.EXTRA_ACCOUNT_UID);
@@ -76,10 +76,10 @@ public class TransactionRecorder extends BroadcastReceiver {
             TransactionType type = TransactionType.valueOf(args.getString(Transaction.EXTRA_TRANSACTION_TYPE));
             BigDecimal amountBigDecimal = (BigDecimal) args.getSerializable(Transaction.EXTRA_AMOUNT);
             Commodity commodity = CommoditiesDbAdapter.getInstance().getCommodity(currencyCode);
-            amountBigDecimal = amountBigDecimal.setScale(commodity.getSmallestFractionDigits(), BigDecimal.ROUND_HALF_EVEN).round(MathContext.DECIMAL128);
+            amountBigDecimal = amountBigDecimal.setScale(commodity.smallestFractionDigits(), BigDecimal.ROUND_HALF_EVEN).round(MathContext.DECIMAL128);
             Money amount = new Money(amountBigDecimal, Commodity.getInstance(currencyCode));
             Split split = new Split(amount, accountUID);
-            split.setType(type);
+            split.setMSplitType(type);
             transaction.addSplit(split);
 
             String transferAccountUID = args.getString(Transaction.EXTRA_DOUBLE_ACCOUNT_UID);

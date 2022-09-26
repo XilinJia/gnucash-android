@@ -63,8 +63,8 @@ public class BudgetAmountsDbAdapter extends DatabaseAdapter<BudgetAmount> {
         long periodNum  = cursor.getLong(cursor.getColumnIndexOrThrow(BudgetAmountEntry.COLUMN_PERIOD_NUM));
 
         BudgetAmount budgetAmount = new BudgetAmount(budgetUID, accountUID);
-        budgetAmount.setAmount(new Money(amountNum, amountDenom, getAccountCurrencyCode(accountUID)));
-        budgetAmount.setPeriodNum(periodNum);
+        budgetAmount.setMAmount(new Money(amountNum, amountDenom, getAccountCurrencyCode(accountUID)));
+        budgetAmount.setMPeriodNum(periodNum);
         populateBaseModelAttributes(cursor, budgetAmount);
 
         return budgetAmount;
@@ -73,12 +73,12 @@ public class BudgetAmountsDbAdapter extends DatabaseAdapter<BudgetAmount> {
     @Override
     protected @NonNull SQLiteStatement setBindings(@NonNull SQLiteStatement stmt, @NonNull final BudgetAmount budgetAmount) {
         stmt.clearBindings();
-        stmt.bindString(1, budgetAmount.getBudgetUID());
-        stmt.bindString(2, budgetAmount.getAccountUID());
-        stmt.bindLong(3, budgetAmount.getAmount().getNumerator());
-        stmt.bindLong(4, budgetAmount.getAmount().getDenominator());
-        stmt.bindLong(5, budgetAmount.getPeriodNum());
-        stmt.bindString(6, budgetAmount.getUID());
+        stmt.bindString(1, budgetAmount.getMBudgetUID());
+        stmt.bindString(2, budgetAmount.getMAccountUID());
+        stmt.bindLong(3, budgetAmount.getMAmount().numerator());
+        stmt.bindLong(4, budgetAmount.getMAmount().denominator());
+        stmt.bindLong(5, budgetAmount.getMPeriodNum());
+        stmt.bindString(6, budgetAmount.getMUID());
 
         return stmt;
     }
@@ -134,7 +134,7 @@ public class BudgetAmountsDbAdapter extends DatabaseAdapter<BudgetAmount> {
         List<BudgetAmount> budgetAmounts = getBudgetAmounts(accountUID);
         Money sum = Money.createZeroInstance(getAccountCurrencyCode(accountUID));
         for (BudgetAmount budgetAmount : budgetAmounts) {
-            sum = sum.add(budgetAmount.getAmount());
+            sum = sum.add(budgetAmount.getMAmount());
         }
         return sum;
     }

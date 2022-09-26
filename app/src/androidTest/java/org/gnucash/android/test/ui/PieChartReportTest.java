@@ -130,7 +130,7 @@ public class PieChartReportTest {
         CURRENCY = CommoditiesDbAdapter.getInstance().getCommodity("USD");
 
         PreferenceActivity.getActiveBookSharedPreferences().edit()
-                .putString(context.getString(R.string.key_default_currency), CURRENCY.getCurrencyCode())
+                .putString(context.getString(R.string.key_default_currency), CURRENCY.getMMnemonic())
                 .commit();
     }
 	
@@ -149,10 +149,10 @@ public class PieChartReportTest {
      */
     private void addTransactionForCurrentMonth() throws Exception {
         Transaction transaction = new Transaction(TRANSACTION_NAME);
-        transaction.setTime(System.currentTimeMillis());
+        transaction.setMTimestamp(System.currentTimeMillis());
 
         Split split = new Split(new Money(BigDecimal.valueOf(TRANSACTION_AMOUNT), CURRENCY), DINING_EXPENSE_ACCOUNT_UID);
-        split.setType(TransactionType.DEBIT);
+        split.setMSplitType(TransactionType.DEBIT);
 
         transaction.addSplit(split);
         transaction.addSplit(split.createPair(CASH_IN_WALLET_ASSET_ACCOUNT_UID));
@@ -166,10 +166,10 @@ public class PieChartReportTest {
      */
     private void addTransactionForPreviousMonth(int minusMonths) {
         Transaction transaction = new Transaction(TRANSACTION2_NAME);
-        transaction.setTime(new LocalDateTime().minusMonths(minusMonths).toDate().getTime());
+        transaction.setMTimestamp(new LocalDateTime().minusMonths(minusMonths).toDate().getTime());
 
         Split split = new Split(new Money(BigDecimal.valueOf(TRANSACTION2_AMOUNT), CURRENCY), BOOKS_EXPENSE_ACCOUNT_UID);
-        split.setType(TransactionType.DEBIT);
+        split.setMSplitType(TransactionType.DEBIT);
 
         transaction.addSplit(split);
         transaction.addSplit(split.createPair(CASH_IN_WALLET_ASSET_ACCOUNT_UID));

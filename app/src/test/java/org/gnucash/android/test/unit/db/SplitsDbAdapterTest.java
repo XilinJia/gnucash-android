@@ -68,8 +68,8 @@ public class SplitsDbAdapterTest {
         Transaction transaction = new Transaction("");
         mTransactionsDbAdapter.addRecord(transaction);
 
-        Split split = new Split(Money.getZeroInstance(), "non-existent");
-        split.setTransactionUID(transaction.getUID());
+        Split split = new Split(Money.getSDefaultZero(), "non-existent");
+        split.setMTransactionUID(transaction.getMUID());
         mSplitsDbAdapter.addRecord(split);
     }
 
@@ -80,8 +80,8 @@ public class SplitsDbAdapterTest {
     public void shouldHaveTransactionInDatabase(){
         Transaction transaction = new Transaction(""); //not added to the db
 
-        Split split = new Split(Money.getZeroInstance(), mAccount.getUID());
-        split.setTransactionUID(transaction.getUID());
+        Split split = new Split(Money.getSDefaultZero(), mAccount.getMUID());
+        split.setMTransactionUID(transaction.getMUID());
         mSplitsDbAdapter.addRecord(split);
     }
 
@@ -90,13 +90,13 @@ public class SplitsDbAdapterTest {
         Transaction transaction = new Transaction("");
         mTransactionsDbAdapter.addRecord(transaction);
 
-        Split split = new Split(Money.getZeroInstance(), mAccount.getUID());
-        split.setTransactionUID(transaction.getUID());
+        Split split = new Split(Money.getSDefaultZero(), mAccount.getMUID());
+        split.setMTransactionUID(transaction.getMUID());
         mSplitsDbAdapter.addRecord(split);
 
-        List<Split> splits = mSplitsDbAdapter.getSplitsForTransaction(transaction.getUID());
+        List<Split> splits = mSplitsDbAdapter.getSplitsForTransaction(transaction.getMUID());
         assertThat(splits).isNotEmpty();
-        assertThat(splits.get(0).getUID()).isEqualTo(split.getUID());
+        assertThat(splits.get(0).getMUID()).isEqualTo(split.getMUID());
     }
 
     /**
@@ -105,16 +105,16 @@ public class SplitsDbAdapterTest {
     @Test
     public void addingSplitShouldUnsetExportedFlagOfTransaction(){
         Transaction transaction = new Transaction("");
-        transaction.setExported(true);
+        transaction.setMIsExported(true);
         mTransactionsDbAdapter.addRecord(transaction);
 
-        assertThat(transaction.isExported()).isTrue();
+        assertThat(transaction.getMIsExported()).isTrue();
 
-        Split split = new Split(Money.getZeroInstance(), mAccount.getUID());
-        split.setTransactionUID(transaction.getUID());
+        Split split = new Split(Money.getSDefaultZero(), mAccount.getMUID());
+        split.setMTransactionUID(transaction.getMUID());
         mSplitsDbAdapter.addRecord(split);
 
-        String isExported = mTransactionsDbAdapter.getAttribute(transaction.getUID(),
+        String isExported = mTransactionsDbAdapter.getAttribute(transaction.getMUID(),
                 DatabaseSchema.TransactionEntry.COLUMN_EXPORTED);
         assertThat(Boolean.parseBoolean(isExported)).isFalse();
     }

@@ -1,5 +1,6 @@
 buildscript {
-	repositories{
+    ext.kotlin_version = '1.7.10'
+    repositories{
 		maven { url 'https://maven.fabric.io/public' }
 		jcenter()
 		google()
@@ -8,7 +9,8 @@ buildscript {
 		classpath 'com.android.tools.build:gradle:7.2.2'
 		classpath 'io.fabric.tools:gradle:1.31.2'
 		classpath 'com.stanfy.spoon:spoon-gradle-plugin:1.2.2'
-	}
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
 }
 
 allprojects {

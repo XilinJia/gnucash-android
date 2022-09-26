@@ -142,8 +142,8 @@ public class SplitEditorFragment extends Fragment {
             final String currencyCode = mAccountsDbAdapter.getAccountCurrencyCode(mAccountUID);
             Split split = new Split(new Money(mBaseAmount, Commodity.getInstance(currencyCode)), mAccountUID);
             AccountType accountType = mAccountsDbAdapter.getAccountType(mAccountUID);
-            TransactionType transactionType = Transaction.getTypeForBalance(accountType, mBaseAmount.signum() < 0);
-            split.setType(transactionType);
+            TransactionType transactionType = Transaction.typeForBalance(accountType, mBaseAmount.signum() < 0);
+            split.setMSplitType(transactionType);
             View view = addSplitView(split);
             view.findViewById(R.id.input_accounts_spinner).setEnabled(false);
             view.findViewById(R.id.btn_remove_split).setVisibility(View.GONE);
@@ -221,7 +221,7 @@ public class SplitEditorFragment extends Fragment {
                 + DatabaseSchema.AccountEntry.COLUMN_PLACEHOLDER + " = 0"
                 + ")";
         mCursor = mAccountsDbAdapter.fetchAccountsOrderedByFullName(conditions, null);
-        mCommodity = CommoditiesDbAdapter.getInstance().getCommodity(mAccountsDbAdapter.getCurrencyCode(mAccountUID));
+        mCommodity = CommoditiesDbAdapter.getInstance().getCommodity(mAccountsDbAdapter.getMMnemonic(mAccountUID));
     }
 
     /**
@@ -242,8 +242,8 @@ public class SplitEditorFragment extends Fragment {
         public SplitViewHolder(View splitView, Split split){
             ButterKnife.bind(this, splitView);
             this.splitView = splitView;
-            if (split != null && !split.getQuantity().equals(split.getValue()))
-                this.quantity = split.getQuantity();
+            if (split != null && !split.getMQuantity().equals(split.getMValue()))
+                this.quantity = split.getMQuantity();
             setListeners(split);
         }
 
@@ -272,15 +272,15 @@ public class SplitEditorFragment extends Fragment {
             splitUidTextView.setText(BaseModel.generateUID());
 
             if (split != null) {
-                splitAmountEditText.setCommodity(split.getValue().getCommodity());
-                splitAmountEditText.setValue(split.getFormattedValue().asBigDecimal());
-                splitCurrencyTextView.setText(split.getValue().getCommodity().getSymbol());
-                splitMemoEditText.setText(split.getMemo());
-                splitUidTextView.setText(split.getUID());
-                String splitAccountUID = split.getAccountUID();
+                splitAmountEditText.setCommodity(split.getMValue().getMCommodity());
+                splitAmountEditText.setValue(split.formattedValue().asBigDecimal());
+                splitCurrencyTextView.setText(split.getMValue().getMCommodity().getSymbol());
+                splitMemoEditText.setText(split.getMMemo());
+                splitUidTextView.setText(split.getMUID());
+                String splitAccountUID = split.getMAccountUID();
                 setSelectedTransferAccount(mAccountsDbAdapter.getID(splitAccountUID), accountsSpinner);
                 splitTypeSwitch.setAccountType(mAccountsDbAdapter.getAccountType(splitAccountUID));
-                splitTypeSwitch.setChecked(split.getType());
+                splitTypeSwitch.setChecked(split.getMSplitType());
             }
 
             accountsSpinner.setOnItemSelectedListener(new SplitAccountListener(splitTypeSwitch, this));
@@ -390,16 +390,16 @@ public class SplitEditorFragment extends Fragment {
 
             BigDecimal amountBigDecimal = viewHolder.splitAmountEditText.getValue();
 
-            String currencyCode = mAccountsDbAdapter.getCurrencyCode(mAccountUID);
+            String currencyCode = mAccountsDbAdapter.getMMnemonic(mAccountUID);
             Money valueAmount = new Money(amountBigDecimal.abs(), Commodity.getInstance(currencyCode));
 
             String accountUID = mAccountsDbAdapter.getUID(viewHolder.accountsSpinner.getSelectedItemId());
             Split split = new Split(valueAmount, accountUID);
-            split.setMemo(viewHolder.splitMemoEditText.getText().toString());
-            split.setType(viewHolder.splitTypeSwitch.getTransactionType());
-            split.setUID(viewHolder.splitUidTextView.getText().toString().trim());
+            split.setMMemo(viewHolder.splitMemoEditText.getText().toString());
+            split.setMSplitType(viewHolder.splitTypeSwitch.getTransactionType());
+            split.setMUID(viewHolder.splitUidTextView.getText().toString().trim());
             if (viewHolder.quantity != null)
-                split.setQuantity(viewHolder.quantity.abs());
+                split.setMQuantity(viewHolder.quantity.abs());
             splitList.add(split);
         }
         return splitList;
@@ -475,8 +475,8 @@ public class SplitEditorFragment extends Fragment {
             //refresh the imbalance amount if we change the account
             mImbalanceWatcher.afterTextChanged(null);
 
-            String fromCurrencyCode = mAccountsDbAdapter.getCurrencyCode(mAccountUID);
-            String targetCurrencyCode = mAccountsDbAdapter.getCurrencyCode(mAccountsDbAdapter.getUID(id));
+            String fromCurrencyCode = mAccountsDbAdapter.getMMnemonic(mAccountUID);
+            String targetCurrencyCode = mAccountsDbAdapter.getMMnemonic(mAccountsDbAdapter.getUID(id));
 
             if (!userInteraction || fromCurrencyCode.equals(targetCurrencyCode)){
                 //first call is on layout, subsequent calls will be true and transfer will work as usual

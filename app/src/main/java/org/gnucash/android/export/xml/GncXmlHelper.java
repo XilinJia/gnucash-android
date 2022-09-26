@@ -214,7 +214,7 @@ public abstract class GncXmlHelper {
      * @deprecated Just use the values for numerator and denominator which are saved in the database
      */
     public static String formatSplitAmount(BigDecimal amount, Commodity commodity){
-        int denomInt = commodity.getSmallestFraction();
+        int denomInt = commodity.getMSmallestFraction();
         BigDecimal denom = new BigDecimal(denomInt);
         String denomString = Integer.toString(denomInt);
 

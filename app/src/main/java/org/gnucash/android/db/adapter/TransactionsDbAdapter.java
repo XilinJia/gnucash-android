@@ -105,28 +105,28 @@ public class TransactionsDbAdapter extends DatabaseAdapter<Transaction> {
             Split imbalanceSplit = transaction.createAutoBalanceSplit();
             if (imbalanceSplit != null){
                 String imbalanceAccountUID = new AccountsDbAdapter(mDb, this)
-                        .getOrCreateImbalanceAccountUID(transaction.getCommodity());
-                imbalanceSplit.setAccountUID(imbalanceAccountUID);
+                        .getOrCreateImbalanceAccountUID(transaction.getMCommodity());
+                imbalanceSplit.setMAccountUID(imbalanceAccountUID);
             }
             super.addRecord(transaction, updateMethod);
 
             Log.d(LOG_TAG, "Adding splits for transaction");
-            ArrayList<String> splitUIDs = new ArrayList<>(transaction.getSplits().size());
-            for (Split split : transaction.getSplits()) {
+            ArrayList<String> splitUIDs = new ArrayList<>(transaction.getMSplitList().size());
+            for (Split split : transaction.getMSplitList()) {
                 Log.d(LOG_TAG, "Replace transaction split in db");
                 if (imbalanceSplit == split) {
                     mSplitsDbAdapter.addRecord(split, UpdateMethod.insert);
                 } else {
                     mSplitsDbAdapter.addRecord(split, updateMethod);
                 }
-                splitUIDs.add(split.getUID());
+                splitUIDs.add(split.getMUID());
             }
-            Log.d(LOG_TAG, transaction.getSplits().size() + " splits added");
+            Log.d(LOG_TAG, transaction.getMSplitList().size() + " splits added");
 
             long deleted = mDb.delete(SplitEntry.TABLE_NAME,
                     SplitEntry.COLUMN_TRANSACTION_UID + " = ? AND "
                             + SplitEntry.COLUMN_UID + " NOT IN ('" + TextUtils.join("' , '", splitUIDs) + "')",
-                    new String[]{transaction.getUID()});
+                    new String[]{transaction.getMUID()});
             Log.d(LOG_TAG, deleted + " splits deleted");
 
             mDb.setTransactionSuccessful();
@@ -155,7 +155,7 @@ public class TransactionsDbAdapter extends DatabaseAdapter<Transaction> {
         Log.d(getClass().getSimpleName(), String.format("bulk add transaction time %d ", end - start));
         List<Split> splitList = new ArrayList<>(transactionList.size()*3);
         for (Transaction transaction : transactionList) {
-            splitList.addAll(transaction.getSplits());
+            splitList.addAll(transaction.getMSplitList());
         }
         if (rowInserted != 0 && !splitList.isEmpty()) {
             try {
@@ -178,20 +178,20 @@ public class TransactionsDbAdapter extends DatabaseAdapter<Transaction> {
     @Override
     protected @NonNull SQLiteStatement setBindings(@NonNull SQLiteStatement stmt, @NonNull Transaction transaction) {
         stmt.clearBindings();
-        stmt.bindString(1, transaction.getDescription());
-        stmt.bindString(2, transaction.getNote());
-        stmt.bindLong(3, transaction.getTimeMillis());
-        stmt.bindLong(4, transaction.isExported() ? 1 : 0);
-        stmt.bindString(5, transaction.getCurrencyCode());
-        stmt.bindString(6, transaction.getCommodity().getUID());
-        stmt.bindString(7, TimestampHelper.getUtcStringFromTimestamp(transaction.getCreatedTimestamp()));
+        stmt.bindString(1, transaction.getMDescription());
+        stmt.bindString(2, transaction.getMNotes());
+        stmt.bindLong(3, transaction.getMTimestamp());
+        stmt.bindLong(4, transaction.getMIsExported() ? 1 : 0);
+        stmt.bindString(5, transaction.getMMnemonic());
+        stmt.bindString(6, transaction.getMCommodity().getMUID());
+        stmt.bindString(7, TimestampHelper.getUtcStringFromTimestamp(transaction.getMCreatedTimestamp()));
 
-        if (transaction.getScheduledActionUID() == null)
+        if (transaction.getMScheduledActionUID() == null)
             stmt.bindNull(8);
         else
-            stmt.bindString(8, transaction.getScheduledActionUID());
-        stmt.bindLong(9, transaction.isTemplate() ? 1 : 0);
-        stmt.bindString(10, transaction.getUID());
+            stmt.bindString(8, transaction.getMScheduledActionUID());
+        stmt.bindLong(9, transaction.getMIsTemplate() ? 1 : 0);
+        stmt.bindString(10, transaction.getMUID());
 
         return stmt;
     }
@@ -416,15 +416,15 @@ public class TransactionsDbAdapter extends DatabaseAdapter<Transaction> {
 		Transaction transaction = new Transaction(name);
         populateBaseModelAttributes(c, transaction);
 
-		transaction.setTime(c.getLong(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_TIMESTAMP)));
-		transaction.setNote(c.getString(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_NOTES)));
-		transaction.setExported(c.getInt(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_EXPORTED)) == 1);
-		transaction.setTemplate(c.getInt(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_TEMPLATE)) == 1);
+		transaction.setMTimestamp(c.getLong(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_TIMESTAMP)));
+		transaction.setMNotes(c.getString(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_NOTES)));
+		transaction.setMIsExported(c.getInt(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_EXPORTED)) == 1);
+		transaction.setMIsTemplate(c.getInt(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_TEMPLATE)) == 1);
         String currencyCode = c.getString(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_CURRENCY));
-        transaction.setCommodity(mCommoditiesDbAdapter.getCommodity(currencyCode));
-        transaction.setScheduledActionUID(c.getString(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_SCHEDX_ACTION_UID)));
+        transaction.setMCommodity(mCommoditiesDbAdapter.getCommodity(currencyCode));
+        transaction.setMScheduledActionUID(c.getString(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_SCHEDX_ACTION_UID)));
         long transactionID = c.getLong(c.getColumnIndexOrThrow(TransactionEntry._ID));
-        transaction.setSplits(mSplitsDbAdapter.getSplitsForTransaction(transactionID));
+        transaction.setMSplitList(mSplitsDbAdapter.getSplitsForTransaction(transactionID));
 
 		return transaction;
 	}
@@ -456,7 +456,7 @@ public class TransactionsDbAdapter extends DatabaseAdapter<Transaction> {
 
 		List<Split> splits = mSplitsDbAdapter.getSplitsForTransactionInAccount(transactionUID, srcAccountUID);
         for (Split split : splits) {
-            split.setAccountUID(dstAccountUID);
+            split.setMAccountUID(dstAccountUID);
         }
         mSplitsDbAdapter.bulkAddRecords(splits, UpdateMethod.update);
         return splits.size();

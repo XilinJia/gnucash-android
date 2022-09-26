@@ -28,22 +28,22 @@ public class CommodityTest {
     @Test
     public void setSmallestFraction_shouldNotUseDigits(){
         Commodity commodity = new Commodity("Test", "USD", 100);
-        assertThat(commodity.getSmallestFraction()).isEqualTo(100);
+        assertThat(commodity.getMSmallestFraction()).isEqualTo(100);
 
-        commodity.setSmallestFraction(1000);
-        assertThat(commodity.getSmallestFraction()).isEqualTo(1000);
+        commodity.setMSmallestFraction(1000);
+        assertThat(commodity.getMSmallestFraction()).isEqualTo(1000);
     }
 
     @Test
     public void testSmallestFractionDigits(){
         Commodity commodity = new Commodity("Test", "USD", 100);
-        assertThat(commodity.getSmallestFractionDigits()).isEqualTo(2);
+        assertThat(commodity.smallestFractionDigits()).isEqualTo(2);
 
-        commodity.setSmallestFraction(10);
-        assertThat(commodity.getSmallestFractionDigits()).isEqualTo(1);
+        commodity.setMSmallestFraction(10);
+        assertThat(commodity.smallestFractionDigits()).isEqualTo(1);
 
-        commodity.setSmallestFraction(1);
-        assertThat(commodity.getSmallestFractionDigits()).isEqualTo(0);
+        commodity.setMSmallestFraction(1);
+        assertThat(commodity.smallestFractionDigits()).isEqualTo(0);
 
     }
 }

@@ -64,7 +64,7 @@ public class BooksDbAdapterTest {
         mBooksDbAdapter.addRecord(book, DatabaseAdapter.UpdateMethod.insert);
 
         assertThat(mBooksDbAdapter.getRecordsCount()).isEqualTo(1);
-        assertThat(mBooksDbAdapter.getRecord(book.getUID()).getDisplayName()).isEqualTo("Book 1");
+        assertThat(mBooksDbAdapter.getRecord(book.getMUID()).getMDisplayName()).isEqualTo("Book 1");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -76,10 +76,10 @@ public class BooksDbAdapterTest {
     @Test
     public void deleteBook(){
         Book book = new Book();
-        book.setRootAccountUID(BaseModel.generateUID());
+        book.setMRootAccountUID(BaseModel.generateUID());
         mBooksDbAdapter.addRecord(book);
 
-        mBooksDbAdapter.deleteRecord(book.getUID());
+        mBooksDbAdapter.deleteRecord(book.getMUID());
 
         assertThat(mBooksDbAdapter.getRecordsCount()).isZero();
     }
@@ -92,14 +92,14 @@ public class BooksDbAdapterTest {
         mBooksDbAdapter.addRecord(book1);
         mBooksDbAdapter.addRecord(book2);
 
-        mBooksDbAdapter.setActive(book1.getUID());
+        mBooksDbAdapter.setActive(book1.getMUID());
 
-        assertThat(mBooksDbAdapter.getActiveBookUID()).isEqualTo(book1.getUID());
+        assertThat(mBooksDbAdapter.getActiveBookUID()).isEqualTo(book1.getMUID());
 
-        mBooksDbAdapter.setActive(book2.getUID());
-        assertThat(mBooksDbAdapter.isActive(book2.getUID())).isTrue();
+        mBooksDbAdapter.setActive(book2.getMUID());
+        assertThat(mBooksDbAdapter.isActive(book2.getMUID())).isTrue();
         //setting book2 as active should disable book1 as active
-        Book book = mBooksDbAdapter.getRecord(book1.getUID());
+        Book book = mBooksDbAdapter.getRecord(book1.getMUID());
         assertThat(book.isActive()).isFalse();
     }
 
@@ -151,22 +151,22 @@ public class BooksDbAdapterTest {
 
         assertThat(mBooksDbAdapter.getRecordsCount()).isEqualTo(3L);
 
-        mBooksDbAdapter.deleteRecord(book2.getUID());
+        mBooksDbAdapter.deleteRecord(book2.getMUID());
         assertThat(mBooksDbAdapter.getRecordsCount()).isEqualTo(2L);
 
         String generatedName = mBooksDbAdapter.generateDefaultBookName();
-        assertThat(generatedName).isNotEqualTo(book3.getDisplayName());
+        assertThat(generatedName).isNotEqualTo(book3.getMDisplayName());
         assertThat(generatedName).isEqualTo("Book 4");
     }
 
     @Test
     public void recoverFromNoActiveBookFound() {
         Book book1 = new Book(BaseModel.generateUID());
-        book1.setActive(false);
+        book1.setMActive(false);
         mBooksDbAdapter.addRecord(book1);
 
         Book book2 = new Book(BaseModel.generateUID());
-        book2.setActive(false);
+        book2.setMActive(false);
         mBooksDbAdapter.addRecord(book2);
 
         try {
@@ -176,7 +176,7 @@ public class BooksDbAdapterTest {
             mBooksDbAdapter.fixBooksDatabase();
         }
 
-        assertThat(mBooksDbAdapter.getActiveBookUID()).isEqualTo(book1.getUID());
+        assertThat(mBooksDbAdapter.getActiveBookUID()).isEqualTo(book1.getMUID());
     }
 
     /**

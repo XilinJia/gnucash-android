@@ -75,11 +75,11 @@ public class BooksDbAdapter extends DatabaseAdapter<Book> {
         String lastSync = cursor.getString(cursor.getColumnIndexOrThrow(BookEntry.COLUMN_LAST_SYNC));
 
         Book book = new Book(rootAccountGUID);
-        book.setDisplayName(displayName);
-        book.setRootTemplateUID(rootTemplateGUID);
-        book.setSourceUri(uriString == null ? null : Uri.parse(uriString));
-        book.setActive(active > 0);
-        book.setLastSync(TimestampHelper.getTimestampFromUtcString(lastSync));
+        book.setMDisplayName(displayName);
+        book.setMRootTemplateUID(rootTemplateGUID);
+        book.setMSourceUri(uriString == null ? null : Uri.parse(uriString));
+        book.setMActive(active > 0);
+        book.setMLastSync(TimestampHelper.getTimestampFromUtcString(lastSync));
 
         populateBaseModelAttributes(cursor, book);
         return book;
@@ -88,15 +88,15 @@ public class BooksDbAdapter extends DatabaseAdapter<Book> {
     @Override
     protected @NonNull SQLiteStatement setBindings(@NonNull SQLiteStatement stmt, @NonNull final Book book) {
         stmt.clearBindings();
-        String displayName = book.getDisplayName() == null ? generateDefaultBookName() : book.getDisplayName();
+        String displayName = book.getMDisplayName() == null ? generateDefaultBookName() : book.getMDisplayName();
         stmt.bindString(1, displayName);
-        stmt.bindString(2, book.getRootAccountUID());
-        stmt.bindString(3, book.getRootTemplateUID());
-        if (book.getSourceUri() != null)
-            stmt.bindString(4, book.getSourceUri().toString());
+        stmt.bindString(2, book.getMRootAccountUID());
+        stmt.bindString(3, book.getMRootTemplateUID());
+        if (book.getMSourceUri() != null)
+            stmt.bindString(4, book.getMSourceUri().toString());
         stmt.bindLong(5, book.isActive() ? 1L : 0L);
-        stmt.bindString(6, book.getUID());
-        stmt.bindString(7, TimestampHelper.getUtcStringFromTimestamp(book.getLastSync()));
+        stmt.bindString(6, book.getMUID());
+        stmt.bindString(7, TimestampHelper.getUtcStringFromTimestamp(book.getMLastSync()));
         return stmt;
     }
 
@@ -179,9 +179,9 @@ public class BooksDbAdapter extends DatabaseAdapter<Book> {
         StringBuilder info = new StringBuilder("UID, created, source\n");
         for (Book book : getAllRecords()) {
             info.append(String.format("%s, %s, %s\n",
-                                      book.getUID(),
-                                      book.getCreatedTimestamp(),
-                                      book.getSourceUri()));
+                                      book.getMUID(),
+                                      book.getMCreatedTimestamp(),
+                                      book.getMSourceUri()));
         }
         return info.toString();
     }
@@ -210,10 +210,10 @@ public class BooksDbAdapter extends DatabaseAdapter<Book> {
     private void recoverBookRecords() {
         for (String dbName : getBookDatabases()) {
             Book book = new Book(getRootAccountUID(dbName));
-            book.setUID(dbName);
-            book.setDisplayName(generateDefaultBookName());
+            book.setMUID(dbName);
+            book.setMDisplayName(generateDefaultBookName());
             addRecord(book);
-            Log.w(LOG_TAG, "Recovered book record: " + book.getUID());
+            Log.w(LOG_TAG, "Recovered book record: " + book.getMUID());
         }
     }
 
@@ -236,9 +236,9 @@ public class BooksDbAdapter extends DatabaseAdapter<Book> {
      */
     private void setFirstBookAsActive() {
         Book firstBook = getAllRecords().get(0);
-        firstBook.setActive(true);
+        firstBook.setMActive(true);
         addRecord(firstBook);
-        Log.w(LOG_TAG, "Book " + firstBook.getUID() + " set as active.");
+        Log.w(LOG_TAG, "Book " + firstBook.getMUID() + " set as active.");
     }
 
     /**

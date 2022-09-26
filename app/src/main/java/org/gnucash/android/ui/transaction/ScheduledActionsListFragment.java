@@ -132,7 +132,7 @@ public class ScheduledActionsListFragment extends ListFragment implements
                                         R.string.toast_recurring_transaction_deleted,
                                         Toast.LENGTH_SHORT).show();
                                 for (ScheduledAction action : actions) {
-                                    scheduledActionDbAdapter.deleteRecord(action.getUID());
+                                    scheduledActionDbAdapter.deleteRecord(action.getMUID());
                                 }
                             }
                         } else if (mActionType == ScheduledAction.ActionType.BACKUP){
@@ -273,12 +273,12 @@ public class ScheduledActionsListFragment extends ListFragment implements
         Transaction transaction = mTransactionsDbAdapter.getRecord(id);
 
         //this should actually never happen, but has happened once. So perform check for the future
-        if (transaction.getSplits().size() == 0){
+        if (transaction.getMSplitList().size() == 0){
             Toast.makeText(getActivity(), R.string.toast_transaction_has_no_splits_and_cannot_open, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String accountUID = transaction.getSplits().get(0).getAccountUID();
+        String accountUID = transaction.getMSplitList().get(0).getMAccountUID();
         openTransactionForEdit(accountUID, mTransactionsDbAdapter.getUID(id),
                 v.getTag().toString());
     }
@@ -470,12 +470,12 @@ public class ScheduledActionsListFragment extends ListFragment implements
             Transaction transaction = mTransactionsDbAdapter.buildModelInstance(cursor);
 
             TextView amountTextView = (TextView) view.findViewById(R.id.right_text);
-            if (transaction.getSplits().size() == 2){
-                if (transaction.getSplits().get(0).isPairOf(transaction.getSplits().get(1))){
-                    amountTextView.setText(transaction.getSplits().get(0).getValue().formattedString());
+            if (transaction.getMSplitList().size() == 2){
+                if (transaction.getMSplitList().get(0).isPairOf(transaction.getMSplitList().get(1))){
+                    amountTextView.setText(transaction.getMSplitList().get(0).getMValue().formattedString());
                 }
             } else {
-                amountTextView.setText(getString(R.string.label_split_count, transaction.getSplits().size()));
+                amountTextView.setText(getString(R.string.label_split_count, transaction.getMSplitList().size()));
             }
             TextView descriptionTextView = (TextView) view.findViewById(R.id.secondary_text);
 
@@ -483,14 +483,14 @@ public class ScheduledActionsListFragment extends ListFragment implements
             String scheduledActionUID = cursor.getString(cursor.getColumnIndexOrThrow("origin_scheduled_action_uid")); //column created from join when fetching scheduled transactions
             view.setTag(scheduledActionUID);
             ScheduledAction scheduledAction = scheduledActionDbAdapter.getRecord(scheduledActionUID);
-            long endTime = scheduledAction.getEndTime();
+            long endTime = scheduledAction.getMEndDate();
             if (endTime > 0 && endTime < System.currentTimeMillis()){
                 ((TextView)view.findViewById(R.id.primary_text)).setTextColor(
                         ContextCompat.getColor(getContext(), android.R.color.darker_gray));
                 descriptionTextView.setText(getString(R.string.label_scheduled_action_ended,
-                        DateFormat.getInstance().format(new Date(scheduledAction.getLastRunTime()))));
+                        DateFormat.getInstance().format(new Date(scheduledAction.getMLastRun()))));
             } else {
-                descriptionTextView.setText(scheduledAction.getRepeatString());
+                descriptionTextView.setText(scheduledAction.repeatString());
             }
         }
     }
@@ -571,27 +571,27 @@ public class ScheduledActionsListFragment extends ListFragment implements
             ScheduledAction scheduledAction = mScheduledActionDbAdapter.buildModelInstance(cursor);
 
             TextView primaryTextView = (TextView) view.findViewById(R.id.primary_text);
-            ExportParams params = ExportParams.parseCsv(scheduledAction.getTag());
+            ExportParams params = ExportParams.parseCsv(scheduledAction.getMTag());
             String exportDestination = params.getExportTarget().getDescription();
             if (params.getExportTarget() == ExportParams.ExportTarget.URI){
                 exportDestination = exportDestination + " (" + Uri.parse(params.getExportLocation()).getHost() + ")";
             }
             primaryTextView.setText(params.getExportFormat().name() + " "
-                    + scheduledAction.getActionType().name().toLowerCase() + " to "
+                    + scheduledAction.getMActionType().name().toLowerCase() + " to "
                     + exportDestination);
 
             view.findViewById(R.id.right_text).setVisibility(View.GONE);
 
             TextView descriptionTextView = (TextView) view.findViewById(R.id.secondary_text);
-            descriptionTextView.setText(scheduledAction.getRepeatString());
-            long endTime = scheduledAction.getEndTime();
+            descriptionTextView.setText(scheduledAction.repeatString());
+            long endTime = scheduledAction.getMEndDate();
             if (endTime > 0 && endTime < System.currentTimeMillis()){
                 ((TextView)view.findViewById(R.id.primary_text))
                     .setTextColor(ContextCompat.getColor(getContext(), android.R.color.darker_gray));
                 descriptionTextView.setText(getString(R.string.label_scheduled_action_ended,
-                        DateFormat.getInstance().format(new Date(scheduledAction.getLastRunTime()))));
+                        DateFormat.getInstance().format(new Date(scheduledAction.getMLastRun()))));
             } else {
-                descriptionTextView.setText(scheduledAction.getRepeatString());
+                descriptionTextView.setText(scheduledAction.repeatString());
             }
         }
     }

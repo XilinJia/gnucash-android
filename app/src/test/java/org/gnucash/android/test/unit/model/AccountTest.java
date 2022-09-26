@@ -37,49 +37,49 @@ public class AccountTest{
 	@Test
 	public void testAccountUsesDefaultCurrency(){
 		Account account = new Account("Dummy account");
-		assertThat(account.getCommodity().getCurrencyCode()).isEqualTo(Money.DEFAULT_CURRENCY_CODE);
+		assertThat(account.getMCommodity().getMMnemonic()).isEqualTo(Money.DEFAULT_CURRENCY_CODE);
 	}
 
 	@Test
 	public void testAccountAlwaysHasUID(){
 		Account account = new Account("Dummy");
-		assertThat(account.getUID()).isNotNull();
+		assertThat(account.getMUID()).isNotNull();
 	}
 
 	@Test
 	public void testTransactionsHaveSameCurrencyAsAccount(){
 		Account acc1 = new Account("Japanese", Commodity.JPY);
-		acc1.setUID("simile");
+		acc1.setMUID("simile");
 		Transaction trx = new Transaction("Underground");
 		Transaction term = new Transaction( "Tube");
 
-		assertThat(trx.getCurrencyCode()).isEqualTo(Money.DEFAULT_CURRENCY_CODE);
+		assertThat(trx.getMMnemonic()).isEqualTo(Money.DEFAULT_CURRENCY_CODE);
 
 		acc1.addTransaction(trx);
 		acc1.addTransaction(term);
 
-		assertThat(trx.getCurrencyCode()).isEqualTo("JPY");
-		assertThat(term.getCurrencyCode()).isEqualTo("JPY");
+		assertThat(trx.getMMnemonic()).isEqualTo("JPY");
+		assertThat(term.getMMnemonic()).isEqualTo("JPY");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetInvalidColorCode(){
 		Account account = new Account("Test");
-		account.setColor("443859");
+		account.setMColor("443859");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetColorWithAlphaComponent(){
 		Account account = new Account("Test");
-		account.setColor(Color.parseColor("#aa112233"));
+		account.setMColor(Color.parseColor("#aa112233"));
 	}
 
 	@Test
 	public void shouldSetFullNameWhenCreated(){
 		String fullName = "Full name ";
 		Account account = new Account(fullName);
-		assertThat(account.getName()).isEqualTo(fullName.trim()); //names are trimmed
-		assertThat(account.getFullName()).isEqualTo(fullName.trim()); //names are trimmed
+		assertThat(account.getMName()).isEqualTo(fullName.trim()); //names are trimmed
+		assertThat(account.getMFullName()).isEqualTo(fullName.trim()); //names are trimmed
 	}
 
 	@Test
@@ -87,15 +87,15 @@ public class AccountTest{
 		String fullName = "Full name";
 		Account account = new Account(fullName);
 
-		account.setName("Name");
-		assertThat(account.getName()).isEqualTo("Name");
-		assertThat(account.getFullName()).isEqualTo(fullName);
+		account.setMName("Name");
+		assertThat(account.getMName()).isEqualTo("Name");
+		assertThat(account.getMFullName()).isEqualTo(fullName);
 	}
 
 	@Test
 	public void newInstance_shouldReturnNonNullValues() {
 		Account account = new Account("Test account");
-		assertThat(account.getDescription()).isEqualTo("");
-		assertThat(account.getColor()).isEqualTo(Account.DEFAULT_COLOR);
+		assertThat(account.getMDescription()).isEqualTo("");
+		assertThat(account.getMColor()).isEqualTo(Account.DEFAULT_COLOR);
 	}
 }

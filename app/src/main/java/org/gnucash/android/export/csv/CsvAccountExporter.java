@@ -90,16 +90,16 @@ public class CsvAccountExporter extends Exporter{
 
             csvWriter.newLine();
             for (Account account : accounts) {
-                csvWriter.writeToken(account.getAccountType().toString());
-                csvWriter.writeToken(account.getFullName());
-                csvWriter.writeToken(account.getName());
+                csvWriter.writeToken(account.getMAccountType().toString());
+                csvWriter.writeToken(account.getMFullName());
+                csvWriter.writeToken(account.getMName());
 
                 csvWriter.writeToken(null); //Account code
-                csvWriter.writeToken(account.getDescription());
+                csvWriter.writeToken(account.getMDescription());
                 csvWriter.writeToken(account.getColorHexString());
                 csvWriter.writeToken(null); //Account notes
 
-                csvWriter.writeToken(account.getCommodity().getCurrencyCode());
+                csvWriter.writeToken(account.getMCommodity().getMMnemonic());
                 csvWriter.writeToken("CURRENCY");
                 csvWriter.writeToken(account.isHidden() ? "T" : "F");
 

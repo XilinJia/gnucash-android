@@ -69,13 +69,13 @@ public class BudgetsDbAdapter extends DatabaseAdapter<Budget>{
 
     @Override
     public void addRecord(@NonNull Budget budget, UpdateMethod updateMethod) {
-        if (budget.getBudgetAmounts().size() == 0)
+        if (budget.getMBudgetAmounts().size() == 0)
             throw new IllegalArgumentException("Budgets must have budget amounts");
 
-        mRecurrenceDbAdapter.addRecord(budget.getRecurrence(), updateMethod);
+        mRecurrenceDbAdapter.addRecord(budget.getMRecurrence(), updateMethod);
         super.addRecord(budget, updateMethod);
-        mBudgetAmountsDbAdapter.deleteBudgetAmountsForBudget(budget.getUID());
-        for (BudgetAmount budgetAmount : budget.getBudgetAmounts()) {
+        mBudgetAmountsDbAdapter.deleteBudgetAmountsForBudget(budget.getMUID());
+        for (BudgetAmount budgetAmount : budget.getMBudgetAmounts()) {
             mBudgetAmountsDbAdapter.addRecord(budgetAmount, updateMethod);
         }
     }
@@ -84,13 +84,13 @@ public class BudgetsDbAdapter extends DatabaseAdapter<Budget>{
     public long bulkAddRecords(@NonNull List<Budget> budgetList, UpdateMethod updateMethod) {
         List<BudgetAmount> budgetAmountList = new ArrayList<>(budgetList.size()*2);
         for (Budget budget : budgetList) {
-            budgetAmountList.addAll(budget.getBudgetAmounts());
+            budgetAmountList.addAll(budget.getMBudgetAmounts());
         }
 
         //first add the recurrences, they have no dependencies (foreign key constraints)
         List<Recurrence> recurrenceList = new ArrayList<>(budgetList.size());
         for (Budget budget : budgetList) {
-            recurrenceList.add(budget.getRecurrence());
+            recurrenceList.add(budget.getMRecurrence());
         }
         mRecurrenceDbAdapter.bulkAddRecords(recurrenceList, updateMethod);
 
@@ -114,11 +114,11 @@ public class BudgetsDbAdapter extends DatabaseAdapter<Budget>{
 
 
         Budget budget = new Budget(name);
-        budget.setDescription(description);
-        budget.setRecurrence(mRecurrenceDbAdapter.getRecord(recurrenceUID));
-        budget.setNumberOfPeriods(numPeriods);
+        budget.setMDescription(description);
+        budget.setMRecurrence(mRecurrenceDbAdapter.getRecord(recurrenceUID));
+        budget.setMNumberOfPeriods(numPeriods);
         populateBaseModelAttributes(cursor, budget);
-        budget.setBudgetAmounts(mBudgetAmountsDbAdapter.getBudgetAmountsForBudget(budget.getUID()));
+        budget.setMBudgetAmounts(mBudgetAmountsDbAdapter.getBudgetAmountsForBudget(budget.getMUID()));
 
         return budget;
     }
@@ -126,12 +126,12 @@ public class BudgetsDbAdapter extends DatabaseAdapter<Budget>{
     @Override
     protected @NonNull SQLiteStatement setBindings(@NonNull SQLiteStatement stmt, @NonNull final Budget budget) {
         stmt.clearBindings();
-        stmt.bindString(1, budget.getName());
-        if (budget.getDescription() != null)
-            stmt.bindString(2, budget.getDescription());
-        stmt.bindString(3, budget.getRecurrence().getUID());
-        stmt.bindLong(4, budget.getNumberOfPeriods());
-        stmt.bindString(5, budget.getUID());
+        stmt.bindString(1, budget.getMName());
+        if (budget.getMDescription() != null)
+            stmt.bindString(2, budget.getMDescription());
+        stmt.bindString(3, budget.getMRecurrence().getMUID());
+        stmt.bindLong(4, budget.getMNumberOfPeriods());
+        stmt.bindString(5, budget.getMUID());
 
         return stmt;
     }
@@ -183,7 +183,7 @@ public class BudgetsDbAdapter extends DatabaseAdapter<Budget>{
         List<BudgetAmount> budgetAmounts = mBudgetAmountsDbAdapter.getBudgetAmountsForBudget(budgetUID);
         List<String> accountUIDs = new ArrayList<>();
         for (BudgetAmount budgetAmount : budgetAmounts) {
-            accountUIDs.add(budgetAmount.getAccountUID());
+            accountUIDs.add(budgetAmount.getMAccountUID());
         }
 
         return new AccountsDbAdapter(mDb).getAccountsBalance(accountUIDs, periodStart, periodEnd);

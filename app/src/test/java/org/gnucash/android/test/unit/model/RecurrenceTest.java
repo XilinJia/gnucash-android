@@ -35,11 +35,11 @@ public class RecurrenceTest {
         Recurrence recurrence = new Recurrence(PeriodType.MONTH);
 
         DateTime startTime = new DateTime(2015, 10, 5, 0, 0);
-        recurrence.setPeriodStart(new Timestamp(startTime.getMillis()));
-        recurrence.setPeriodEnd(3);
+        recurrence.setMPeriodStart(new Timestamp(startTime.getMillis()));
+        recurrence.setMPeriodEnd(3);
 
         DateTime expectedEndtime = new DateTime(2016, 1, 5, 0, 0);
-        assertThat(recurrence.getPeriodEnd().getTime()).isEqualTo(expectedEndtime.getMillis());
+        assertThat(recurrence.getMPeriodEnd().getTime()).isEqualTo(expectedEndtime.getMillis());
     }
 
     /**
@@ -50,10 +50,10 @@ public class RecurrenceTest {
         Recurrence recurrence = new Recurrence(PeriodType.MONTH);
 
         DateTime start = new DateTime(2015, 10, 5, 0, 0);
-        recurrence.setPeriodStart(new Timestamp(start.getMillis()));
+        recurrence.setMPeriodStart(new Timestamp(start.getMillis()));
 
         DateTime end = new DateTime(2016, 8, 5, 0, 0);
-        recurrence.setPeriodEnd(new Timestamp(end.getMillis()));
+        recurrence.setMPeriodEnd(new Timestamp(end.getMillis()));
 
         assertThat(recurrence.getCount()).isEqualTo(10);
 
@@ -62,9 +62,9 @@ public class RecurrenceTest {
         DateTime endTime = new DateTime(2016, 8, 29, 10, 0);
         PeriodType biWeekly = PeriodType.WEEK;
         recurrence = new Recurrence(biWeekly);
-        recurrence.setMultiplier(2);
-        recurrence.setPeriodStart(new Timestamp(startTime.getMillis()));
-        recurrence.setPeriodEnd(new Timestamp(endTime.getMillis()));
+        recurrence.setMMultiplier(2);
+        recurrence.setMPeriodStart(new Timestamp(startTime.getMillis()));
+        recurrence.setMPeriodEnd(new Timestamp(endTime.getMillis()));
 
         assertThat(recurrence.getCount()).isEqualTo(7);
 
@@ -80,7 +80,7 @@ public class RecurrenceTest {
         Recurrence recurrence = new Recurrence(PeriodType.MONTH);
 
         DateTime start = new DateTime(2015, 10, 5, 0, 0);
-        recurrence.setPeriodStart(new Timestamp(start.getMillis()));
+        recurrence.setMPeriodStart(new Timestamp(start.getMillis()));
 
         assertThat(recurrence.getCount()).isEqualTo(-1);
     }

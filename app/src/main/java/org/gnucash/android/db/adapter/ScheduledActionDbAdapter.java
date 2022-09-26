@@ -74,7 +74,7 @@ public class ScheduledActionDbAdapter extends DatabaseAdapter<ScheduledAction> {
 
     @Override
     public void addRecord(@NonNull ScheduledAction scheduledAction, UpdateMethod updateMethod) {
-        mRecurrenceDbAdapter.addRecord(scheduledAction.getRecurrence(), updateMethod);
+        mRecurrenceDbAdapter.addRecord(scheduledAction.getMRecurrence(), updateMethod);
         super.addRecord(scheduledAction, updateMethod);
     }
 
@@ -82,7 +82,7 @@ public class ScheduledActionDbAdapter extends DatabaseAdapter<ScheduledAction> {
     public long bulkAddRecords(@NonNull List<ScheduledAction> scheduledActions, UpdateMethod updateMethod) {
         List<Recurrence> recurrenceList = new ArrayList<>(scheduledActions.size());
         for (ScheduledAction scheduledAction : scheduledActions) {
-            recurrenceList.add(scheduledAction.getRecurrence());
+            recurrenceList.add(scheduledAction.getMRecurrence());
         }
 
         //first add the recurrences, they have no dependencies (foreign key constraints)
@@ -105,49 +105,49 @@ public class ScheduledActionDbAdapter extends DatabaseAdapter<ScheduledAction> {
         //since we are updating, first fetch the existing recurrence UID and set it to the object
         //so that it will be updated and not a new one created
         RecurrenceDbAdapter recurrenceDbAdapter = new RecurrenceDbAdapter(mDb);
-        String recurrenceUID = recurrenceDbAdapter.getAttribute(scheduledAction.getUID(), ScheduledActionEntry.COLUMN_RECURRENCE_UID);
+        String recurrenceUID = recurrenceDbAdapter.getAttribute(scheduledAction.getMUID(), ScheduledActionEntry.COLUMN_RECURRENCE_UID);
 
-        Recurrence recurrence = scheduledAction.getRecurrence();
-        recurrence.setUID(recurrenceUID);
+        Recurrence recurrence = scheduledAction.getMRecurrence();
+        recurrence.setMUID(recurrenceUID);
         recurrenceDbAdapter.addRecord(recurrence, UpdateMethod.update);
 
         ContentValues contentValues = new ContentValues();
         extractBaseModelAttributes(contentValues, scheduledAction);
-        contentValues.put(ScheduledActionEntry.COLUMN_START_TIME, scheduledAction.getStartTime());
-        contentValues.put(ScheduledActionEntry.COLUMN_END_TIME,  scheduledAction.getEndTime());
-        contentValues.put(ScheduledActionEntry.COLUMN_TAG,       scheduledAction.getTag());
-        contentValues.put(ScheduledActionEntry.COLUMN_TOTAL_FREQUENCY, scheduledAction.getTotalPlannedExecutionCount());
+        contentValues.put(ScheduledActionEntry.COLUMN_START_TIME, scheduledAction.getMStartTime());
+        contentValues.put(ScheduledActionEntry.COLUMN_END_TIME,  scheduledAction.getMEndDate());
+        contentValues.put(ScheduledActionEntry.COLUMN_TAG,       scheduledAction.getMTag());
+        contentValues.put(ScheduledActionEntry.COLUMN_TOTAL_FREQUENCY, scheduledAction.getMTotalFrequency());
 
         Log.d(LOG_TAG, "Updating scheduled event recurrence attributes");
         String where = ScheduledActionEntry.COLUMN_UID + "=?";
-        String[] whereArgs = new String[]{scheduledAction.getUID()};
+        String[] whereArgs = new String[]{scheduledAction.getMUID()};
         return mDb.update(ScheduledActionEntry.TABLE_NAME, contentValues, where, whereArgs);
     }
 
     @Override
     protected @NonNull SQLiteStatement setBindings(@NonNull SQLiteStatement stmt, @NonNull final ScheduledAction schedxAction) {
         stmt.clearBindings();
-        stmt.bindString(1, schedxAction.getActionUID());
-        stmt.bindString(2, schedxAction.getActionType().name());
-        stmt.bindLong(3,   schedxAction.getStartTime());
-        stmt.bindLong(4, schedxAction.getEndTime());
-        stmt.bindLong(5, schedxAction.getLastRunTime());
+        stmt.bindString(1, schedxAction.getMActionUID());
+        stmt.bindString(2, schedxAction.getMActionType().name());
+        stmt.bindLong(3,   schedxAction.getMStartTime());
+        stmt.bindLong(4, schedxAction.getMEndDate());
+        stmt.bindLong(5, schedxAction.getMLastRun());
         stmt.bindLong(6, schedxAction.isEnabled() ? 1 : 0);
-        stmt.bindString(7, schedxAction.getCreatedTimestamp().toString());
-        if (schedxAction.getTag() == null)
+        stmt.bindString(7, schedxAction.getMCreatedTimestamp().toString());
+        if (schedxAction.getMTag() == null)
             stmt.bindNull(8);
         else
-            stmt.bindString(8, schedxAction.getTag());
-        stmt.bindString(9, Integer.toString(schedxAction.getTotalPlannedExecutionCount()));
-        stmt.bindString(10, schedxAction.getRecurrence().getUID());
+            stmt.bindString(8, schedxAction.getMTag());
+        stmt.bindString(9, Integer.toString(schedxAction.getMTotalFrequency()));
+        stmt.bindString(10, schedxAction.getMRecurrence().getMUID());
         stmt.bindLong(11,   schedxAction.shouldAutoCreate() ? 1 : 0);
         stmt.bindLong(12,   schedxAction.shouldAutoNotify() ? 1 : 0);
-        stmt.bindLong(13,   schedxAction.getAdvanceCreateDays());
-        stmt.bindLong(14,   schedxAction.getAdvanceNotifyDays());
-        stmt.bindString(15, schedxAction.getTemplateAccountUID());
+        stmt.bindLong(13,   schedxAction.getMAdvanceCreateDays());
+        stmt.bindLong(14,   schedxAction.getMAdvanceNotifyDays());
+        stmt.bindString(15, schedxAction.getMTemplateAccountUID());
 
-        stmt.bindString(16, Integer.toString(schedxAction.getExecutionCount()));
-        stmt.bindString(17, schedxAction.getUID());
+        stmt.bindString(16, Integer.toString(schedxAction.getMExecutionCount()));
+        stmt.bindString(17, schedxAction.getMUID());
         return stmt;
     }
     /**
@@ -176,21 +176,21 @@ public class ScheduledActionDbAdapter extends DatabaseAdapter<ScheduledAction> {
 
         ScheduledAction event = new ScheduledAction(ScheduledAction.ActionType.valueOf(typeString));
         populateBaseModelAttributes(cursor, event);
-        event.setStartTime(startTime);
-        event.setEndTime(endTime);
-        event.setActionUID(actionUid);
-        event.setLastRun(lastRun);
-        event.setTag(tag);
-        event.setEnabled(enabled);
-        event.setTotalPlannedExecutionCount(numOccurrences);
-        event.setExecutionCount(execCount);
-        event.setAutoCreate(autoCreate == 1);
-        event.setAutoNotify(autoNotify == 1);
-        event.setAdvanceCreateDays(advanceCreate);
-        event.setAdvanceNotifyDays(advanceNotify);
+        event.setMStartTime(startTime);
+        event.setMEndDate(endTime);
+        event.setMActionUID(actionUid);
+        event.setMLastRun(lastRun);
+        event.setMTag(tag);
+        event.setMIsEnabled(enabled);
+        event.setMTotalFrequency(numOccurrences);
+        event.setMExecutionCount(execCount);
+        event.setMAutoCreate(autoCreate == 1);
+        event.setMAutoNotify(autoNotify == 1);
+        event.setMAdvanceCreateDays(advanceCreate);
+        event.setMAdvanceNotifyDays(advanceNotify);
         //TODO: optimize by doing overriding fetchRecord(String) and join the two tables
-        event.setRecurrence(mRecurrenceDbAdapter.getRecord(recurrenceUID));
-        event.setTemplateAccountUID(templateActUID);
+        event.setMRecurrence(mRecurrenceDbAdapter.getRecord(recurrenceUID));
+        event.setMTemplateAccountUID(templateActUID);
 
         return event;
     }

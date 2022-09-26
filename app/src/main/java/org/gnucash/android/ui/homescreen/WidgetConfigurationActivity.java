@@ -137,7 +137,7 @@ public class WidgetConfigurationActivity extends Activity {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				Book book = BooksDbAdapter.getInstance().getRecord(id);
-				SQLiteDatabase db = new DatabaseHelper(WidgetConfigurationActivity.this, book.getUID()).getWritableDatabase();
+				SQLiteDatabase db = new DatabaseHelper(WidgetConfigurationActivity.this, book.getMUID()).getWritableDatabase();
 				mAccountsDbAdapter = new AccountsDbAdapter(db);
 
 				Cursor cursor = mAccountsDbAdapter.fetchAllRecordsOrderedByFullName();
@@ -287,7 +287,7 @@ public class WidgetConfigurationActivity extends Activity {
 		
 		final RemoteViews views = new RemoteViews(context.getPackageName(),
 				R.layout.widget_4x1);
-		views.setTextViewText(R.id.account_name, account.getName());
+		views.setTextViewText(R.id.account_name, account.getMName());
 
 		Money accountBalance = accountsDbAdapter.getAccountBalance(accountUID, -1, System.currentTimeMillis());
 

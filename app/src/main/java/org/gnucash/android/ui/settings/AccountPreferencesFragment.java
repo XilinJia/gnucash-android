@@ -90,7 +90,7 @@ public class AccountPreferencesFragment extends PreferenceFragmentCompat impleme
 
         String defaultCurrency = GnuCashApplication.getDefaultCurrencyCode();
         Preference pref = findPreference(getString(R.string.key_default_currency));
-        String currencyName = CommoditiesDbAdapter.getInstance().getCommodity(defaultCurrency).getFullname();
+        String currencyName = CommoditiesDbAdapter.getInstance().getCommodity(defaultCurrency).getMFullname();
         pref.setSummary(currencyName);
         pref.setOnPreferenceChangeListener(this);
 
@@ -178,7 +178,7 @@ public class AccountPreferencesFragment extends PreferenceFragmentCompat impleme
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference.getKey().equals(getString(R.string.key_default_currency))){
             GnuCashApplication.setDefaultCurrencyCode(newValue.toString());
-            String fullname = CommoditiesDbAdapter.getInstance().getCommodity(newValue.toString()).getFullname();
+            String fullname = CommoditiesDbAdapter.getInstance().getCommodity(newValue.toString()).getMFullname();
             preference.setSummary(fullname);
             return true;
         }

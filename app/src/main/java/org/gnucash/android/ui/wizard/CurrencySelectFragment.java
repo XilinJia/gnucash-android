@@ -100,7 +100,7 @@ public class CurrencySelectFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        String currencyCode = mCommoditiesDbAdapter.getCurrencyCode(mCommoditiesDbAdapter.getUID(id));
+        String currencyCode = mCommoditiesDbAdapter.getMMnemonic(mCommoditiesDbAdapter.getUID(id));
         mPage.getData().putString(CurrencySelectPage.CURRENCY_CODE_DATA_KEY, currencyCode);
     }
 

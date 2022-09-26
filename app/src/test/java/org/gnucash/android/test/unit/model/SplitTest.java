@@ -27,38 +27,38 @@ public class SplitTest {
     @Test
     public void amounts_shouldBeStoredUnsigned() {
         Split split = new Split(new Money("-1", "USD"), new Money("-2", "EUR"), "account-UID");
-        assertThat(split.getValue().isNegative()).isFalse();
-        assertThat(split.getQuantity().isNegative()).isFalse();
+        assertThat(split.getMValue().isNegative()).isFalse();
+        assertThat(split.getMQuantity().isNegative()).isFalse();
 
-        split.setValue(new Money("-3", "USD"));
-        split.setQuantity(new Money("-4", "EUR"));
-        assertThat(split.getValue().isNegative()).isFalse();
-        assertThat(split.getQuantity().isNegative()).isFalse();
+        split.setMValue(new Money("-3", "USD"));
+        split.setMQuantity(new Money("-4", "EUR"));
+        assertThat(split.getMValue().isNegative()).isFalse();
+        assertThat(split.getMQuantity().isNegative()).isFalse();
     }
 
     @Test
     public void testAddingSplitToTransaction(){
-        Split split = new Split(Money.getZeroInstance(), "Test");
-        assertThat(split.getTransactionUID()).isEmpty();
+        Split split = new Split(Money.getSDefaultZero(), "Test");
+        assertThat(split.getMTransactionUID()).isEmpty();
 
         Transaction transaction = new Transaction("Random");
         transaction.addSplit(split);
 
-        assertThat(transaction.getUID()).isEqualTo(split.getTransactionUID());
+        assertThat(transaction.getMUID()).isEqualTo(split.getMTransactionUID());
 
     }
 
     @Test
     public void testCloning(){
         Split split = new Split(new Money(BigDecimal.TEN, Commodity.getInstance("EUR")), "random-account");
-        split.setTransactionUID("terminator-trx");
-        split.setType(TransactionType.CREDIT);
+        split.setMTransactionUID("terminator-trx");
+        split.setMSplitType(TransactionType.CREDIT);
 
         Split clone1 = new Split(split, false);
         assertThat(clone1).isEqualTo(split);
 
         Split clone2 = new Split(split, true);
-        assertThat(clone2.getUID()).isNotEqualTo(split.getUID());
+        assertThat(clone2.getMUID()).isNotEqualTo(split.getMUID());
         assertThat(split.isEquivalentTo(clone2)).isTrue();
     }
 
@@ -69,33 +69,33 @@ public class SplitTest {
     @Test
     public void shouldCreateInversePair(){
         Split split = new Split(new Money("2", "USD"), "dummy");
-        split.setType(TransactionType.CREDIT);
-        split.setTransactionUID("random-trx");
+        split.setMSplitType(TransactionType.CREDIT);
+        split.setMTransactionUID("random-trx");
         Split pair = split.createPair("test");
 
-        assertThat(pair.getType()).isEqualTo(TransactionType.DEBIT);
-        assertThat(pair.getValue()).isEqualTo(split.getValue());
-        assertThat(pair.getMemo()).isEqualTo(split.getMemo());
-        assertThat(pair.getTransactionUID()).isEqualTo(split.getTransactionUID());
+        assertThat(pair.getMSplitType()).isEqualTo(TransactionType.DEBIT);
+        assertThat(pair.getMValue()).isEqualTo(split.getMValue());
+        assertThat(pair.getMMemo()).isEqualTo(split.getMMemo());
+        assertThat(pair.getMTransactionUID()).isEqualTo(split.getMTransactionUID());
     }
 
     @Test
     public void shouldGenerateValidCsv(){
         Split split = new Split(new Money(BigDecimal.TEN, Commodity.getInstance("EUR")), "random-account");
-        split.setTransactionUID("terminator-trx");
-        split.setType(TransactionType.CREDIT);
+        split.setMTransactionUID("terminator-trx");
+        split.setMSplitType(TransactionType.CREDIT);
 
-        assertThat(split.toCsv()).isEqualTo(split.getUID() + ";1000;100;EUR;1000;100;EUR;terminator-trx;random-account;CREDIT");
+        assertThat(split.toCsv()).isEqualTo(split.getMUID() + ";1000;100;EUR;1000;100;EUR;terminator-trx;random-account;CREDIT");
     }
 
     @Test
     public void shouldParseCsv(){
         String csv = "test-split-uid;490;100;USD;490;100;USD;trx-action;test-account;DEBIT;Didn't you get the memo?";
         Split split = Split.parseSplit(csv);
-        assertThat(split.getValue().getNumerator()).isEqualTo(new Money("4.90", "USD").getNumerator());
-        assertThat(split.getTransactionUID()).isEqualTo("trx-action");
-        assertThat(split.getAccountUID()).isEqualTo("test-account");
-        assertThat(split.getType()).isEqualTo(TransactionType.DEBIT);
-        assertThat(split.getMemo()).isEqualTo("Didn't you get the memo?");
+        assertThat(split.getMValue().numerator()).isEqualTo(new Money("4.90", "USD").numerator());
+        assertThat(split.getMTransactionUID()).isEqualTo("trx-action");
+        assertThat(split.getMAccountUID()).isEqualTo("test-account");
+        assertThat(split.getMSplitType()).isEqualTo(TransactionType.DEBIT);
+        assertThat(split.getMMemo()).isEqualTo("Didn't you get the memo?");
     }
 }

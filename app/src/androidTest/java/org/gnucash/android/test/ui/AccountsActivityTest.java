@@ -155,8 +155,8 @@ public class AccountsActivityTest {
         mAccountsDbAdapter.deleteAllRecords(); //clear the data
 
         Account simpleAccount = new Account(SIMPLE_ACCOUNT_NAME);
-        simpleAccount.setUID(SIMPLE_ACCOUNT_UID);
-        simpleAccount.setCommodity(Commodity.getInstance(ACCOUNTS_CURRENCY_CODE));
+        simpleAccount.setMUID(SIMPLE_ACCOUNT_UID);
+        simpleAccount.setMCommodity(Commodity.getInstance(ACCOUNTS_CURRENCY_CODE));
         mAccountsDbAdapter.addRecord(simpleAccount, DatabaseAdapter.UpdateMethod.insert);
 
         refreshAccountsList();
@@ -199,7 +199,7 @@ public class AccountsActivityTest {
         String SEARCH_ACCOUNT_NAME = "Search Account";
 
         Account account = new Account(SEARCH_ACCOUNT_NAME);
-        account.setParentUID(SIMPLE_ACCOUNT_UID);
+        account.setMParentAccountUID(SIMPLE_ACCOUNT_UID);
         mAccountsDbAdapter.addRecord(account, DatabaseAdapter.UpdateMethod.insert);
 
         //enter search query
@@ -234,8 +234,8 @@ public class AccountsActivityTest {
         assertThat(accounts).hasSize(2);
         Account newestAccount = accounts.get(0); //because of alphabetical sorting
 
-        assertThat(newestAccount.getName()).isEqualTo(NEW_ACCOUNT_NAME);
-        assertThat(newestAccount.getCommodity().getCurrencyCode()).isEqualTo(Money.DEFAULT_CURRENCY_CODE);
+        assertThat(newestAccount.getMName()).isEqualTo(NEW_ACCOUNT_NAME);
+        assertThat(newestAccount.getMCommodity().getMMnemonic()).isEqualTo(Money.DEFAULT_CURRENCY_CODE);
         assertThat(newestAccount.isPlaceholderAccount()).isTrue();
     }
 
@@ -244,7 +244,7 @@ public class AccountsActivityTest {
         Transaction transaction = new Transaction("Future transaction");
         Split split1 = new Split(new Money("4.15", ACCOUNTS_CURRENCY_CODE), SIMPLE_ACCOUNT_UID);
         transaction.addSplit(split1);
-        transaction.setTime(System.currentTimeMillis() + 4815162342L);
+        transaction.setMTimestamp(System.currentTimeMillis() + 4815162342L);
         mTransactionsDbAdapter.addRecord(transaction);
 
         refreshAccountsList();
@@ -278,8 +278,8 @@ public class AccountsActivityTest {
 
         onView(withId(R.id.menu_save)).perform(click());
 
-        Account editedAccount = mAccountsDbAdapter.getRecord(account.getUID());
-        String parentUID = editedAccount.getParentUID();
+        Account editedAccount = mAccountsDbAdapter.getRecord(account.getMUID());
+        String parentUID = editedAccount.getMParentAccountUID();
 
         assertThat(parentUID).isNotNull();
         assertThat(parentUID).isEqualTo(SIMPLE_ACCOUNT_UID);
@@ -337,8 +337,8 @@ public class AccountsActivityTest {
         List<Account> accounts = mAccountsDbAdapter.getAllRecords();
         Account latest = accounts.get(0);  //will be the first due to alphabetical sorting
 
-        assertThat(latest.getName()).isEqualTo(editedAccountName);
-        assertThat(latest.getCommodity().getCurrencyCode()).isEqualTo(ACCOUNTS_CURRENCY_CODE);
+        assertThat(latest.getMName()).isEqualTo(editedAccountName);
+        assertThat(latest.getMCommodity().getMMnemonic()).isEqualTo(ACCOUNTS_CURRENCY_CODE);
     }
 
     @Test
@@ -348,24 +348,24 @@ public class AccountsActivityTest {
                      isDisplayed())).perform(click());
 
         Account account = new Account("Transfer Account");
-        account.setCommodity(Commodity.getInstance(ACCOUNTS_CURRENCY.getCurrencyCode()));
+        account.setMCommodity(Commodity.getInstance(ACCOUNTS_CURRENCY.getMMnemonic()));
         Transaction transaction = new Transaction("Simple transaction");
-        transaction.setCommodity(ACCOUNTS_CURRENCY);
-        Split split = new Split(new Money(BigDecimal.TEN, ACCOUNTS_CURRENCY), account.getUID());
+        transaction.setMCommodity(ACCOUNTS_CURRENCY);
+        Split split = new Split(new Money(BigDecimal.TEN, ACCOUNTS_CURRENCY), account.getMUID());
         transaction.addSplit(split);
         transaction.addSplit(split.createPair(SIMPLE_ACCOUNT_UID));
         account.addTransaction(transaction);
         mAccountsDbAdapter.addRecord(account, DatabaseAdapter.UpdateMethod.insert);
 
         assertThat(mAccountsDbAdapter.getRecord(SIMPLE_ACCOUNT_UID).getTransactionCount()).isEqualTo(1);
-        assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getUID())).hasSize(2);
+        assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getMUID())).hasSize(2);
 
         onView(withText(R.string.title_edit_account)).perform(click());
 
         onView(withId(R.id.menu_save)).perform(click());
         assertThat(mAccountsDbAdapter.getRecord(SIMPLE_ACCOUNT_UID).getTransactionCount()).isEqualTo(1);
         assertThat(mSplitsDbAdapter.fetchSplitsForAccount(SIMPLE_ACCOUNT_UID).getCount()).isEqualTo(1);
-        assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getUID())).hasSize(2);
+        assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getMUID())).hasSize(2);
 
     }
 
@@ -399,8 +399,8 @@ public class AccountsActivityTest {
     public void testDeleteAccountWithSubaccounts() {
         refreshAccountsList();
         Account account = new Account("Sub-account");
-        account.setParentUID(SIMPLE_ACCOUNT_UID);
-        account.setUID(CHILD_ACCOUNT_UID);
+        account.setMParentAccountUID(SIMPLE_ACCOUNT_UID);
+        account.setMUID(CHILD_ACCOUNT_UID);
         mAccountsDbAdapter.addRecord(account);
 
         refreshAccountsList();
@@ -421,7 +421,7 @@ public class AccountsActivityTest {
     public void testDeleteAccountMovingSubaccounts() {
         long accountCount = mAccountsDbAdapter.getRecordsCount();
         Account subAccount = new Account("Child account");
-        subAccount.setParentUID(SIMPLE_ACCOUNT_UID);
+        subAccount.setMParentAccountUID(SIMPLE_ACCOUNT_UID);
 
         Account tranferAcct = new Account("Other account");
         mAccountsDbAdapter.addRecord(subAccount, DatabaseAdapter.UpdateMethod.insert);
@@ -442,10 +442,10 @@ public class AccountsActivityTest {
         onView(withText(R.string.alert_dialog_ok_delete)).perform(click());
 
         assertThat(accountExists(SIMPLE_ACCOUNT_UID)).isFalse();
-        assertThat(accountExists(subAccount.getUID())).isTrue();
+        assertThat(accountExists(subAccount.getMUID())).isTrue();
 
-        String newParentUID = mAccountsDbAdapter.getParentAccountUID(subAccount.getUID());
-        assertThat(newParentUID).isEqualTo(tranferAcct.getUID());
+        String newParentUID = mAccountsDbAdapter.getParentAccountUID(subAccount.getMUID());
+        assertThat(newParentUID).isEqualTo(tranferAcct.getMUID());
     }
 
     /**
@@ -476,9 +476,9 @@ public class AccountsActivityTest {
 
         Account account = mAccountsDbAdapter.getRecord("intent-account");
         assertThat(account).isNotNull();
-        assertThat(account.getName()).isEqualTo("Intent Account");
-        assertThat(account.getUID()).isEqualTo("intent-account");
-        assertThat(account.getCommodity().getCurrencyCode()).isEqualTo("EUR");
+        assertThat(account.getMName()).isEqualTo("Intent Account");
+        assertThat(account.getMUID()).isEqualTo("intent-account");
+        assertThat(account.getMCommodity().getMMnemonic()).isEqualTo("EUR");
     }
 
     /**

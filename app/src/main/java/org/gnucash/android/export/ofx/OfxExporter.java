@@ -111,7 +111,7 @@ public class OfxExporter extends Exporter{
 				continue; 
 
             //do not export imbalance accounts for OFX transactions and double-entry disabled
-            if (!GnuCashApplication.isDoubleEntryEnabled() && account.getName().contains(mContext.getString(R.string.imbalance_account_name)))
+            if (!GnuCashApplication.isDoubleEntryEnabled() && account.getMName().contains(mContext.getString(R.string.imbalance_account_name)))
                 continue;
 
 
@@ -119,7 +119,7 @@ public class OfxExporter extends Exporter{
 			account.toOfx(doc, statementTransactionResponse, mExportParams.getExportStartTime());
 			
 			//mark as exported
-			accountsDbAdapter.markAsExported(account.getUID());
+			accountsDbAdapter.markAsExported(account.getMUID());
 			
 		}
 	}

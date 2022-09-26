@@ -125,9 +125,9 @@ public class AccountsDbAdapterTest{
         Account account1 = new Account("AlphaAccount");
         Account account2 = new Account("BetaAccount");
         Transaction transaction = new Transaction("MyTransaction");
-        Split split = new Split(Money.getZeroInstance(), account1.getUID());
+        Split split = new Split(Money.getSDefaultZero(), account1.getMUID());
         transaction.addSplit(split);
-        transaction.addSplit(split.createPair(account2.getUID()));
+        transaction.addSplit(split.createPair(account2.getMUID()));
         account1.addTransaction(transaction);
         account2.addTransaction(transaction);
 
@@ -138,10 +138,10 @@ public class AccountsDbAdapterTest{
         mAccountsDbAdapter.bulkAddRecords(accounts);
 
         SplitsDbAdapter splitsDbAdapter = SplitsDbAdapter.getInstance();
-        assertThat(splitsDbAdapter.getSplitsForTransactionInAccount(transaction.getUID(), account1.getUID())).hasSize(1);
-        assertThat(splitsDbAdapter.getSplitsForTransactionInAccount(transaction.getUID(), account2.getUID())).hasSize(1);
+        assertThat(splitsDbAdapter.getSplitsForTransactionInAccount(transaction.getMUID(), account1.getMUID())).hasSize(1);
+        assertThat(splitsDbAdapter.getSplitsForTransactionInAccount(transaction.getMUID(), account2.getMUID())).hasSize(1);
 
-        assertThat(mAccountsDbAdapter.getRecord(account1.getUID()).getTransactions()).hasSize(1);
+        assertThat(mAccountsDbAdapter.getRecord(account1.getMUID()).getMTransactionsList()).hasSize(1);
     }
 
     @Test
@@ -149,23 +149,23 @@ public class AccountsDbAdapterTest{
         Account account1 = new Account("AlphaAccount");
         Account account2 = new Account("BetaAccount");
         Transaction transaction = new Transaction("MyTransaction");
-        Split split = new Split(Money.getZeroInstance(), account1.getUID());
+        Split split = new Split(Money.getSDefaultZero(), account1.getMUID());
         transaction.addSplit(split);
-        transaction.addSplit(split.createPair(account2.getUID()));
+        transaction.addSplit(split.createPair(account2.getMUID()));
         account1.addTransaction(transaction);
         account2.addTransaction(transaction);
 
         mAccountsDbAdapter.addRecord(account1);
         mAccountsDbAdapter.addRecord(account2);
 
-        Account firstAccount = mAccountsDbAdapter.getRecord(account1.getUID());
+        Account firstAccount = mAccountsDbAdapter.getRecord(account1.getMUID());
         assertThat(firstAccount).isNotNull();
-        assertThat(firstAccount.getUID()).isEqualTo(account1.getUID());
-        assertThat(firstAccount.getFullName()).isEqualTo(account1.getFullName());
+        assertThat(firstAccount.getMUID()).isEqualTo(account1.getMUID());
+        assertThat(firstAccount.getMFullName()).isEqualTo(account1.getMFullName());
 
-        Account secondAccount = mAccountsDbAdapter.getRecord(account2.getUID());
+        Account secondAccount = mAccountsDbAdapter.getRecord(account2.getMUID());
         assertThat(secondAccount).isNotNull();
-        assertThat(secondAccount.getUID()).isEqualTo(account2.getUID());
+        assertThat(secondAccount.getMUID()).isEqualTo(account2.getMUID());
 
         assertThat(mTransactionsDbAdapter.getRecordsCount()).isEqualTo(1);
     }
@@ -176,15 +176,15 @@ public class AccountsDbAdapterTest{
     @Test
     public void shouldDeleteSplitsWhenAccountDeleted(){
         Account first = new Account(ALPHA_ACCOUNT_NAME);
-        first.setUID(ALPHA_ACCOUNT_NAME);
+        first.setMUID(ALPHA_ACCOUNT_NAME);
         Account second = new Account(BRAVO_ACCOUNT_NAME);
-        second.setUID(BRAVO_ACCOUNT_NAME);
+        second.setMUID(BRAVO_ACCOUNT_NAME);
 
         mAccountsDbAdapter.addRecord(second);
         mAccountsDbAdapter.addRecord(first);
 
         Transaction transaction = new Transaction("TestTrn");
-        Split split = new Split(Money.getZeroInstance(), ALPHA_ACCOUNT_NAME);
+        Split split = new Split(Money.getSDefaultZero(), ALPHA_ACCOUNT_NAME);
         transaction.addSplit(split);
         transaction.addSplit(split.createPair(BRAVO_ACCOUNT_NAME));
 
@@ -192,9 +192,9 @@ public class AccountsDbAdapterTest{
 
         mAccountsDbAdapter.deleteRecord(ALPHA_ACCOUNT_NAME);
 
-        Transaction trxn = mTransactionsDbAdapter.getRecord(transaction.getUID());
-        assertThat(trxn.getSplits().size()).isEqualTo(1);
-        assertThat(trxn.getSplits().get(0).getAccountUID()).isEqualTo(BRAVO_ACCOUNT_NAME);
+        Transaction trxn = mTransactionsDbAdapter.getRecord(transaction.getMUID());
+        assertThat(trxn.getMSplitList().size()).isEqualTo(1);
+        assertThat(trxn.getMSplitList().get(0).getMAccountUID()).isEqualTo(BRAVO_ACCOUNT_NAME);
     }
 
     /**
@@ -210,7 +210,7 @@ public class AccountsDbAdapterTest{
         assertThat(accounts).extracting("mAccountType").contains(AccountType.ROOT);
 
         String rootAccountUID = mAccountsDbAdapter.getOrCreateGnuCashRootAccountUID();
-        assertThat(rootAccountUID).isEqualTo(accounts.get(1).getParentUID());
+        assertThat(rootAccountUID).isEqualTo(accounts.get(1).getMParentAccountUID());
     }
 
     @Test
@@ -221,16 +221,16 @@ public class AccountsDbAdapterTest{
         mAccountsDbAdapter.addRecord(parent);
         mAccountsDbAdapter.addRecord(child);
 
-        child.setParentUID(parent.getUID());
+        child.setMParentAccountUID(parent.getMUID());
         mAccountsDbAdapter.addRecord(child);
 
-        child = mAccountsDbAdapter.getRecord(child.getUID());
-        parent = mAccountsDbAdapter.getRecord(parent.getUID());
+        child = mAccountsDbAdapter.getRecord(child.getMUID());
+        parent = mAccountsDbAdapter.getRecord(parent.getMUID());
 
-        assertThat(mAccountsDbAdapter.getSubAccountCount(parent.getUID())).isEqualTo(1);
-        assertThat(parent.getUID()).isEqualTo(child.getParentUID());
+        assertThat(mAccountsDbAdapter.getSubAccountCount(parent.getMUID())).isEqualTo(1);
+        assertThat(parent.getMUID()).isEqualTo(child.getMParentAccountUID());
 
-        assertThat(child.getFullName()).isEqualTo("Test:Child");
+        assertThat(child.getMFullName()).isEqualTo("Test:Child");
     }
 
     @Test
@@ -239,10 +239,10 @@ public class AccountsDbAdapterTest{
         mAccountsDbAdapter.addRecord(account);
 
         Transaction transaction = new Transaction("Test description");
-        Split split = new Split(Money.getZeroInstance(), account.getUID());
+        Split split = new Split(Money.getSDefaultZero(), account.getMUID());
         transaction.addSplit(split);
         Account account1 = new Account("Transfer account");
-        transaction.addSplit(split.createPair(account1.getUID()));
+        transaction.addSplit(split.createPair(account1.getMUID()));
         account1.addTransaction(transaction);
 
         mAccountsDbAdapter.addRecord(account1);
@@ -257,25 +257,25 @@ public class AccountsDbAdapterTest{
     public void shouldClearAllTablesWhenDeletingAllAccounts(){
         Account account = new Account("Test");
         Transaction transaction = new Transaction("Test description");
-        Split split = new Split(Money.getZeroInstance(), account.getUID());
+        Split split = new Split(Money.getSDefaultZero(), account.getMUID());
         transaction.addSplit(split);
         Account account2 = new Account("Transfer account");
-        transaction.addSplit(split.createPair(account2.getUID()));
+        transaction.addSplit(split.createPair(account2.getMUID()));
 
         mAccountsDbAdapter.addRecord(account);
         mAccountsDbAdapter.addRecord(account2);
 
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
-        scheduledAction.setActionUID("Test-uid");
-        scheduledAction.setRecurrence(new Recurrence(PeriodType.WEEK));
+        scheduledAction.setMActionUID("Test-uid");
+        scheduledAction.setMRecurrence(new Recurrence(PeriodType.WEEK));
         ScheduledActionDbAdapter scheduledActionDbAdapter = ScheduledActionDbAdapter.getInstance();
 
         scheduledActionDbAdapter.addRecord(scheduledAction);
 
         Budget budget = new Budget("Test");
-        BudgetAmount budgetAmount = new BudgetAmount(Money.getZeroInstance(), account.getUID());
+        BudgetAmount budgetAmount = new BudgetAmount(Money.getSDefaultZero(), account.getMUID());
         budget.addBudgetAmount(budgetAmount);
-        budget.setRecurrence(new Recurrence(PeriodType.MONTH));
+        budget.setMRecurrence(new Recurrence(PeriodType.MONTH));
         BudgetsDbAdapter.getInstance().addRecord(budget);
 
         mAccountsDbAdapter.deleteAllRecords();
@@ -294,10 +294,10 @@ public class AccountsDbAdapterTest{
     public void simpleAccountListShouldNotContainTransactions(){
         Account account = new Account("Test");
         Transaction transaction = new Transaction("Test description");
-        Split split = new Split(Money.getZeroInstance(), account.getUID());
+        Split split = new Split(Money.getSDefaultZero(), account.getMUID());
         transaction.addSplit(split);
         Account account1 = new Account("Transfer");
-        transaction.addSplit(split.createPair(account1.getUID()));
+        transaction.addSplit(split.createPair(account1.getMUID()));
 
         mAccountsDbAdapter.addRecord(account);
         mAccountsDbAdapter.addRecord(account1);
@@ -311,7 +311,7 @@ public class AccountsDbAdapterTest{
     @Test
     public void shouldComputeAccountBalanceCorrectly(){
         Account account = new Account("Test", Commodity.USD);
-        account.setAccountType(AccountType.ASSET); //debit normal account balance
+        account.setMAccountType(AccountType.ASSET); //debit normal account balance
         Account transferAcct = new Account("Transfer");
 
         mAccountsDbAdapter.addRecord(account);
@@ -319,32 +319,32 @@ public class AccountsDbAdapterTest{
 
         Transaction transaction = new Transaction("Test description");
         mTransactionsDbAdapter.addRecord(transaction);
-        Split split = new Split(new Money(BigDecimal.TEN, Commodity.USD), account.getUID());
-        split.setTransactionUID(transaction.getUID());
-        split.setType(TransactionType.DEBIT);
+        Split split = new Split(new Money(BigDecimal.TEN, Commodity.USD), account.getMUID());
+        split.setMTransactionUID(transaction.getMUID());
+        split.setMSplitType(TransactionType.DEBIT);
         mSplitsDbAdapter.addRecord(split);
 
-        split = new Split(new Money("4.99", "USD"), account.getUID());
-        split.setTransactionUID(transaction.getUID());
-        split.setType(TransactionType.DEBIT);
+        split = new Split(new Money("4.99", "USD"), account.getMUID());
+        split.setMTransactionUID(transaction.getMUID());
+        split.setMSplitType(TransactionType.DEBIT);
         mSplitsDbAdapter.addRecord(split);
 
-        split = new Split(new Money("1.19", "USD"), account.getUID());
-        split.setTransactionUID(transaction.getUID());
-        split.setType(TransactionType.CREDIT);
+        split = new Split(new Money("1.19", "USD"), account.getMUID());
+        split.setMTransactionUID(transaction.getMUID());
+        split.setMSplitType(TransactionType.CREDIT);
         mSplitsDbAdapter.addRecord(split);
 
-        split = new Split(new Money("3.49", "EUR"), account.getUID());
-        split.setTransactionUID(transaction.getUID());
-        split.setType(TransactionType.DEBIT);
+        split = new Split(new Money("3.49", "EUR"), account.getMUID());
+        split.setMTransactionUID(transaction.getMUID());
+        split.setMSplitType(TransactionType.DEBIT);
         mSplitsDbAdapter.addRecord(split);
 
-        split = new Split(new Money("8.39", "USD"), transferAcct.getUID());
-        split.setTransactionUID(transaction.getUID());
+        split = new Split(new Money("8.39", "USD"), transferAcct.getMUID());
+        split.setMTransactionUID(transaction.getMUID());
         mSplitsDbAdapter.addRecord(split);
 
         //balance computation ignores the currency of the split
-        Money balance = mAccountsDbAdapter.getAccountBalance(account.getUID());
+        Money balance = mAccountsDbAdapter.getAccountBalance(account.getMUID());
         Money expectedBalance = new Money("17.29", "USD"); //EUR splits should be ignored
 
         assertThat(balance).isEqualTo(expectedBalance);
@@ -366,14 +366,14 @@ public class AccountsDbAdapterTest{
     public void shouldRecursivelyDeleteAccount(){
         Account account = new Account("Parent");
         Account account2 = new Account("Child");
-        account2.setParentUID(account.getUID());
+        account2.setMParentAccountUID(account.getMUID());
 
         Transaction transaction = new Transaction("Random");
         account2.addTransaction(transaction);
 
-        Split split = new Split(Money.getZeroInstance(), account.getUID());
+        Split split = new Split(Money.getSDefaultZero(), account.getMUID());
         transaction.addSplit(split);
-        transaction.addSplit(split.createPair(account2.getUID()));
+        transaction.addSplit(split.createPair(account2.getMUID()));
 
         mAccountsDbAdapter.addRecord(account);
         mAccountsDbAdapter.addRecord(account2);
@@ -382,7 +382,7 @@ public class AccountsDbAdapterTest{
         assertThat(mTransactionsDbAdapter.getRecordsCount()).isEqualTo(1);
         assertThat(mSplitsDbAdapter.getRecordsCount()).isEqualTo(2);
 
-        boolean result = mAccountsDbAdapter.recursiveDeleteAccount(mAccountsDbAdapter.getID(account.getUID()));
+        boolean result = mAccountsDbAdapter.recursiveDeleteAccount(mAccountsDbAdapter.getID(account.getMUID()));
         assertThat(result).isTrue();
 
         assertThat(mAccountsDbAdapter.getRecordsCount()).isEqualTo(1); //the root account
@@ -444,24 +444,24 @@ public class AccountsDbAdapterTest{
 
         Money money = new Money(BigDecimal.TEN, Commodity.EUR);
         Transaction transaction = new Transaction("Template");
-        transaction.setTemplate(true);
-        transaction.setCommodity(Commodity.EUR);
-        Split split = new Split(money, account.getUID());
+        transaction.setMIsTemplate(true);
+        transaction.setMCommodity(Commodity.EUR);
+        Split split = new Split(money, account.getMUID());
         transaction.addSplit(split);
-        transaction.addSplit(split.createPair(transferAccount.getUID()));
+        transaction.addSplit(split.createPair(transferAccount.getMUID()));
 
         mTransactionsDbAdapter.addRecord(transaction);
         List<Transaction> transactions = mTransactionsDbAdapter.getAllRecords();
         assertThat(transactions).hasSize(1);
 
-        assertThat(mTransactionsDbAdapter.getScheduledTransactionsForAccount(account.getUID())).hasSize(1);
+        assertThat(mTransactionsDbAdapter.getScheduledTransactionsForAccount(account.getMUID())).hasSize(1);
 
         //edit the account
-        account.setName("Edited account");
+        account.setMName("Edited account");
         mAccountsDbAdapter.addRecord(account, DatabaseAdapter.UpdateMethod.update);
 
-        assertThat(mTransactionsDbAdapter.getScheduledTransactionsForAccount(account.getUID())).hasSize(1);
-        assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getUID())).hasSize(2);
+        assertThat(mTransactionsDbAdapter.getScheduledTransactionsForAccount(account.getMUID())).hasSize(1);
+        assertThat(mSplitsDbAdapter.getSplitsForTransaction(transaction.getMUID())).hasSize(2);
     }
 
     @Test
@@ -471,29 +471,29 @@ public class AccountsDbAdapterTest{
 
         Account account1 = new Account("Test");
         Account account2 = new Account("Transfer Account");
-        account1.setDefaultTransferAccountUID(account2.getUID());
+        account1.setMDefaultTransferAccountUID(account2.getMUID());
 
         mAccountsDbAdapter.addRecord(account1);
         mAccountsDbAdapter.addRecord(account2);
 
         assertThat(mAccountsDbAdapter.getRecordsCount()).isEqualTo(3L); //plus ROOT account
-        mAccountsDbAdapter.deleteRecord(account2.getUID());
+        mAccountsDbAdapter.deleteRecord(account2.getMUID());
 
         assertThat(mAccountsDbAdapter.getRecordsCount()).isEqualTo(2L);
-        assertThat(mAccountsDbAdapter.getRecord(account1.getUID()).getDefaultTransferAccountUID()).isNull();
+        assertThat(mAccountsDbAdapter.getRecord(account1.getMUID()).getMDefaultTransferAccountUID()).isNull();
 
         Account account3 = new Account("Sub-test");
-        account3.setParentUID(account1.getUID());
+        account3.setMParentAccountUID(account1.getMUID());
         Account account4 = new Account("Third-party");
-        account4.setDefaultTransferAccountUID(account3.getUID());
+        account4.setMDefaultTransferAccountUID(account3.getMUID());
 
         mAccountsDbAdapter.addRecord(account3);
         mAccountsDbAdapter.addRecord(account4);
         assertThat(mAccountsDbAdapter.getRecordsCount()).isEqualTo(4L);
 
-        mAccountsDbAdapter.recursiveDeleteAccount(mAccountsDbAdapter.getID(account1.getUID()));
+        mAccountsDbAdapter.recursiveDeleteAccount(mAccountsDbAdapter.getID(account1.getMUID()));
         assertThat(mAccountsDbAdapter.getRecordsCount()).isEqualTo(2L);
-        assertThat(mAccountsDbAdapter.getRecord(account4.getUID()).getDefaultTransferAccountUID()).isNull();
+        assertThat(mAccountsDbAdapter.getRecord(account4.getMUID()).getMDefaultTransferAccountUID()).isNull();
     }
     /**
      * Opening an XML file should set the default currency to that used by the most accounts in the file

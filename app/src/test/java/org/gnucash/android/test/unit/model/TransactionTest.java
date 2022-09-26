@@ -24,19 +24,19 @@ public class TransactionTest {
 	@Test
 	public void testCloningTransaction(){
 		Transaction transaction = new Transaction("Bobba Fett");
-		assertThat(transaction.getUID()).isNotNull();
-		assertThat(transaction.getCurrencyCode()).isEqualTo(Commodity.DEFAULT_COMMODITY.getCurrencyCode());
+		assertThat(transaction.getMUID()).isNotNull();
+		assertThat(transaction.getMMnemonic()).isEqualTo(Commodity.DEFAULT_COMMODITY.getMMnemonic());
 
 		Transaction clone1 = new Transaction(transaction, false);
-		assertThat(transaction.getUID()).isEqualTo(clone1.getUID());
+		assertThat(transaction.getMUID()).isEqualTo(clone1.getMUID());
 		assertThat(transaction).isEqualTo(clone1);
 
 		Transaction clone2 = new Transaction(transaction, true);
-		assertThat(transaction.getUID()).isNotEqualTo(clone2.getUID());
-		assertThat(transaction.getCurrencyCode()).isEqualTo(clone2.getCurrencyCode());
-		assertThat(transaction.getDescription()).isEqualTo(clone2.getDescription());
-		assertThat(transaction.getNote()).isEqualTo(clone2.getNote());
-		assertThat(transaction.getTimeMillis()).isEqualTo(clone2.getTimeMillis());
+		assertThat(transaction.getMUID()).isNotEqualTo(clone2.getMUID());
+		assertThat(transaction.getMMnemonic()).isEqualTo(clone2.getMMnemonic());
+		assertThat(transaction.getMDescription()).isEqualTo(clone2.getMDescription());
+		assertThat(transaction.getMNotes()).isEqualTo(clone2.getMNotes());
+		assertThat(transaction.getMTimestamp()).isEqualTo(clone2.getMTimestamp());
 		//TODO: Clone the created_at and modified_at times?
 	}
 
@@ -46,32 +46,32 @@ public class TransactionTest {
 	@Test
 	public void addingSplitsShouldSetTransactionUID(){
 		Transaction transaction = new Transaction("");
-		assertThat(transaction.getCurrencyCode()).isEqualTo(Commodity.DEFAULT_COMMODITY.getCurrencyCode());
+		assertThat(transaction.getMMnemonic()).isEqualTo(Commodity.DEFAULT_COMMODITY.getMMnemonic());
 
-		Split split = new Split(Money.getZeroInstance(), "test-account");
-		assertThat(split.getTransactionUID()).isEmpty();
+		Split split = new Split(Money.getSDefaultZero(), "test-account");
+		assertThat(split.getMTransactionUID()).isEmpty();
 
 		transaction.addSplit(split);
-		assertThat(split.getTransactionUID()).isEqualTo(transaction.getUID());
+		assertThat(split.getMTransactionUID()).isEqualTo(transaction.getMUID());
 	}
 
 	@Test
 	public void settingUID_shouldSetTransactionUidOfSplits(){
 		Transaction t1 = new Transaction("Test");
-		Split split1 = new Split(Money.getZeroInstance(), "random");
-		split1.setTransactionUID("non-existent");
+		Split split1 = new Split(Money.getSDefaultZero(), "random");
+		split1.setMTransactionUID("non-existent");
 
-		Split split2 = new Split(Money.getZeroInstance(), "account-something");
-		split2.setTransactionUID("pre-existent");
+		Split split2 = new Split(Money.getSDefaultZero(), "account-something");
+		split2.setMTransactionUID("pre-existent");
 
 		List<Split> splits = new ArrayList<>();
 		splits.add(split1);
 		splits.add(split2);
 
-		t1.setSplits(splits);
+		t1.setMSplitList(splits);
 
-		assertThat(t1.getSplits()).extracting("mTransactionUID")
-				.contains(t1.getUID())
+		assertThat(t1.getMSplitList()).extracting("mTransactionUID")
+				.contains(t1.getMUID())
 				.doesNotContain("non-existent")
 				.doesNotContain("pre-existent");
 	}
@@ -79,30 +79,30 @@ public class TransactionTest {
 	@Test
 	public void testCreateAutoBalanceSplit() {
 		Transaction transactionCredit = new Transaction("Transaction with more credit");
-        transactionCredit.setCommodity(Commodity.getInstance("EUR"));
+        transactionCredit.setMCommodity(Commodity.getInstance("EUR"));
 		Split creditSplit = new Split(new Money("1", "EUR"), "test-account");
-		creditSplit.setType(TransactionType.CREDIT);
+		creditSplit.setMSplitType(TransactionType.CREDIT);
 		transactionCredit.addSplit(creditSplit);
 		Split debitBalanceSplit = transactionCredit.createAutoBalanceSplit();
 
-		assertThat(creditSplit.getValue().isNegative()).isFalse();
-		assertThat(debitBalanceSplit.getValue()).isEqualTo(creditSplit.getValue());
+		assertThat(creditSplit.getMValue().isNegative()).isFalse();
+		assertThat(debitBalanceSplit.getMValue()).isEqualTo(creditSplit.getMValue());
 
-		assertThat(creditSplit.getQuantity().isNegative()).isFalse();
-		assertThat(debitBalanceSplit.getQuantity()).isEqualTo(creditSplit.getQuantity());
+		assertThat(creditSplit.getMQuantity().isNegative()).isFalse();
+		assertThat(debitBalanceSplit.getMQuantity()).isEqualTo(creditSplit.getMQuantity());
 
 
 		Transaction transactionDebit = new Transaction("Transaction with more debit");
-		transactionDebit.setCommodity(Commodity.getInstance("EUR"));
+		transactionDebit.setMCommodity(Commodity.getInstance("EUR"));
 		Split debitSplit = new Split(new Money("1", "EUR"), "test-account");
-		debitSplit.setType(TransactionType.DEBIT);
+		debitSplit.setMSplitType(TransactionType.DEBIT);
 		transactionDebit.addSplit(debitSplit);
 		Split creditBalanceSplit = transactionDebit.createAutoBalanceSplit();
 
-		assertThat(debitSplit.getValue().isNegative()).isFalse();
-		assertThat(creditBalanceSplit.getValue()).isEqualTo(debitSplit.getValue());
+		assertThat(debitSplit.getMValue().isNegative()).isFalse();
+		assertThat(creditBalanceSplit.getMValue()).isEqualTo(debitSplit.getMValue());
 
-		assertThat(debitSplit.getQuantity().isNegative()).isFalse();
-		assertThat(creditBalanceSplit.getQuantity()).isEqualTo(debitSplit.getQuantity());
+		assertThat(debitSplit.getMQuantity().isNegative()).isFalse();
+		assertThat(creditBalanceSplit.getMQuantity()).isEqualTo(debitSplit.getMQuantity());
 	}
 }

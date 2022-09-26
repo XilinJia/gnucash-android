@@ -27,31 +27,31 @@ public class PriceDbAdapterTest {
         String commodityUID = CommoditiesDbAdapter.getInstance().getCommodityUID("EUR");
         String currencyUID = CommoditiesDbAdapter.getInstance().getCommodityUID("USD");
         Price price = new Price(commodityUID, currencyUID);
-        price.setValueNum(134);
-        price.setValueDenom(100);
+        price.setMValueNum(134);
+        price.setMValueDenom(100);
 
         PricesDbAdapter pricesDbAdapter = PricesDbAdapter.getInstance();
         pricesDbAdapter.addRecord(price);
 
-        price = pricesDbAdapter.getRecord(price.getUID());
+        price = pricesDbAdapter.getRecord(price.getMUID());
         assertThat(pricesDbAdapter.getRecordsCount()).isEqualTo(1);
-        assertThat(price.getValueNum()).isEqualTo(67); //the price is reduced to 57/100 before saving
+        assertThat(price.getMValueNum()).isEqualTo(67); //the price is reduced to 57/100 before saving
 
         Price price1 = new Price(commodityUID, currencyUID);
-        price1.setValueNum(187);
-        price1.setValueDenom(100);
+        price1.setMValueNum(187);
+        price1.setMValueDenom(100);
         pricesDbAdapter.addRecord(price1);
 
         assertThat(pricesDbAdapter.getRecordsCount()).isEqualTo(1);
         Price savedPrice = pricesDbAdapter.getAllRecords().get(0);
-        assertThat(savedPrice.getUID()).isEqualTo(price1.getUID()); //different records
-        assertThat(savedPrice.getValueNum()).isEqualTo(187);
-        assertThat(savedPrice.getValueDenom()).isEqualTo(100);
+        assertThat(savedPrice.getMUID()).isEqualTo(price1.getMUID()); //different records
+        assertThat(savedPrice.getMValueNum()).isEqualTo(187);
+        assertThat(savedPrice.getMValueDenom()).isEqualTo(100);
 
 
         Price price2 = new Price(currencyUID, commodityUID);
-        price2.setValueNum(190);
-        price2.setValueDenom(100);
+        price2.setMValueNum(190);
+        price2.setMValueDenom(100);
         pricesDbAdapter.addRecord(price2);
 
         assertThat(pricesDbAdapter.getRecordsCount()).isEqualTo(2);

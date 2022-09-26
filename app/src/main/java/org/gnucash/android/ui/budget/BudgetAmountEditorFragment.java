@@ -248,7 +248,7 @@ public class BudgetAmountEditorFragment extends Fragment {
             budgetAccountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String currencyCode = mAccountsDbAdapter.getCurrencyCode(mAccountsDbAdapter.getUID(id));
+                    String currencyCode = mAccountsDbAdapter.getMMnemonic(mAccountsDbAdapter.getUID(id));
                     Commodity commodity = Commodity.getInstance(currencyCode);
                     currencySymbolTextView.setText(commodity.getSymbol());
                 }
@@ -269,8 +269,8 @@ public class BudgetAmountEditorFragment extends Fragment {
         }
 
         public void bindViews(BudgetAmount budgetAmount){
-            amountEditText.setValue(budgetAmount.getAmount().asBigDecimal());
-            budgetAccountSpinner.setSelection(mAccountCursorAdapter.getPosition(budgetAmount.getAccountUID()));
+            amountEditText.setValue(budgetAmount.getMAmount().asBigDecimal());
+            budgetAccountSpinner.setSelection(mAccountCursorAdapter.getPosition(budgetAmount.getMAccountUID()));
         }
     }
 }

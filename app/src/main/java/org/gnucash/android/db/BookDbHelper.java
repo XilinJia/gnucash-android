@@ -86,14 +86,14 @@ public class BookDbHelper extends SQLiteOpenHelper {
             String rootAccountUID = accountsDbAdapter.getOrCreateGnuCashRootAccountUID();
 
             Book book = new Book(rootAccountUID);
-            book.setActive(true);
+            book.setMActive(true);
             insertBook(db, book);
 
             String mainDbPath = mainDb.getPath();
             helper.close();
 
             File src = new File(mainDbPath);
-            File dst = new File(src.getParent(), book.getUID());
+            File dst = new File(src.getParent(), book.getMUID());
             try {
                 MigrationHelper.moveFile(src, dst);
             } catch (IOException e) {
@@ -102,7 +102,7 @@ public class BookDbHelper extends SQLiteOpenHelper {
                 Log.e(LOG_TAG, err_msg, e);
             }
 
-            migrateBackupFiles(book.getUID());
+            migrateBackupFiles(book.getMUID());
         }
 
         String sql = "SELECT COUNT(*) FROM " + BookEntry.TABLE_NAME;
@@ -111,14 +111,14 @@ public class BookDbHelper extends SQLiteOpenHelper {
         if (count == 0) { //no book in the database, create a default one
             Log.i(LOG_TAG, "No books found in database, creating default book");
             Book book = new Book();
-            DatabaseHelper helper = new DatabaseHelper(GnuCashApplication.getAppContext(), book.getUID());
+            DatabaseHelper helper = new DatabaseHelper(GnuCashApplication.getAppContext(), book.getMUID());
             SQLiteDatabase mainDb = helper.getWritableDatabase(); //actually create the db
             AccountsDbAdapter accountsDbAdapter = new AccountsDbAdapter(mainDb,
                     new TransactionsDbAdapter(mainDb, new SplitsDbAdapter(mainDb)));
 
             String rootAccountUID = accountsDbAdapter.getOrCreateGnuCashRootAccountUID();
-            book.setRootAccountUID(rootAccountUID);
-            book.setActive(true);
+            book.setMRootAccountUID(rootAccountUID);
+            book.setMActive(true);
             insertBook(db, book);
         }
 
@@ -141,8 +141,8 @@ public class BookDbHelper extends SQLiteOpenHelper {
      */
     private void insertBook(SQLiteDatabase db, Book book) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(BookEntry.COLUMN_UID, book.getUID());
-        contentValues.put(BookEntry.COLUMN_ROOT_GUID, book.getRootAccountUID());
+        contentValues.put(BookEntry.COLUMN_UID, book.getMUID());
+        contentValues.put(BookEntry.COLUMN_ROOT_GUID, book.getMRootAccountUID());
         contentValues.put(BookEntry.COLUMN_TEMPLATE_GUID, Book.generateUID());
         contentValues.put(BookEntry.COLUMN_DISPLAY_NAME, new BooksDbAdapter(db).generateDefaultBookName());
         contentValues.put(BookEntry.COLUMN_ACTIVE, book.isActive() ? 1 : 0);

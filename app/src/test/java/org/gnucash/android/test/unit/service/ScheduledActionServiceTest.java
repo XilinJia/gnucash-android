@@ -102,21 +102,21 @@ public class ScheduledActionServiceTest {
     @BeforeClass
     public static void makeAccounts(){
         mTemplateTransaction = new Transaction("Recurring Transaction");
-        mTemplateTransaction.setTemplate(true);
+        mTemplateTransaction.setMIsTemplate(true);
 
-        mActionUID = mTemplateTransaction.getUID();
+        mActionUID = mTemplateTransaction.getMUID();
     }
 
     @Before
     public void setUp(){
         mDb = GnuCashApplication.getActiveDb();
         new CommoditiesDbAdapter(mDb); //initializes commodity static values
-        mBaseAccount.setCommodity(Commodity.DEFAULT_COMMODITY);
-        mTransferAccount.setCommodity(Commodity.DEFAULT_COMMODITY);
-        mTemplateTransaction.setCommodity(Commodity.DEFAULT_COMMODITY);
+        mBaseAccount.setMCommodity(Commodity.DEFAULT_COMMODITY);
+        mTransferAccount.setMCommodity(Commodity.DEFAULT_COMMODITY);
+        mTemplateTransaction.setMCommodity(Commodity.DEFAULT_COMMODITY);
 
-        Split split1 = new Split(new Money(BigDecimal.TEN, Commodity.DEFAULT_COMMODITY), mBaseAccount.getUID());
-        Split split2 = split1.createPair(mTransferAccount.getUID());
+        Split split1 = new Split(new Money(BigDecimal.TEN, Commodity.DEFAULT_COMMODITY), mBaseAccount.getMUID());
+        Split split2 = split1.createPair(mTransferAccount.getMUID());
 
         mTemplateTransaction.addSplit(split1);
         mTemplateTransaction.addSplit(split2);
@@ -133,10 +133,10 @@ public class ScheduledActionServiceTest {
     public void disabledScheduledActions_shouldNotRun(){
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
         ScheduledAction scheduledAction1 = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
-        scheduledAction1.setStartTime(System.currentTimeMillis() - 100000);
-        scheduledAction1.setEnabled(false);
-        scheduledAction1.setActionUID(mActionUID);
-        scheduledAction1.setRecurrence(recurrence);
+        scheduledAction1.setMStartTime(System.currentTimeMillis() - 100000);
+        scheduledAction1.setMIsEnabled(false);
+        scheduledAction1.setMActionUID(mActionUID);
+        scheduledAction1.setMRecurrence(recurrence);
 
         List<ScheduledAction> actions = new ArrayList<>();
         actions.add(scheduledAction1);
@@ -151,10 +151,10 @@ public class ScheduledActionServiceTest {
     @Test
     public void futureScheduledActions_shouldNotRun(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
-        scheduledAction.setStartTime(System.currentTimeMillis() + 100000);
-        scheduledAction.setEnabled(true);
-        scheduledAction.setRecurrence(new Recurrence(PeriodType.MONTH));
-        scheduledAction.setActionUID(mActionUID);
+        scheduledAction.setMStartTime(System.currentTimeMillis() + 100000);
+        scheduledAction.setMIsEnabled(true);
+        scheduledAction.setMRecurrence(new Recurrence(PeriodType.MONTH));
+        scheduledAction.setMActionUID(mActionUID);
 
         List<ScheduledAction> actions = new ArrayList<>();
         actions.add(scheduledAction);
@@ -172,12 +172,12 @@ public class ScheduledActionServiceTest {
     @Test
     public void exceededExecutionCounts_shouldNotRun(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
-        scheduledAction.setActionUID(mActionUID);
-        scheduledAction.setStartTime(new DateTime(2015, 5, 31, 14, 0).getMillis());
-        scheduledAction.setEnabled(true);
-        scheduledAction.setRecurrence(new Recurrence(PeriodType.WEEK));
-        scheduledAction.setTotalPlannedExecutionCount(4);
-        scheduledAction.setExecutionCount(4);
+        scheduledAction.setMActionUID(mActionUID);
+        scheduledAction.setMStartTime(new DateTime(2015, 5, 31, 14, 0).getMillis());
+        scheduledAction.setMIsEnabled(true);
+        scheduledAction.setMRecurrence(new Recurrence(PeriodType.WEEK));
+        scheduledAction.setMTotalFrequency(4);
+        scheduledAction.setMExecutionCount(4);
 
         List<ScheduledAction> actions = new ArrayList<>();
         actions.add(scheduledAction);
@@ -195,16 +195,16 @@ public class ScheduledActionServiceTest {
     public void missedScheduledTransactions_shouldBeGenerated(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
         DateTime startTime = new DateTime(2016, 6, 6, 9, 0);
-        scheduledAction.setStartTime(startTime.getMillis());
+        scheduledAction.setMStartTime(startTime.getMillis());
         DateTime endTime = new DateTime(2016, 9, 12, 8, 0); //end just before last appointment
-        scheduledAction.setEndTime(endTime.getMillis());
+        scheduledAction.setMEndDate(endTime.getMillis());
 
-        scheduledAction.setActionUID(mActionUID);
+        scheduledAction.setMActionUID(mActionUID);
 
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setMultiplier(2);
-        recurrence.setByDays(Collections.singletonList(Calendar.MONDAY));
-        scheduledAction.setRecurrence(recurrence);
+        recurrence.setMMultiplier(2);
+        recurrence.byDays(Collections.singletonList(Calendar.MONDAY));
+        scheduledAction.setMRecurrence(recurrence);
         ScheduledActionDbAdapter.getInstance().addRecord(scheduledAction, DatabaseAdapter.UpdateMethod.insert);
 
         TransactionsDbAdapter transactionsDbAdapter = TransactionsDbAdapter.getInstance();
@@ -220,11 +220,11 @@ public class ScheduledActionServiceTest {
     public void endTimeInTheFuture_shouldExecuteOnlyUntilPresent(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
         DateTime startTime = new DateTime(2016, 6, 6, 9, 0);
-        scheduledAction.setStartTime(startTime.getMillis());
-        scheduledAction.setActionUID(mActionUID);
+        scheduledAction.setMStartTime(startTime.getMillis());
+        scheduledAction.setMActionUID(mActionUID);
 
-        scheduledAction.setRecurrence(PeriodType.WEEK, 2);
-        scheduledAction.setEndTime(new DateTime(2017, 8, 16, 9, 0).getMillis());
+        scheduledAction.setMRecurrence(PeriodType.WEEK, 2);
+        scheduledAction.setMEndDate(new DateTime(2017, 8, 16, 9, 0).getMillis());
         ScheduledActionDbAdapter.getInstance().addRecord(scheduledAction, DatabaseAdapter.UpdateMethod.insert);
 
         TransactionsDbAdapter transactionsDbAdapter = TransactionsDbAdapter.getInstance();
@@ -250,14 +250,14 @@ public class ScheduledActionServiceTest {
     public void scheduledTransactionsWithEndTimeInPast_shouldBeExecuted(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
         DateTime startTime = new DateTime(2016, 6, 6, 9, 0);
-        scheduledAction.setStartTime(startTime.getMillis());
-        scheduledAction.setActionUID(mActionUID);
+        scheduledAction.setMStartTime(startTime.getMillis());
+        scheduledAction.setMActionUID(mActionUID);
 
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setMultiplier(2);
-        recurrence.setByDays(Collections.singletonList(Calendar.MONDAY));
-        scheduledAction.setRecurrence(recurrence);
-        scheduledAction.setEndTime(new DateTime(2016, 8, 8, 9, 0).getMillis());
+        recurrence.setMMultiplier(2);
+        recurrence.byDays(Collections.singletonList(Calendar.MONDAY));
+        scheduledAction.setMRecurrence(recurrence);
+        scheduledAction.setMEndDate(new DateTime(2016, 8, 8, 9, 0).getMillis());
         ScheduledActionDbAdapter.getInstance().addRecord(scheduledAction, DatabaseAdapter.UpdateMethod.insert);
 
         TransactionsDbAdapter transactionsDbAdapter = TransactionsDbAdapter.getInstance();
@@ -268,7 +268,7 @@ public class ScheduledActionServiceTest {
         ScheduledActionService.processScheduledActions(actions, mDb);
 
         int expectedCount = 5;
-        assertThat(scheduledAction.getExecutionCount()).isEqualTo(expectedCount);
+        assertThat(scheduledAction.getMExecutionCount()).isEqualTo(expectedCount);
         assertThat(transactionsDbAdapter.getRecordsCount()).isEqualTo(expectedCount); //would be 6 if the end time is not respected
     }
 
@@ -279,8 +279,8 @@ public class ScheduledActionServiceTest {
     public void recurringTransactions_shouldHaveScheduledActionUID(){
         ScheduledAction scheduledAction = new ScheduledAction(ScheduledAction.ActionType.TRANSACTION);
         DateTime startTime = new DateTime(2016, 7, 4, 12 ,0);
-        scheduledAction.setStartTime(startTime.getMillis());
-        scheduledAction.setRecurrence(PeriodType.MONTH, 1);
+        scheduledAction.setMStartTime(startTime.getMillis());
+        scheduledAction.setMRecurrence(PeriodType.MONTH, 1);
 
         TransactionsDbAdapter transactionsDbAdapter = TransactionsDbAdapter.getInstance();
         assertThat(transactionsDbAdapter.getRecordsCount()).isZero();
@@ -307,16 +307,16 @@ public class ScheduledActionServiceTest {
     @Test
     public void scheduledBackups_shouldRunOnlyOnce(){
         ScheduledAction scheduledBackup = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
-        scheduledBackup.setStartTime(LocalDateTime.now()
+        scheduledBackup.setMStartTime(LocalDateTime.now()
                 .minusMonths(4).minusDays(2).toDate().getTime());
-        scheduledBackup.setRecurrence(PeriodType.MONTH, 1);
-        scheduledBackup.setExecutionCount(2);
-        scheduledBackup.setLastRun(LocalDateTime.now().minusMonths(2).toDate().getTime());
-        long previousLastRun = scheduledBackup.getLastRunTime();
+        scheduledBackup.setMRecurrence(PeriodType.MONTH, 1);
+        scheduledBackup.setMExecutionCount(2);
+        scheduledBackup.setMLastRun(LocalDateTime.now().minusMonths(2).toDate().getTime());
+        long previousLastRun = scheduledBackup.getMLastRun();
 
         ExportParams backupParams = new ExportParams(ExportFormat.XML);
         backupParams.setExportTarget(ExportParams.ExportTarget.SD_CARD);
-        scheduledBackup.setTag(backupParams.toCsv());
+        scheduledBackup.setMTag(backupParams.toCsv());
 
         File backupFolder = new File(Exporter.getExportFolderPath(BooksDbAdapter.getInstance().getActiveBookUID()));
         assertThat(backupFolder).exists();
@@ -327,17 +327,17 @@ public class ScheduledActionServiceTest {
 
         // Check there's not a backup for each missed run
         ScheduledActionService.processScheduledActions(actions, mDb);
-        assertThat(scheduledBackup.getExecutionCount()).isEqualTo(3);
-        assertThat(scheduledBackup.getLastRunTime()).isGreaterThan(previousLastRun);
+        assertThat(scheduledBackup.getMExecutionCount()).isEqualTo(3);
+        assertThat(scheduledBackup.getMLastRun()).isGreaterThan(previousLastRun);
         File[] backupFiles = backupFolder.listFiles();
         assertThat(backupFiles).hasSize(1);
         assertThat(backupFiles[0]).exists().hasExtension("gnca");
 
         // Check also across service runs
-        previousLastRun = scheduledBackup.getLastRunTime();
+        previousLastRun = scheduledBackup.getMLastRun();
         ScheduledActionService.processScheduledActions(actions, mDb);
-        assertThat(scheduledBackup.getExecutionCount()).isEqualTo(3);
-        assertThat(scheduledBackup.getLastRunTime()).isEqualTo(previousLastRun);
+        assertThat(scheduledBackup.getMExecutionCount()).isEqualTo(3);
+        assertThat(scheduledBackup.getMLastRun()).isEqualTo(previousLastRun);
         backupFiles = backupFolder.listFiles();
         assertThat(backupFiles).hasSize(1);
         assertThat(backupFiles[0]).exists().hasExtension("gnca");
@@ -352,19 +352,19 @@ public class ScheduledActionServiceTest {
     @Test
     public void scheduledBackups_shouldNotRunBeforeNextScheduledExecution(){
         ScheduledAction scheduledBackup = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
-        scheduledBackup.setStartTime(
+        scheduledBackup.setMStartTime(
                 LocalDateTime.now().withDayOfWeek(DateTimeConstants.WEDNESDAY).toDate().getTime());
-        scheduledBackup.setLastRun(scheduledBackup.getStartTime());
-        long previousLastRun = scheduledBackup.getLastRunTime();
-        scheduledBackup.setExecutionCount(1);
+        scheduledBackup.setMLastRun(scheduledBackup.getMStartTime());
+        long previousLastRun = scheduledBackup.getMLastRun();
+        scheduledBackup.setMExecutionCount(1);
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setMultiplier(1);
-        recurrence.setByDays(Collections.singletonList(Calendar.MONDAY));
-        scheduledBackup.setRecurrence(recurrence);
+        recurrence.setMMultiplier(1);
+        recurrence.byDays(Collections.singletonList(Calendar.MONDAY));
+        scheduledBackup.setMRecurrence(recurrence);
 
         ExportParams backupParams = new ExportParams(ExportFormat.XML);
         backupParams.setExportTarget(ExportParams.ExportTarget.SD_CARD);
-        scheduledBackup.setTag(backupParams.toCsv());
+        scheduledBackup.setMTag(backupParams.toCsv());
 
         File backupFolder = new File(
                 Exporter.getExportFolderPath(BooksDbAdapter.getInstance().getActiveBookUID()));
@@ -375,8 +375,8 @@ public class ScheduledActionServiceTest {
         actions.add(scheduledBackup);
         ScheduledActionService.processScheduledActions(actions, mDb);
 
-        assertThat(scheduledBackup.getExecutionCount()).isEqualTo(1);
-        assertThat(scheduledBackup.getLastRunTime()).isEqualTo(previousLastRun);
+        assertThat(scheduledBackup.getMExecutionCount()).isEqualTo(1);
+        assertThat(scheduledBackup.getMLastRun()).isEqualTo(previousLastRun);
         assertThat(backupFolder.listFiles()).hasSize(0);
     }
 
@@ -387,30 +387,30 @@ public class ScheduledActionServiceTest {
     @Test
     public void scheduledBackups_shouldNotIncludeTransactionsPreviousToTheLastRun() {
         ScheduledAction scheduledBackup = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
-        scheduledBackup.setStartTime(LocalDateTime.now().minusDays(15).toDate().getTime());
-        scheduledBackup.setLastRun(LocalDateTime.now().minusDays(8).toDate().getTime());
-        long previousLastRun = scheduledBackup.getLastRunTime();
-        scheduledBackup.setExecutionCount(1);
+        scheduledBackup.setMStartTime(LocalDateTime.now().minusDays(15).toDate().getTime());
+        scheduledBackup.setMLastRun(LocalDateTime.now().minusDays(8).toDate().getTime());
+        long previousLastRun = scheduledBackup.getMLastRun();
+        scheduledBackup.setMExecutionCount(1);
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setMultiplier(1);
-        recurrence.setByDays(Collections.singletonList(Calendar.WEDNESDAY));
-        scheduledBackup.setRecurrence(recurrence);
+        recurrence.setMMultiplier(1);
+        recurrence.byDays(Collections.singletonList(Calendar.WEDNESDAY));
+        scheduledBackup.setMRecurrence(recurrence);
         ExportParams backupParams = new ExportParams(ExportFormat.QIF);
         backupParams.setExportTarget(ExportParams.ExportTarget.SD_CARD);
-        backupParams.setExportStartTime(new Timestamp(scheduledBackup.getStartTime()));
-        scheduledBackup.setTag(backupParams.toCsv());
+        backupParams.setExportStartTime(new Timestamp(scheduledBackup.getMStartTime()));
+        scheduledBackup.setMTag(backupParams.toCsv());
 
         // Create a transaction with a modified date previous to the last run
         Transaction transaction = new Transaction("Tandoori express");
-        Split split = new Split(new Money("10", Commodity.DEFAULT_COMMODITY.getCurrencyCode()),
-                                mBaseAccount.getUID());
-        split.setType(TransactionType.DEBIT);
+        Split split = new Split(new Money("10", Commodity.DEFAULT_COMMODITY.getMMnemonic()),
+                                mBaseAccount.getMUID());
+        split.setMSplitType(TransactionType.DEBIT);
         transaction.addSplit(split);
-        transaction.addSplit(split.createPair(mTransferAccount.getUID()));
+        transaction.addSplit(split.createPair(mTransferAccount.getMUID()));
         mTransactionsDbAdapter.addRecord(transaction);
         // We set the date directly in the database as the corresponding field
         // is ignored when the object is stored. It's set through a trigger instead.
-        setTransactionInDbModifiedTimestamp(transaction.getUID(),
+        setTransactionInDbModifiedTimestamp(transaction.getMUID(),
                 new Timestamp(LocalDateTime.now().minusDays(9).toDate().getTime()));
 
         File backupFolder = new File(
@@ -422,8 +422,8 @@ public class ScheduledActionServiceTest {
         actions.add(scheduledBackup);
         ScheduledActionService.processScheduledActions(actions, mDb);
 
-        assertThat(scheduledBackup.getExecutionCount()).isEqualTo(1);
-        assertThat(scheduledBackup.getLastRunTime()).isEqualTo(previousLastRun);
+        assertThat(scheduledBackup.getMExecutionCount()).isEqualTo(1);
+        assertThat(scheduledBackup.getMLastRun()).isEqualTo(previousLastRun);
         assertThat(backupFolder.listFiles()).hasSize(0);
     }
 
@@ -448,25 +448,25 @@ public class ScheduledActionServiceTest {
     @Test
     public void scheduledBackups_shouldIncludeTransactionsAfterTheLastRun() {
         ScheduledAction scheduledBackup = new ScheduledAction(ScheduledAction.ActionType.BACKUP);
-        scheduledBackup.setStartTime(LocalDateTime.now().minusDays(15).toDate().getTime());
-        scheduledBackup.setLastRun(LocalDateTime.now().minusDays(8).toDate().getTime());
-        long previousLastRun = scheduledBackup.getLastRunTime();
-        scheduledBackup.setExecutionCount(1);
+        scheduledBackup.setMStartTime(LocalDateTime.now().minusDays(15).toDate().getTime());
+        scheduledBackup.setMLastRun(LocalDateTime.now().minusDays(8).toDate().getTime());
+        long previousLastRun = scheduledBackup.getMLastRun();
+        scheduledBackup.setMExecutionCount(1);
         Recurrence recurrence = new Recurrence(PeriodType.WEEK);
-        recurrence.setMultiplier(1);
-        recurrence.setByDays(Collections.singletonList(Calendar.FRIDAY));
-        scheduledBackup.setRecurrence(recurrence);
+        recurrence.setMMultiplier(1);
+        recurrence.byDays(Collections.singletonList(Calendar.FRIDAY));
+        scheduledBackup.setMRecurrence(recurrence);
         ExportParams backupParams = new ExportParams(ExportFormat.QIF);
         backupParams.setExportTarget(ExportParams.ExportTarget.SD_CARD);
-        backupParams.setExportStartTime(new Timestamp(scheduledBackup.getStartTime()));
-        scheduledBackup.setTag(backupParams.toCsv());
+        backupParams.setExportStartTime(new Timestamp(scheduledBackup.getMStartTime()));
+        scheduledBackup.setMTag(backupParams.toCsv());
 
         Transaction transaction = new Transaction("Orient palace");
-        Split split = new Split(new Money("10", Commodity.DEFAULT_COMMODITY.getCurrencyCode()),
-                mBaseAccount.getUID());
-        split.setType(TransactionType.DEBIT);
+        Split split = new Split(new Money("10", Commodity.DEFAULT_COMMODITY.getMMnemonic()),
+                mBaseAccount.getMUID());
+        split.setMSplitType(TransactionType.DEBIT);
         transaction.addSplit(split);
-        transaction.addSplit(split.createPair(mTransferAccount.getUID()));
+        transaction.addSplit(split.createPair(mTransferAccount.getMUID()));
         mTransactionsDbAdapter.addRecord(transaction);
 
         File backupFolder = new File(
@@ -478,8 +478,8 @@ public class ScheduledActionServiceTest {
         actions.add(scheduledBackup);
         ScheduledActionService.processScheduledActions(actions, mDb);
 
-        assertThat(scheduledBackup.getExecutionCount()).isEqualTo(2);
-        assertThat(scheduledBackup.getLastRunTime()).isGreaterThan(previousLastRun);
+        assertThat(scheduledBackup.getMExecutionCount()).isEqualTo(2);
+        assertThat(scheduledBackup.getMLastRun()).isGreaterThan(previousLastRun);
         assertThat(backupFolder.listFiles()).hasSize(1);
         assertThat(backupFolder.listFiles()[0].getName()).endsWith(".qif");
     }

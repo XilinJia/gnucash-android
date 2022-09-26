@@ -367,8 +367,8 @@ public class AccountFormFragment extends Fragment {
         if (account == null)
             throw new IllegalArgumentException("Account cannot be null");
 
-        loadParentAccountList(account.getAccountType());
-        mParentAccountUID = account.getParentUID();
+        loadParentAccountList(account.getMAccountType());
+        mParentAccountUID = account.getMParentAccountUID();
         if (mParentAccountUID == null) {
             // null parent, set Parent as root
             mParentAccountUID = mRootAccountUID;
@@ -378,25 +378,25 @@ public class AccountFormFragment extends Fragment {
             setParentAccountSelection(mAccountsDbAdapter.getID(mParentAccountUID));
         }
 
-        String currencyCode = account.getCommodity().getCurrencyCode();
+        String currencyCode = account.getMCommodity().getMMnemonic();
         setSelectedCurrency(currencyCode);
 
-        if (mAccountsDbAdapter.getTransactionMaxSplitNum(mAccount.getUID()) > 1)
+        if (mAccountsDbAdapter.getTransactionMaxSplitNum(mAccount.getMUID()) > 1)
         {
             //TODO: Allow changing the currency and effecting the change for all transactions without any currency exchange (purely cosmetic change)
             mCurrencySpinner.setEnabled(false);
         }
 
-        mNameEditText.setText(account.getName());
+        mNameEditText.setText(account.getMName());
         mNameEditText.setSelection(mNameEditText.getText().length());
-        mDescriptionEditText.setText(account.getDescription());
+        mDescriptionEditText.setText(account.getMDescription());
 
         if (mUseDoubleEntry) {
-            if (account.getDefaultTransferAccountUID() != null) {
-                long doubleDefaultAccountId = mAccountsDbAdapter.getID(account.getDefaultTransferAccountUID());
+            if (account.getMDefaultTransferAccountUID() != null) {
+                long doubleDefaultAccountId = mAccountsDbAdapter.getID(account.getMDefaultTransferAccountUID());
                 setDefaultTransferAccountSelection(doubleDefaultAccountId, true);
             } else {
-                String currentAccountUID = account.getParentUID();
+                String currentAccountUID = account.getMParentAccountUID();
                 String rootAccountUID = mAccountsDbAdapter.getOrCreateGnuCashRootAccountUID();
                 while (!currentAccountUID.equals(rootAccountUID)) {
                     long defaultTransferAccountID = mAccountsDbAdapter.getDefaultTransferAccountID(mAccountsDbAdapter.getID(currentAccountUID));
@@ -410,10 +410,10 @@ public class AccountFormFragment extends Fragment {
         }
 
         mPlaceholderCheckBox.setChecked(account.isPlaceholderAccount());
-        mSelectedColor = account.getColor();
-        mColorSquare.setBackgroundColor(account.getColor());
+        mSelectedColor = account.getMColor();
+        mColorSquare.setBackgroundColor(account.getMColor());
 
-        setAccountTypeSelection(account.getAccountType());
+        setAccountTypeSelection(account.getMAccountType());
     }
 
     /**
@@ -534,7 +534,7 @@ public class AccountFormFragment extends Fragment {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         int currentColor = Color.LTGRAY;
         if (mAccount != null){
-            currentColor = mAccount.getColor();
+            currentColor = mAccount.getMColor();
         }
 
         ColorPickerDialog colorPickerDialogFragment = ColorPickerDialog.newInstance(
@@ -597,7 +597,7 @@ public class AccountFormFragment extends Fragment {
                 + getAllowedParentAccountTypes(accountType) + ") AND " + DatabaseSchema.AccountEntry.COLUMN_HIDDEN + "!=1 ";
 
         if (mAccount != null){  //if editing an account
-            mDescendantAccountUIDs = mAccountsDbAdapter.getDescendantAccountUIDs(mAccount.getUID(), null, null);
+            mDescendantAccountUIDs = mAccountsDbAdapter.getDescendantAccountUIDs(mAccount.getMUID(), null, null);
             String rootAccountUID = mAccountsDbAdapter.getOrCreateGnuCashRootAccountUID();
             List<String> descendantAccountUIDs = new ArrayList<>(mDescendantAccountUIDs);
             if (rootAccountUID != null)
@@ -746,41 +746,41 @@ public class AccountFormFragment extends Fragment {
             mAccountsDbAdapter.addRecord(mAccount, DatabaseAdapter.UpdateMethod.insert); //new account, insert it
 		}
 		else {
-            nameChanged = !mAccount.getName().equals(getEnteredName());
-            mAccount.setName(getEnteredName());
+            nameChanged = !mAccount.getMName().equals(getEnteredName());
+            mAccount.setMName(getEnteredName());
         }
 
         long commodityId = mCurrencySpinner.getSelectedItemId();
         Commodity commodity = CommoditiesDbAdapter.getInstance().getRecord(commodityId);
-        mAccount.setCommodity(commodity);
+        mAccount.setMCommodity(commodity);
 
         AccountType selectedAccountType = getSelectedAccountType();
-        mAccount.setAccountType(selectedAccountType);
+        mAccount.setMAccountType(selectedAccountType);
 
-        mAccount.setDescription(mDescriptionEditText.getText().toString());
-        mAccount.setPlaceHolderFlag(mPlaceholderCheckBox.isChecked());
-        mAccount.setColor(mSelectedColor);
+        mAccount.setMDescription(mDescriptionEditText.getText().toString());
+        mAccount.setMIsPlaceHolderAccount(mPlaceholderCheckBox.isChecked());
+        mAccount.setMColor(mSelectedColor);
 
         long newParentAccountId;
         String newParentAccountUID;
 		if (mParentCheckBox.isChecked()) {
             newParentAccountId = mParentAccountSpinner.getSelectedItemId();
             newParentAccountUID = mAccountsDbAdapter.getUID(newParentAccountId);
-            mAccount.setParentUID(newParentAccountUID);
+            mAccount.setMParentAccountUID(newParentAccountUID);
         } else {
             //need to do this explicitly in case user removes parent account
             newParentAccountUID = mRootAccountUID;
             newParentAccountId = mRootAccountId;
 		}
-        mAccount.setParentUID(newParentAccountUID);
+        mAccount.setMParentAccountUID(newParentAccountUID);
 
         if (mDefaultTransferAccountCheckBox.isChecked()
                 && mDefaultTransferAccountSpinner.getSelectedItemId() != Spinner.INVALID_ROW_ID){
             long id = mDefaultTransferAccountSpinner.getSelectedItemId();
-            mAccount.setDefaultTransferAccountUID(mAccountsDbAdapter.getUID(id));
+            mAccount.setMDefaultTransferAccountUID(mAccountsDbAdapter.getUID(id));
         } else {
             //explicitly set in case of removal of default account
-            mAccount.setDefaultTransferAccountUID(null);
+            mAccount.setMDefaultTransferAccountUID(null);
         }
 
         long parentAccountId = mParentAccountUID == null ? -1 : mAccountsDbAdapter.getID(mParentAccountUID);
@@ -789,13 +789,13 @@ public class AccountFormFragment extends Fragment {
             // current account name changed or new Account or parent account changed
             String newAccountFullName;
             if (newParentAccountId == mRootAccountId){
-                newAccountFullName = mAccount.getName();
+                newAccountFullName = mAccount.getMName();
             }
             else {
                 newAccountFullName = mAccountsDbAdapter.getAccountFullName(newParentAccountUID) +
-                    AccountsDbAdapter.ACCOUNT_NAME_SEPARATOR + mAccount.getName();
+                    AccountsDbAdapter.ACCOUNT_NAME_SEPARATOR + mAccount.getMName();
             }
-            mAccount.setFullName(newAccountFullName);
+            mAccount.setMFullName(newAccountFullName);
             if (mDescendantAccountUIDs != null) {
                 // modifying existing account, e.t. name changed and/or parent changed
                 if ((nameChanged || parentAccountId != newParentAccountId) && mDescendantAccountUIDs.size() > 0) {
@@ -806,19 +806,19 @@ public class AccountFormFragment extends Fragment {
                     ));
                 }
                 HashMap<String, Account> mapAccount = new HashMap<>();
-                for (Account acct : accountsToUpdate) mapAccount.put(acct.getUID(), acct);
+                for (Account acct : accountsToUpdate) mapAccount.put(acct.getMUID(), acct);
                 for (String uid: mDescendantAccountUIDs) {
                     // mAccountsDbAdapter.getDescendantAccountUIDs() will ensure a parent-child order
                     Account acct = mapAccount.get(uid);
                     // mAccount cannot be root, so acct here cannot be top level account.
-                    if (mAccount.getUID().equals(acct.getParentUID())) {
-                        acct.setFullName(mAccount.getFullName() + AccountsDbAdapter.ACCOUNT_NAME_SEPARATOR + acct.getName());
+                    if (mAccount.getMUID().equals(acct.getMParentAccountUID())) {
+                        acct.setMFullName(mAccount.getMFullName() + AccountsDbAdapter.ACCOUNT_NAME_SEPARATOR + acct.getMName());
                     }
                     else {
-                        acct.setFullName(
-                                mapAccount.get(acct.getParentUID()).getFullName() +
+                        acct.setMFullName(
+                                mapAccount.get(acct.getMParentAccountUID()).getMFullName() +
                                         AccountsDbAdapter.ACCOUNT_NAME_SEPARATOR +
-                                        acct.getName()
+                                        acct.getMName()
                         );
                     }
                 }

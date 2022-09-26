@@ -64,8 +64,8 @@ public class PriceTest {
         long denominator = 3;
         Price price = new Price();
 
-        price.setValueNum(numerator);
-        price.setValueDenom(denominator);
+        price.setMValueNum(numerator);
+        price.setMValueDenom(denominator);
         try {
             price.toString();
         } catch (ArithmeticException e) {
@@ -79,9 +79,9 @@ public class PriceTest {
         long denominator = 3;
         Price price = new Price();
 
-        price.setValueNum(numerator * 2);
-        price.setValueDenom(denominator * 2);
-        assertThat(price.getValueNum()).isEqualTo(numerator);
+        price.setMValueNum(numerator * 2);
+        price.setMValueDenom(denominator * 2);
+        assertThat(price.getMValueNum()).isEqualTo(numerator);
     }
 
     @Test
@@ -90,8 +90,8 @@ public class PriceTest {
         long denominator = 3;
         Price price = new Price();
 
-        price.setValueNum(numerator * 2);
-        price.setValueDenom(denominator * 2);
-        assertThat(price.getValueDenom()).isEqualTo(denominator);
+        price.setMValueNum(numerator * 2);
+        price.setMValueDenom(denominator * 2);
+        assertThat(price.getMValueDenom()).isEqualTo(denominator);
     }
 }

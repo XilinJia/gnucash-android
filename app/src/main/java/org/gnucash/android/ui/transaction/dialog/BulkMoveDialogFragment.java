@@ -126,7 +126,7 @@ public class BulkMoveDialogFragment extends DialogFragment {
                 + DatabaseSchema.AccountEntry.COLUMN_PLACEHOLDER + " = 0"
                 + ")";
 		Cursor cursor = accountsDbAdapter.fetchAccountsOrderedByFullName(conditions,
-                new String[]{mOriginAccountUID, accountsDbAdapter.getCurrencyCode(mOriginAccountUID)});
+                new String[]{mOriginAccountUID, accountsDbAdapter.getMMnemonic(mOriginAccountUID)});
 
 		SimpleCursorAdapter mCursorAdapter = new QualifiedAccountNameCursorAdapter(getActivity(), cursor);
 		mDestinationAccountSpinner.setAdapter(mCursorAdapter);

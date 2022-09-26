@@ -206,38 +206,38 @@ public class BudgetListFragment extends Fragment implements Refreshable,
         @Override
         public void onBindViewHolderCursor(BudgetViewHolder holder, Cursor cursor) {
             final Budget budget = mBudgetsDbAdapter.buildModelInstance(cursor);
-            holder.budgetId = mBudgetsDbAdapter.getID(budget.getUID());
+            holder.budgetId = mBudgetsDbAdapter.getID(budget.getMUID());
 
-            holder.budgetName.setText(budget.getName());
+            holder.budgetName.setText(budget.getMName());
 
             AccountsDbAdapter accountsDbAdapter = AccountsDbAdapter.getInstance();
             String accountString;
-            int numberOfAccounts = budget.getNumberOfAccounts();
+            int numberOfAccounts = budget.numberOfAccounts();
             if (numberOfAccounts == 1){
-                accountString = accountsDbAdapter.getAccountFullName(budget.getBudgetAmounts().get(0).getAccountUID());
+                accountString = accountsDbAdapter.getAccountFullName(budget.getMBudgetAmounts().get(0).getMAccountUID());
             } else {
                 accountString = numberOfAccounts + " budgeted accounts";
             }
             holder.accountName.setText(accountString);
 
-            holder.budgetRecurrence.setText(budget.getRecurrence().getRepeatString() + " - "
-                    + budget.getRecurrence().getDaysLeftInCurrentPeriod() + " days left");
+            holder.budgetRecurrence.setText(budget.getMRecurrence().repeatString() + " - "
+                    + budget.getMRecurrence().daysLeftInCurrentPeriod() + " days left");
 
             BigDecimal spentAmountValue = BigDecimal.ZERO;
-            for (BudgetAmount budgetAmount : budget.getCompactedBudgetAmounts()) {
-                Money balance = accountsDbAdapter.getAccountBalance(budgetAmount.getAccountUID(),
-                        budget.getStartofCurrentPeriod(), budget.getEndOfCurrentPeriod());
+            for (BudgetAmount budgetAmount : budget.compactedBudgetAmounts()) {
+                Money balance = accountsDbAdapter.getAccountBalance(budgetAmount.getMAccountUID(),
+                        budget.startofCurrentPeriod(), budget.endOfCurrentPeriod());
                 spentAmountValue = spentAmountValue.add(balance.asBigDecimal());
             }
 
-            Money budgetTotal = budget.getAmountSum();
-            Commodity commodity = budgetTotal.getCommodity();
+            Money budgetTotal = budget.amountSum();
+            Commodity commodity = budgetTotal.getMCommodity();
             String usedAmount = commodity.getSymbol() + spentAmountValue + " of "
                     + budgetTotal.formattedString();
             holder.budgetAmount.setText(usedAmount);
 
             double budgetProgress = spentAmountValue.divide(budgetTotal.asBigDecimal(),
-                    commodity.getSmallestFractionDigits(), RoundingMode.HALF_EVEN)
+                    commodity.smallestFractionDigits(), RoundingMode.HALF_EVEN)
                     .doubleValue();
             holder.budgetIndicator.setProgress((int) (budgetProgress * 100));
 
@@ -246,7 +246,7 @@ public class BudgetListFragment extends Fragment implements Refreshable,
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onClickBudget(budget.getUID());
+                    onClickBudget(budget.getMUID());
                 }
             });
         }

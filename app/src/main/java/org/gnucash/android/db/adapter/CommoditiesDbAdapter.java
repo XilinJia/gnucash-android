@@ -54,14 +54,14 @@ public class CommoditiesDbAdapter extends DatabaseAdapter<Commodity> {
     @Override
     protected @NonNull SQLiteStatement setBindings(@NonNull SQLiteStatement stmt, @NonNull final Commodity commodity) {
         stmt.clearBindings();
-        stmt.bindString(1, commodity.getFullname());
-        stmt.bindString(2, commodity.getNamespace().name());
-        stmt.bindString(3, commodity.getMnemonic());
-        stmt.bindString(4, commodity.getLocalSymbol());
-        stmt.bindString(5, commodity.getCusip());
-        stmt.bindLong(6, commodity.getSmallestFraction());
-        stmt.bindLong(7, commodity.getQuoteFlag());
-        stmt.bindString(8, commodity.getUID());
+        stmt.bindString(1, commodity.getMFullname());
+        stmt.bindString(2, commodity.getMNamespace().name());
+        stmt.bindString(3, commodity.getMMnemonic());
+        stmt.bindString(4, commodity.getMLocalSymbol());
+        stmt.bindString(5, commodity.getMCusip());
+        stmt.bindLong(6, commodity.getMSmallestFraction());
+        stmt.bindLong(7, commodity.getMQuoteFlag());
+        stmt.bindString(8, commodity.getMUID());
 
         return stmt;
     }
@@ -78,10 +78,10 @@ public class CommoditiesDbAdapter extends DatabaseAdapter<Commodity> {
         int quoteFlag = cursor.getInt(cursor.getColumnIndexOrThrow(CommodityEntry.COLUMN_QUOTE_FLAG));
 
         Commodity commodity = new Commodity(fullname, mnemonic, fraction);
-        commodity.setNamespace(Commodity.Namespace.valueOf(namespace));
-        commodity.setCusip(cusip);
-        commodity.setQuoteFlag(quoteFlag);
-        commodity.setLocalSymbol(localSymbol);
+        commodity.setMNamespace(Commodity.Namespace.valueOf(namespace));
+        commodity.setMCusip(cusip);
+        commodity.setMQuoteFlag(quoteFlag);
+        commodity.setMLocalSymbol(localSymbol);
         populateBaseModelAttributes(cursor, commodity);
 
         return commodity;
@@ -122,7 +122,7 @@ public class CommoditiesDbAdapter extends DatabaseAdapter<Commodity> {
         return commodity;
     }
 
-    public String getCurrencyCode(@NonNull String guid) {
+    public String getMMnemonic(@NonNull String guid) {
         Cursor cursor = mDb.query(mTableName, new String[]{CommodityEntry.COLUMN_MNEMONIC},
                 DatabaseSchema.CommonColumns.COLUMN_UID + " = ?", new String[]{guid},
                 null, null, null);

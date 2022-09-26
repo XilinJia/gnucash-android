@@ -106,10 +106,10 @@ public class CsvTransactionsExporter extends Exporter{
                 writer.write("" + mCsvSeparator + mCsvSeparator + mCsvSeparator + mCsvSeparator
                         + mCsvSeparator + mCsvSeparator + mCsvSeparator + mCsvSeparator);
             }
-            writer.writeToken(split.getMemo());
+            writer.writeToken(split.getMMemo());
 
             //cache accounts so that we do not have to go to the DB each time
-            String accountUID = split.getAccountUID();
+            String accountUID = split.getMAccountUID();
             Account account;
             if (uidAccountMap.containsKey(accountUID)) {
                 account = uidAccountMap.get(accountUID);
@@ -118,20 +118,20 @@ public class CsvTransactionsExporter extends Exporter{
                 uidAccountMap.put(accountUID, account);
             }
 
-            writer.writeToken(account.getFullName());
-            writer.writeToken(account.getName());
+            writer.writeToken(account.getMFullName());
+            writer.writeToken(account.getMName());
 
-            String sign = split.getType() == TransactionType.CREDIT ? "-" : "";
-            writer.writeToken(sign + split.getQuantity().formattedString());
-            writer.writeToken(sign + split.getQuantity().toLocaleString());
-            writer.writeToken("" + split.getReconcileState());
-            if (split.getReconcileState() == Split.FLAG_RECONCILED) {
-                String recDateString = dateFormat.format(new Date(split.getReconcileDate().getTime()));
+            String sign = split.getMSplitType() == TransactionType.CREDIT ? "-" : "";
+            writer.writeToken(sign + split.getMQuantity().formattedString());
+            writer.writeToken(sign + split.getMQuantity().toLocaleString());
+            writer.writeToken("" + split.getMReconcileState());
+            if (split.getMReconcileState() == Split.FLAG_RECONCILED) {
+                String recDateString = dateFormat.format(new Date(split.getMReconcileDate().getTime()));
                 writer.writeToken(recDateString);
             } else {
                 writer.writeToken(null);
             }
-            writer.writeEndToken(split.getQuantity().divide(split.getValue()).toLocaleString());
+            writer.writeEndToken(split.getMQuantity().divide(split.getMValue()).toLocaleString());
         }
     }
 
@@ -148,18 +148,18 @@ public class CsvTransactionsExporter extends Exporter{
             Log.d(LOG_TAG, String.format("Exporting %d transactions to CSV", cursor.getCount()));
             while (cursor.moveToNext()){
                 Transaction transaction = mTransactionsDbAdapter.buildModelInstance(cursor);
-                Date date = new Date(transaction.getTimeMillis());
+                Date date = new Date(transaction.getMTimestamp());
                 csvWriter.writeToken(dateFormat.format(date));
-                csvWriter.writeToken(transaction.getUID());
+                csvWriter.writeToken(transaction.getMUID());
                 csvWriter.writeToken(null);  //Transaction number
 
-                csvWriter.writeToken(transaction.getDescription());
-                csvWriter.writeToken(transaction.getNote());
+                csvWriter.writeToken(transaction.getMDescription());
+                csvWriter.writeToken(transaction.getMNotes());
 
-                csvWriter.writeToken("CURRENCY::" + transaction.getCurrencyCode());
+                csvWriter.writeToken("CURRENCY::" + transaction.getMMnemonic());
                 csvWriter.writeToken(null); // Void Reason
                 csvWriter.writeToken(null); // Action
-                writeSplitsToCsv(transaction.getSplits(), csvWriter);
+                writeSplitsToCsv(transaction.getMSplitList(), csvWriter);
             }
 
             PreferencesHelper.setLastExportTime(TimestampHelper.getTimestampFromNow());

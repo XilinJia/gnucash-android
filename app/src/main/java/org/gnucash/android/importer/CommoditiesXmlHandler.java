@@ -72,9 +72,9 @@ public class CommoditiesXmlHandler extends DefaultHandler {
             String localSymbol = attributes.getValue(ATTR_LOCAL_SYMBOL);
 
             Commodity commodity = new Commodity(fullname, isoCode, Integer.parseInt(smallestFraction));
-            commodity.setNamespace(Commodity.Namespace.valueOf(namespace));
-            commodity.setCusip(cusip);
-            commodity.setLocalSymbol(localSymbol);
+            commodity.setMNamespace(Commodity.Namespace.valueOf(namespace));
+            commodity.setMCusip(cusip);
+            commodity.setMLocalSymbol(localSymbol);
 
             mCommodities.add(commodity);
         }

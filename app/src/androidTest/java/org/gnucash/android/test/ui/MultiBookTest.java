@@ -80,13 +80,13 @@ public class MultiBookTest {
 
     public void testLoadBookFromBookManager(){
         Book book = new Book();
-        book.setDisplayName("Launch Codes");
+        book.setMDisplayName("Launch Codes");
         BooksDbAdapter.getInstance().addRecord(book);
 
         shouldOpenBookManager();
-        onView(withText(book.getDisplayName())).perform(click());
+        onView(withText(book.getMDisplayName())).perform(click());
 
-        assertThat(BooksDbAdapter.getInstance().getActiveBookUID()).isEqualTo(book.getUID());
+        assertThat(BooksDbAdapter.getInstance().getActiveBookUID()).isEqualTo(book.getMUID());
     }
 
     @Test
@@ -110,7 +110,7 @@ public class MultiBookTest {
 
         //// TODO: 25.08.2016 Delete all books before the start of this test
         Book activeBook = mBooksDbAdapter.getRecord(mBooksDbAdapter.getActiveBookUID());
-        assertThat(activeBook.getDisplayName()).isEqualTo("Book " + (booksCount+1));
+        assertThat(activeBook.getMDisplayName()).isEqualTo("Book " + (booksCount+1));
     }
 
     @Test
@@ -132,7 +132,7 @@ public class MultiBookTest {
 
         Book book = new Book();
         String displayName = "To Be Deleted";
-        book.setDisplayName(displayName);
+        book.setMDisplayName(displayName);
         mBooksDbAdapter.addRecord(book);
 
         assertThat(mBooksDbAdapter.getRecordsCount()).isEqualTo(bookCount + 1);

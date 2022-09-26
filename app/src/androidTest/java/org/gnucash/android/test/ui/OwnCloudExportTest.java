@@ -131,8 +131,8 @@ public class OwnCloudExportTest {
 
         Account account = new Account("ownCloud");
         Transaction transaction = new Transaction("birds");
-        transaction.setTime(System.currentTimeMillis());
-        Split split = new Split(new Money("11.11", currencyCode), account.getUID());
+        transaction.setMTimestamp(System.currentTimeMillis());
+        Split split = new Split(new Money("11.11", currencyCode), account.getMUID());
         transaction.addSplit(split);
         transaction.addSplit(split.createPair(
                 mAccountsDbAdapter.getOrCreateImbalanceAccountUID(Commodity.DEFAULT_COMMODITY)));

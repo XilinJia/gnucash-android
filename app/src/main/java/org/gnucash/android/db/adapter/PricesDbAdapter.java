@@ -39,18 +39,18 @@ public class PricesDbAdapter extends DatabaseAdapter<Price> {
     @Override
     protected @NonNull SQLiteStatement setBindings(@NonNull SQLiteStatement stmt, @NonNull final Price price) {
         stmt.clearBindings();
-        stmt.bindString(1, price.getCommodityUID());
-        stmt.bindString(2, price.getCurrencyUID());
-        stmt.bindString(3, price.getDate().toString());
-        if (price.getSource() != null) {
-            stmt.bindString(4, price.getSource());
+        stmt.bindString(1, price.getMCommodityUID());
+        stmt.bindString(2, price.getMCurrencyUID());
+        stmt.bindString(3, price.getMDate().toString());
+        if (price.getMSource() != null) {
+            stmt.bindString(4, price.getMSource());
         }
-        if (price.getType() != null) {
-            stmt.bindString(5, price.getType());
+        if (price.getMType() != null) {
+            stmt.bindString(5, price.getMType());
         }
-        stmt.bindLong(6, price.getValueNum());
-        stmt.bindLong(7, price.getValueDenom());
-        stmt.bindString(8, price.getUID());
+        stmt.bindLong(6, price.getMValueNum());
+        stmt.bindLong(7, price.getMValueDenom());
+        stmt.bindString(8, price.getMUID());
 
         return stmt;
     }
@@ -66,11 +66,11 @@ public class PricesDbAdapter extends DatabaseAdapter<Price> {
         long valueDenom   = cursor.getLong(cursor.getColumnIndexOrThrow(PriceEntry.COLUMN_VALUE_DENOM));
 
         Price price = new Price(commodityUID, currencyUID);
-        price.setDate(TimestampHelper.getTimestampFromUtcString(dateString));
-        price.setSource(source);
-        price.setType(type);
-        price.setValueNum(valueNum);
-        price.setValueDenom(valueDenom);
+        price.setMDate(TimestampHelper.getTimestampFromUtcString(dateString));
+        price.setMSource(source);
+        price.setMType(type);
+        price.setMValueNum(valueNum);
+        price.setMValueDenom(valueDenom);
 
         populateBaseModelAttributes(cursor, price);
         return price;

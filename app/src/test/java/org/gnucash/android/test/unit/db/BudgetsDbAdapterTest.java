@@ -83,23 +83,23 @@ public class BudgetsDbAdapterTest {
         assertThat(mRecurrenceDbAdapter.getRecordsCount()).isZero();
 
         Budget budget = new Budget("Test");
-        budget.addBudgetAmount(new BudgetAmount(Money.getZeroInstance(), mAccount.getUID()));
-        budget.addBudgetAmount(new BudgetAmount(new Money("10", Money.DEFAULT_CURRENCY_CODE), mSecondAccount.getUID()));
+        budget.addBudgetAmount(new BudgetAmount(Money.getSDefaultZero(), mAccount.getMUID()));
+        budget.addBudgetAmount(new BudgetAmount(new Money("10", Money.DEFAULT_CURRENCY_CODE), mSecondAccount.getMUID()));
         Recurrence recurrence = new Recurrence(PeriodType.MONTH);
-        budget.setRecurrence(recurrence);
+        budget.setMRecurrence(recurrence);
 
         mBudgetsDbAdapter.addRecord(budget);
         assertThat(mBudgetsDbAdapter.getRecordsCount()).isEqualTo(1);
         assertThat(mBudgetAmountsDbAdapter.getRecordsCount()).isEqualTo(2);
         assertThat(mRecurrenceDbAdapter.getRecordsCount()).isEqualTo(1);
 
-        budget.getBudgetAmounts().clear();
-        BudgetAmount budgetAmount = new BudgetAmount(new Money("5", Money.DEFAULT_CURRENCY_CODE), mAccount.getUID());
+        budget.getMBudgetAmounts().clear();
+        BudgetAmount budgetAmount = new BudgetAmount(new Money("5", Money.DEFAULT_CURRENCY_CODE), mAccount.getMUID());
         budget.addBudgetAmount(budgetAmount);
         mBudgetsDbAdapter.addRecord(budget);
 
         assertThat(mBudgetAmountsDbAdapter.getRecordsCount()).isEqualTo(1);
-        assertThat(mBudgetAmountsDbAdapter.getAllRecords().get(0).getUID()).isEqualTo(budgetAmount.getUID());
+        assertThat(mBudgetAmountsDbAdapter.getAllRecords().get(0).getMUID()).isEqualTo(budgetAmount.getMUID());
     }
 
     /**
@@ -125,22 +125,22 @@ public class BudgetsDbAdapterTest {
     public void testGetAccountBudgets(){
         mBudgetsDbAdapter.bulkAddRecords(bulkCreateBudgets());
 
-        List<Budget> budgets = mBudgetsDbAdapter.getAccountBudgets(mAccount.getUID());
+        List<Budget> budgets = mBudgetsDbAdapter.getAccountBudgets(mAccount.getMUID());
         assertThat(budgets).hasSize(2);
 
-        assertThat(mBudgetsDbAdapter.getAccountBudgets(mSecondAccount.getUID())).hasSize(1);
+        assertThat(mBudgetsDbAdapter.getAccountBudgets(mSecondAccount.getMUID())).hasSize(1);
     }
 
     @NonNull
     private List<Budget> bulkCreateBudgets() {
         List<Budget> budgets = new ArrayList<>();
         Budget budget = new Budget("", new Recurrence(PeriodType.MONTH));
-        budget.addBudgetAmount(new BudgetAmount(Money.getZeroInstance(), mAccount.getUID()));
+        budget.addBudgetAmount(new BudgetAmount(Money.getSDefaultZero(), mAccount.getMUID()));
         budgets.add(budget);
 
         budget = new Budget("Random", new Recurrence(PeriodType.WEEK));
-        budget.addBudgetAmount(new BudgetAmount(new Money("10.50", Money.DEFAULT_CURRENCY_CODE), mAccount.getUID()));
-        budget.addBudgetAmount(new BudgetAmount(new Money("32.35", Money.DEFAULT_CURRENCY_CODE), mSecondAccount.getUID()));
+        budget.addBudgetAmount(new BudgetAmount(new Money("10.50", Money.DEFAULT_CURRENCY_CODE), mAccount.getMUID()));
+        budget.addBudgetAmount(new BudgetAmount(new Money("32.35", Money.DEFAULT_CURRENCY_CODE), mSecondAccount.getMUID()));
 
         budgets.add(budget);
         return budgets;
@@ -149,7 +149,7 @@ public class BudgetsDbAdapterTest {
     @Test(expected = NullPointerException.class)
     public void savingBudget_shouldRequireExistingAccount(){
         Budget budget = new Budget("");
-        budget.addBudgetAmount(new BudgetAmount(Money.getZeroInstance(), "unknown-account"));
+        budget.addBudgetAmount(new BudgetAmount(Money.getSDefaultZero(), "unknown-account"));
 
         mBudgetsDbAdapter.addRecord(budget);
     }
@@ -157,7 +157,7 @@ public class BudgetsDbAdapterTest {
     @Test(expected = NullPointerException.class)
     public void savingBudget_shouldRequireRecurrence(){
         Budget budget = new Budget("");
-        budget.addBudgetAmount(new BudgetAmount(Money.getZeroInstance(), mAccount.getUID()));
+        budget.addBudgetAmount(new BudgetAmount(Money.getSDefaultZero(), mAccount.getMUID()));
 
         mBudgetsDbAdapter.addRecord(budget);
     }
@@ -165,7 +165,7 @@ public class BudgetsDbAdapterTest {
     @Test(expected = IllegalArgumentException.class)
     public void savingBudget_shouldRequireBudgetAmount(){
         Budget budget = new Budget("");
-        budget.setRecurrence(new Recurrence(PeriodType.MONTH));
+        budget.setMRecurrence(new Recurrence(PeriodType.MONTH));
 
         mBudgetsDbAdapter.addRecord(budget);
     }

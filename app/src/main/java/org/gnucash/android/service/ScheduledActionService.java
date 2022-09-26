@@ -78,14 +78,14 @@ public class ScheduledActionService extends JobIntentService {
         BooksDbAdapter booksDbAdapter = BooksDbAdapter.getInstance();
         List<Book> books = booksDbAdapter.getAllRecords();
         for (Book book : books) { //// TODO: 20.04.2017 Retrieve only the book UIDs with new method
-            DatabaseHelper dbHelper = new DatabaseHelper(GnuCashApplication.getAppContext(), book.getUID());
+            DatabaseHelper dbHelper = new DatabaseHelper(GnuCashApplication.getAppContext(), book.getMUID());
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             RecurrenceDbAdapter recurrenceDbAdapter = new RecurrenceDbAdapter(db);
             ScheduledActionDbAdapter scheduledActionDbAdapter = new ScheduledActionDbAdapter(db, recurrenceDbAdapter);
 
             List<ScheduledAction> scheduledActions = scheduledActionDbAdapter.getAllEnabledScheduledActions();
             Log.i(LOG_TAG, String.format("Processing %d total scheduled actions for Book: %s",
-                    scheduledActions.size(), book.getDisplayName()));
+                    scheduledActions.size(), book.getMDisplayName()));
             processScheduledActions(scheduledActions, db);
 
             //close all databases except the currently active database
@@ -106,12 +106,12 @@ public class ScheduledActionService extends JobIntentService {
         for (ScheduledAction scheduledAction : scheduledActions) {
 
             long now        = System.currentTimeMillis();
-            int totalPlannedExecutions = scheduledAction.getTotalPlannedExecutionCount();
-            int executionCount = scheduledAction.getExecutionCount();
+            int totalPlannedExecutions = scheduledAction.getMTotalFrequency();
+            int executionCount = scheduledAction.getMExecutionCount();
 
             //the end time of the ScheduledAction is not handled here because
             //it is handled differently for transactions and backups. See the individual methods.
-            if (scheduledAction.getStartTime() > now    //if schedule begins in the future
+            if (scheduledAction.getMStartTime() > now    //if schedule begins in the future
                     || !scheduledAction.isEnabled()     // of if schedule is disabled
                     || (totalPlannedExecutions > 0 && executionCount >= totalPlannedExecutions)) { //limit was set and we reached or exceeded it
                 Log.i(LOG_TAG, "Skipping scheduled action: " + scheduledAction.toString());
@@ -130,7 +130,7 @@ public class ScheduledActionService extends JobIntentService {
         Log.i(LOG_TAG, "Executing scheduled action: " + scheduledAction.toString());
         int executionCount = 0;
 
-        switch (scheduledAction.getActionType()){
+        switch (scheduledAction.getMActionType()){
             case TRANSACTION:
                 executionCount += executeTransactions(scheduledAction, db);
                 break;
@@ -141,19 +141,19 @@ public class ScheduledActionService extends JobIntentService {
         }
 
         if (executionCount > 0) {
-            scheduledAction.setLastRun(System.currentTimeMillis());
+            scheduledAction.setMLastRun(System.currentTimeMillis());
             // Set the execution count in the object because it will be checked
             // for the next iteration in the calling loop.
             // This call is important, do not remove!!
-            scheduledAction.setExecutionCount(scheduledAction.getExecutionCount() + executionCount);
+            scheduledAction.setMExecutionCount(scheduledAction.getMExecutionCount() + executionCount);
             // Update the last run time and execution count
             ContentValues contentValues = new ContentValues();
             contentValues.put(DatabaseSchema.ScheduledActionEntry.COLUMN_LAST_RUN,
-                    scheduledAction.getLastRunTime());
+                    scheduledAction.getMLastRun());
             contentValues.put(DatabaseSchema.ScheduledActionEntry.COLUMN_EXECUTION_COUNT,
-                    scheduledAction.getExecutionCount());
+                    scheduledAction.getMExecutionCount());
             db.update(DatabaseSchema.ScheduledActionEntry.TABLE_NAME, contentValues,
-                    DatabaseSchema.ScheduledActionEntry.COLUMN_UID + "=?", new String[]{scheduledAction.getUID()});
+                    DatabaseSchema.ScheduledActionEntry.COLUMN_UID + "=?", new String[]{scheduledAction.getMUID()});
         }
     }
 
@@ -168,9 +168,9 @@ public class ScheduledActionService extends JobIntentService {
         if (!shouldExecuteScheduledBackup(scheduledAction))
             return 0;
 
-        ExportParams params = ExportParams.parseCsv(scheduledAction.getTag());
+        ExportParams params = ExportParams.parseCsv(scheduledAction.getMTag());
         // HACK: the tag isn't updated with the new date, so set the correct by hand
-        params.setExportStartTime(new Timestamp(scheduledAction.getLastRunTime()));
+        params.setExportStartTime(new Timestamp(scheduledAction.getMLastRun()));
         Boolean result = false;
         try {
             //wait for async task to finish before we proceed (we are holding a wake lock)
@@ -198,7 +198,7 @@ public class ScheduledActionService extends JobIntentService {
     @SuppressWarnings("RedundantIfStatement")
     private static boolean shouldExecuteScheduledBackup(ScheduledAction scheduledAction) {
         long now = System.currentTimeMillis();
-        long endTime = scheduledAction.getEndTime();
+        long endTime = scheduledAction.getMEndDate();
 
         if (endTime > 0 && endTime < now)
             return false;
@@ -219,7 +219,7 @@ public class ScheduledActionService extends JobIntentService {
      */
     private static int executeTransactions(ScheduledAction scheduledAction, SQLiteDatabase db) {
         int executionCount = 0;
-        String actionUID = scheduledAction.getActionUID();
+        String actionUID = scheduledAction.getMActionUID();
         TransactionsDbAdapter transactionsDbAdapter = new TransactionsDbAdapter(db, new SplitsDbAdapter(db));
         Transaction trxnTemplate;
         try {
@@ -234,20 +234,20 @@ public class ScheduledActionService extends JobIntentService {
         //if there is an end time in the past, we execute all schedules up to the end time.
         //if the end time is in the future, we execute all schedules until now (current time)
         //if there is no end time, we execute all schedules until now
-        long endTime = scheduledAction.getEndTime() > 0 ? Math.min(scheduledAction.getEndTime(), now) : now;
-        int totalPlannedExecutions = scheduledAction.getTotalPlannedExecutionCount();
+        long endTime = scheduledAction.getMEndDate() > 0 ? Math.min(scheduledAction.getMEndDate(), now) : now;
+        int totalPlannedExecutions = scheduledAction.getMTotalFrequency();
         List<Transaction> transactions = new ArrayList<>();
 
-        int previousExecutionCount = scheduledAction.getExecutionCount(); // We'll modify it
+        int previousExecutionCount = scheduledAction.getMExecutionCount(); // We'll modify it
         //we may be executing scheduled action significantly after scheduled time (depending on when Android fires the alarm)
         //so compute the actual transaction time from pre-known values
         long transactionTime = scheduledAction.computeNextCountBasedScheduledExecutionTime();
         while (transactionTime <= endTime) {
             Transaction recurringTrxn = new Transaction(trxnTemplate, true);
-            recurringTrxn.setTime(transactionTime);
+            recurringTrxn.setMTimestamp(transactionTime);
             transactions.add(recurringTrxn);
-            recurringTrxn.setScheduledActionUID(scheduledAction.getUID());
-            scheduledAction.setExecutionCount(++executionCount); //required for computingNextScheduledExecutionTime
+            recurringTrxn.setMScheduledActionUID(scheduledAction.getMUID());
+            scheduledAction.setMExecutionCount(++executionCount); //required for computingNextScheduledExecutionTime
 
             if (totalPlannedExecutions > 0 && executionCount >= totalPlannedExecutions)
                 break; //if we hit the total planned executions set, then abort
@@ -256,7 +256,7 @@ public class ScheduledActionService extends JobIntentService {
 
         transactionsDbAdapter.bulkAddRecords(transactions, DatabaseAdapter.UpdateMethod.insert);
         // Be nice and restore the parameter's original state to avoid confusing the callers
-        scheduledAction.setExecutionCount(previousExecutionCount);
+        scheduledAction.setMExecutionCount(previousExecutionCount);
         return executionCount;
     }
 }

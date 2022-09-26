@@ -35,22 +35,22 @@ public class BudgetTest {
     public void addingBudgetAmount_shouldSetBudgetUID(){
         Budget budget = new Budget("Test");
 
-        assertThat(budget.getBudgetAmounts()).isNotNull();
-        BudgetAmount budgetAmount = new BudgetAmount(Money.getZeroInstance(), "test");
+        assertThat(budget.getMBudgetAmounts()).isNotNull();
+        BudgetAmount budgetAmount = new BudgetAmount(Money.getSDefaultZero(), "test");
         budget.addBudgetAmount(budgetAmount);
 
-        assertThat(budget.getBudgetAmounts()).hasSize(1);
-        assertThat(budgetAmount.getBudgetUID()).isEqualTo(budget.getUID());
+        assertThat(budget.getMBudgetAmounts()).hasSize(1);
+        assertThat(budgetAmount.getMBudgetUID()).isEqualTo(budget.getMUID());
 
         //setting a whole list should also set the budget UIDs
         List<BudgetAmount> budgetAmounts = new ArrayList<>();
-        budgetAmounts.add(new BudgetAmount(Money.getZeroInstance(),"test"));
-        budgetAmounts.add(new BudgetAmount(Money.getZeroInstance(), "second"));
+        budgetAmounts.add(new BudgetAmount(Money.getSDefaultZero(),"test"));
+        budgetAmounts.add(new BudgetAmount(Money.getSDefaultZero(), "second"));
 
-        budget.setBudgetAmounts(budgetAmounts);
+        budget.setMBudgetAmounts(budgetAmounts);
 
-        assertThat(budget.getBudgetAmounts()).extracting("mBudgetUID")
-                .contains(budget.getUID());
+        assertThat(budget.getMBudgetAmounts()).extracting("mBudgetUID")
+                .contains(budget.getMUID());
     }
 
     @Test
@@ -63,31 +63,31 @@ public class BudgetTest {
         budget.addBudgetAmount(budgetAmount);
         budget.addBudgetAmount(budgetAmount1);
 
-        assertThat(budget.getAmount("account1")).isEqualTo(accountAmount.abs());
-        assertThat(budget.getAmountSum()).isEqualTo(new Money("30", "USD"));
+        assertThat(budget.amount("account1")).isEqualTo(accountAmount.abs());
+        assertThat(budget.amountSum()).isEqualTo(new Money("30", "USD"));
     }
 
     /**
-     * Tests that the method {@link Budget#getCompactedBudgetAmounts()} does not aggregate
+     * Tests that the method {@link Budget#compactedBudgetAmounts()} does not aggregate
      * {@link BudgetAmount}s which have different money amounts
      */
     @Test
     public void shouldNotCompactBudgetAmountsWithDifferentAmounts(){
         Budget budget = new Budget("Test");
-        budget.setNumberOfPeriods(6);
+        budget.setMNumberOfPeriods(6);
         BudgetAmount budgetAmount = new BudgetAmount(new Money("10", "USD"), "test");
-        budgetAmount.setPeriodNum(1);
+        budgetAmount.setMPeriodNum(1);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("15", "USD"), "test");
-        budgetAmount.setPeriodNum(2);
+        budgetAmount.setMPeriodNum(2);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("5", "USD"), "secondAccount");
-        budgetAmount.setPeriodNum(5);
+        budgetAmount.setMPeriodNum(5);
         budget.addBudgetAmount(budgetAmount);
 
-        List<BudgetAmount> compactedBudgetAmounts = budget.getCompactedBudgetAmounts();
+        List<BudgetAmount> compactedBudgetAmounts = budget.compactedBudgetAmounts();
         assertThat(compactedBudgetAmounts).hasSize(3);
         assertThat(compactedBudgetAmounts).extracting("mAccountUID")
                 .contains("test", "secondAccount");
@@ -97,34 +97,34 @@ public class BudgetTest {
     }
 
     /**
-     * Tests that the method {@link Budget#getCompactedBudgetAmounts()} aggregates {@link BudgetAmount}s
+     * Tests that the method {@link Budget#compactedBudgetAmounts()} aggregates {@link BudgetAmount}s
      * with the same amount but leaves others untouched
      */
     @Test
     public void addingSameAmounts_shouldCompactOnRetrieval(){
         Budget budget = new Budget("Test");
-        budget.setNumberOfPeriods(6);
+        budget.setMNumberOfPeriods(6);
         BudgetAmount budgetAmount = new BudgetAmount(new Money("10", "USD"), "first");
-        budgetAmount.setPeriodNum(1);
+        budgetAmount.setMPeriodNum(1);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("10", "USD"), "first");
-        budgetAmount.setPeriodNum(2);
+        budgetAmount.setMPeriodNum(2);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("10", "USD"), "first");
-        budgetAmount.setPeriodNum(5);
+        budgetAmount.setMPeriodNum(5);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("10", "EUR"), "second");
-        budgetAmount.setPeriodNum(4);
+        budgetAmount.setMPeriodNum(4);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("13", "EUR"), "third");
-        budgetAmount.setPeriodNum(-1);
+        budgetAmount.setMPeriodNum(-1);
         budget.addBudgetAmount(budgetAmount);
 
-        List<BudgetAmount> compactedBudgetAmounts = budget.getCompactedBudgetAmounts();
+        List<BudgetAmount> compactedBudgetAmounts = budget.compactedBudgetAmounts();
 
         assertThat(compactedBudgetAmounts).hasSize(3);
         assertThat(compactedBudgetAmounts).extracting("mPeriodNum").hasSize(3)
@@ -136,18 +136,18 @@ public class BudgetTest {
     }
 
     /**
-     * Test that when we set a periodNumber of -1 to a budget amount, the method {@link Budget#getExpandedBudgetAmounts()}
+     * Test that when we set a periodNumber of -1 to a budget amount, the method {@link Budget#expandedBudgetAmounts()}
      * should create new budget amounts for each of the periods in the budgeting period
      */
     @Test
     public void addingNegativePeriodNum_shouldExpandOnRetrieval(){
         Budget budget = new Budget("Test");
-        budget.setNumberOfPeriods(6);
+        budget.setMNumberOfPeriods(6);
         BudgetAmount budgetAmount = new BudgetAmount(new Money("10", "USD"), "first");
-        budgetAmount.setPeriodNum(-1);
+        budgetAmount.setMPeriodNum(-1);
         budget.addBudgetAmount(budgetAmount);
 
-        List<BudgetAmount> expandedBudgetAmount = budget.getExpandedBudgetAmounts();
+        List<BudgetAmount> expandedBudgetAmount = budget.expandedBudgetAmounts();
 
         assertThat(expandedBudgetAmount).hasSize(6);
 
@@ -160,27 +160,27 @@ public class BudgetTest {
     @Test
     public void testGetNumberOfAccounts(){
         Budget budget = new Budget("Test");
-        budget.setNumberOfPeriods(6);
+        budget.setMNumberOfPeriods(6);
         BudgetAmount budgetAmount = new BudgetAmount(new Money("10", "USD"), "first");
-        budgetAmount.setPeriodNum(1);
+        budgetAmount.setMPeriodNum(1);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("10", "USD"), "first");
-        budgetAmount.setPeriodNum(2);
+        budgetAmount.setMPeriodNum(2);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("10", "USD"), "first");
-        budgetAmount.setPeriodNum(5);
+        budgetAmount.setMPeriodNum(5);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("10", "EUR"), "second");
-        budgetAmount.setPeriodNum(4);
+        budgetAmount.setMPeriodNum(4);
         budget.addBudgetAmount(budgetAmount);
 
         budgetAmount = new BudgetAmount(new Money("13", "EUR"), "third");
-        budgetAmount.setPeriodNum(-1);
+        budgetAmount.setMPeriodNum(-1);
         budget.addBudgetAmount(budgetAmount);
 
-        assertThat(budget.getNumberOfAccounts()).isEqualTo(3);
+        assertThat(budget.numberOfAccounts()).isEqualTo(3);
     }
 }

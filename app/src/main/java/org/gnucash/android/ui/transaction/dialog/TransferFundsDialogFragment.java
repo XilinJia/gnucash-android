@@ -98,34 +98,34 @@ public class TransferFundsDialogFragment extends DialogFragment {
         ButterKnife.bind(this, view);
 
         TransactionsActivity.displayBalance(mStartAmountLabel, mOriginAmount);
-        String fromCurrencyCode = mOriginAmount.getCommodity().getCurrencyCode();
+        String fromCurrencyCode = mOriginAmount.getMCommodity().getMMnemonic();
         mFromCurrencyLabel.setText(fromCurrencyCode);
-        mToCurrencyLabel.setText(mTargetCommodity.getCurrencyCode());
-        mConvertedAmountCurrencyLabel.setText(mTargetCommodity.getCurrencyCode());
+        mToCurrencyLabel.setText(mTargetCommodity.getMMnemonic());
+        mConvertedAmountCurrencyLabel.setText(mTargetCommodity.getMMnemonic());
 
         mSampleExchangeRate.setText(String.format(getString(R.string.sample_exchange_rate),
                                                   fromCurrencyCode,
-                                                  mTargetCommodity.getCurrencyCode()));
+                                                  mTargetCommodity.getMMnemonic()));
         final InputLayoutErrorClearer textChangeListener = new InputLayoutErrorClearer();
 
         CommoditiesDbAdapter commoditiesDbAdapter = CommoditiesDbAdapter.getInstance();
         String commodityUID = commoditiesDbAdapter.getCommodityUID(fromCurrencyCode);
-        String currencyUID = mTargetCommodity.getUID();
+        String currencyUID = mTargetCommodity.getMUID();
         PricesDbAdapter pricesDbAdapter = PricesDbAdapter.getInstance();
         Pair<Long, Long> pricePair = pricesDbAdapter.getPrice(commodityUID, currencyUID);
 
         if (pricePair.first > 0 && pricePair.second > 0) {
             // a valid price exists
             Price price = new Price(commodityUID, currencyUID);
-            price.setValueNum(pricePair.first);
-            price.setValueDenom(pricePair.second);
+            price.setMValueNum(pricePair.first);
+            price.setMValueDenom(pricePair.second);
             mExchangeRateInput.setText(price.toString());
 
             BigDecimal numerator = new BigDecimal(pricePair.first);
             BigDecimal denominator = new BigDecimal(pricePair.second);
             // convertedAmount = mOriginAmount * numerator / denominator
             BigDecimal convertedAmount = mOriginAmount.asBigDecimal().multiply(numerator)
-                .divide(denominator, mTargetCommodity.getSmallestFractionDigits(), BigDecimal.ROUND_HALF_EVEN);
+                .divide(denominator, mTargetCommodity.smallestFractionDigits(), BigDecimal.ROUND_HALF_EVEN);
             DecimalFormat formatter = (DecimalFormat) NumberFormat.getNumberInstance();
             mConvertedAmountInput.setText(formatter.format(convertedAmount));
         }
@@ -195,8 +195,8 @@ public class TransferFundsDialogFragment extends DialogFragment {
     private void transferFunds() {
         Price price = null;
 
-        String originCommodityUID = mOriginAmount.getCommodity().getUID();
-        String targetCommodityUID = mTargetCommodity.getUID();
+        String originCommodityUID = mOriginAmount.getMCommodity().getMUID();
+        String targetCommodityUID = mTargetCommodity.getMUID();
 
         if (mExchangeRateRadioButton.isChecked()) {
             BigDecimal rate;
@@ -223,11 +223,11 @@ public class TransferFundsDialogFragment extends DialogFragment {
 
             price = new Price(originCommodityUID, targetCommodityUID);
             // fractions cannot be exactly represented by BigDecimal.
-            price.setValueNum(mConvertedAmount.getNumerator() * mOriginAmount.getDenominator());
-            price.setValueDenom(mOriginAmount.getNumerator() * mConvertedAmount.getDenominator());
+            price.setMValueNum(mConvertedAmount.numerator() * mOriginAmount.denominator());
+            price.setMValueDenom(mOriginAmount.numerator() * mConvertedAmount.denominator());
         }
 
-        price.setSource(Price.SOURCE_USER);
+        price.setMSource(Price.SOURCE_USER);
         PricesDbAdapter.getInstance().addRecord(price);
 
         if (mOnTransferFundsListener != null)

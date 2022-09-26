@@ -117,10 +117,10 @@ public class CalculatorEditTextTest {
         Commodity commodity = commoditiesDbAdapter.getCommodity(CURRENCY_CODE);
 
         Account account = new Account(DUMMY_ACCOUNT_NAME, commodity);
-        account.setUID(DUMMY_ACCOUNT_UID);
+        account.setMUID(DUMMY_ACCOUNT_UID);
 
         Account account2 = new Account(TRANSFER_ACCOUNT_NAME, commodity);
-        account2.setUID(TRANSFER_ACCOUNT_UID);
+        account2.setMUID(TRANSFER_ACCOUNT_UID);
 
         mAccountsDbAdapter.addRecord(account);
         mAccountsDbAdapter.addRecord(account2);

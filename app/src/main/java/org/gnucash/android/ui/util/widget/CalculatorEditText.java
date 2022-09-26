@@ -322,11 +322,11 @@ public class CalculatorEditText extends AppCompatEditText {
      * @param amount BigDecimal amount
      */
     public void setValue(BigDecimal amount){
-        BigDecimal newAmount = amount.setScale(mCommodity.getSmallestFractionDigits(), BigDecimal.ROUND_HALF_EVEN);
+        BigDecimal newAmount = amount.setScale(mCommodity.smallestFractionDigits(), BigDecimal.ROUND_HALF_EVEN);
 
         DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.getDefault());
         formatter.setMinimumFractionDigits(0);
-        formatter.setMaximumFractionDigits(mCommodity.getSmallestFractionDigits());
+        formatter.setMaximumFractionDigits(mCommodity.smallestFractionDigits());
         formatter.setGroupingUsed(false);
         String resultString = formatter.format(newAmount.doubleValue());
 

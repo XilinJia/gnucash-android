@@ -139,7 +139,7 @@ public class DeleteAccountDialogFragment extends DialogFragment {
         AccountsDbAdapter accountsDbAdapter = AccountsDbAdapter.getInstance();
         List<String> descendantAccountUIDs = accountsDbAdapter.getDescendantAccountUIDs(mOriginAccountUID, null, null);
 
-        String currencyCode = accountsDbAdapter.getCurrencyCode(mOriginAccountUID);
+        String currencyCode = accountsDbAdapter.getMMnemonic(mOriginAccountUID);
         AccountType accountType = accountsDbAdapter.getAccountType(mOriginAccountUID);
 
         String transactionDeleteConditions = "(" + DatabaseSchema.AccountEntry.COLUMN_UID + " != ? AND "

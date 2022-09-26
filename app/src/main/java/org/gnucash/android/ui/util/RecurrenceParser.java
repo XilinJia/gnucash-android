@@ -86,11 +86,11 @@ public class RecurrenceParser {
 
         int interval = eventRecurrence.interval == 0 ? 1 : eventRecurrence.interval; //bug from betterpickers library sometimes returns 0 as the interval
         Recurrence recurrence = new Recurrence(periodType);
-        recurrence.setMultiplier(interval);
+        recurrence.setMMultiplier(interval);
         parseEndTime(eventRecurrence, recurrence);
-        recurrence.setByDays(parseByDay(eventRecurrence.byday));
+        recurrence.byDays(parseByDay(eventRecurrence.byday));
         if (eventRecurrence.startDate != null)
-            recurrence.setPeriodStart(new Timestamp(eventRecurrence.startDate.toMillis(false)));
+            recurrence.setMPeriodStart(new Timestamp(eventRecurrence.startDate.toMillis(false)));
 
         return recurrence;
     }
@@ -105,9 +105,9 @@ public class RecurrenceParser {
         if (eventRecurrence.until != null && eventRecurrence.until.length() > 0) {
             Time endTime = new Time();
             endTime.parse(eventRecurrence.until);
-            recurrence.setPeriodEnd(new Timestamp(endTime.toMillis(false)));
+            recurrence.setMPeriodEnd(new Timestamp(endTime.toMillis(false)));
         } else if (eventRecurrence.count > 0){
-            recurrence.setPeriodEnd(eventRecurrence.count);
+            recurrence.setMPeriodEnd(eventRecurrence.count);
         }
     }
 

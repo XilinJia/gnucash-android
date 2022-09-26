@@ -442,8 +442,8 @@ public abstract class DatabaseAdapter<Model extends BaseModel> {
      * @return {@link android.content.ContentValues} with the data to be inserted into the db
      */
     protected ContentValues extractBaseModelAttributes(@NonNull ContentValues contentValues, @NonNull Model model){
-        contentValues.put(CommonColumns.COLUMN_UID, model.getUID());
-        contentValues.put(CommonColumns.COLUMN_CREATED_AT, TimestampHelper.getUtcStringFromTimestamp(model.getCreatedTimestamp()));
+        contentValues.put(CommonColumns.COLUMN_UID, model.getMUID());
+        contentValues.put(CommonColumns.COLUMN_CREATED_AT, TimestampHelper.getUtcStringFromTimestamp(model.getMCreatedTimestamp()));
         //there is a trigger in the database for updated the modified_at column
         /* Due to the use of SQL REPLACE syntax, we insert the created_at values each time
         * (maintain the original creation time and not the time of creation of the replacement)
@@ -462,9 +462,9 @@ public abstract class DatabaseAdapter<Model extends BaseModel> {
         String created = cursor.getString(cursor.getColumnIndexOrThrow(CommonColumns.COLUMN_CREATED_AT));
         String modified= cursor.getString(cursor.getColumnIndexOrThrow(CommonColumns.COLUMN_MODIFIED_AT));
 
-        model.setUID(uid);
-        model.setCreatedTimestamp(TimestampHelper.getTimestampFromUtcString(created));
-        model.setModifiedTimestamp(TimestampHelper.getTimestampFromUtcString(modified));
+        model.setMUID(uid);
+        model.setMCreatedTimestamp(TimestampHelper.getTimestampFromUtcString(created));
+        model.setMModifiedTimestamp(TimestampHelper.getTimestampFromUtcString(modified));
     }
 
 	/**

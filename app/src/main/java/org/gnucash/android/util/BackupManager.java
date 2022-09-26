@@ -138,8 +138,8 @@ public class BackupManager {
      */
     private static String getBackupFilePath(String bookUID){
         Book book = BooksDbAdapter.getInstance().getRecord(bookUID);
-        return getBackupFolderPath(book.getUID())
-               + Exporter.buildExportFilename(ExportFormat.XML, book.getDisplayName());
+        return getBackupFolderPath(book.getMUID())
+               + Exporter.buildExportFilename(ExportFormat.XML, book.getMDisplayName());
     }
 
     /**

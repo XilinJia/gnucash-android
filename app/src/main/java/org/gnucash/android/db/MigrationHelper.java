@@ -1367,17 +1367,17 @@ public class MigrationHelper {
                 long period = cursor.getLong(cursor.getColumnIndexOrThrow("period"));
                 long startTime = cursor.getLong(cursor.getColumnIndexOrThrow(ScheduledActionEntry.COLUMN_START_TIME));
                 Recurrence recurrence = Recurrence.fromLegacyPeriod(period);
-                recurrence.setPeriodStart(new Timestamp(startTime));
+                recurrence.setMPeriodStart(new Timestamp(startTime));
 
                 contentValues.clear();
-                contentValues.put(RecurrenceEntry.COLUMN_UID, recurrence.getUID());
-                contentValues.put(RecurrenceEntry.COLUMN_MULTIPLIER, recurrence.getMultiplier());
-                contentValues.put(RecurrenceEntry.COLUMN_PERIOD_TYPE, recurrence.getPeriodType().name());
-                contentValues.put(RecurrenceEntry.COLUMN_PERIOD_START, recurrence.getPeriodStart().toString());
+                contentValues.put(RecurrenceEntry.COLUMN_UID, recurrence.getMUID());
+                contentValues.put(RecurrenceEntry.COLUMN_MULTIPLIER, recurrence.getMMultiplier());
+                contentValues.put(RecurrenceEntry.COLUMN_PERIOD_TYPE, recurrence.getMPeriodType().name());
+                contentValues.put(RecurrenceEntry.COLUMN_PERIOD_START, recurrence.getMPeriodStart().toString());
                 db.insert(RecurrenceEntry.TABLE_NAME, null, contentValues);
 
                 contentValues.clear();
-                contentValues.put(ScheduledActionEntry.COLUMN_RECURRENCE_UID, recurrence.getUID());
+                contentValues.put(ScheduledActionEntry.COLUMN_RECURRENCE_UID, recurrence.getMUID());
                 contentValues.put(ScheduledActionEntry.COLUMN_TEMPLATE_ACCT_UID, BaseModel.generateUID());
                 db.update(ScheduledActionEntry.TABLE_NAME, contentValues,
                         ScheduledActionEntry.COLUMN_UID + " = ?", new String[]{uid});
