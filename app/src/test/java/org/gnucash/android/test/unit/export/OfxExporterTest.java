@@ -54,12 +54,12 @@ public class OfxExporterTest {
 
     @Before
     public void setUp() throws Exception {
-        BookDbHelper bookDbHelper = new BookDbHelper(GnuCashApplication.getAppContext());
+        BookDbHelper bookDbHelper = new BookDbHelper(GnuCashApplication.Companion.getAppContext());
         BooksDbAdapter booksDbAdapter = new BooksDbAdapter(bookDbHelper.getWritableDatabase());
         Book testBook = new Book("testRootAccountUID");
         booksDbAdapter.addRecord(testBook);
         DatabaseHelper databaseHelper =
-                new DatabaseHelper(GnuCashApplication.getAppContext(), testBook.getMUID());
+                new DatabaseHelper(GnuCashApplication.Companion.getAppContext(), testBook.getMUID());
         mDb = databaseHelper.getWritableDatabase();
     }
 

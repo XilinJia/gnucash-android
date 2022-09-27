@@ -133,7 +133,7 @@ public class TransactionsActivityTest {
 
 	@BeforeClass
 	public static void prepareTestCase(){
-		Context context = GnuCashApplication.getAppContext();
+		Context context = GnuCashApplication.Companion.getAppContext();
 		AccountsActivityTest.preventFirstRunDialogs(context);
 
 		mSplitsDbAdapter = SplitsDbAdapter.getInstance();

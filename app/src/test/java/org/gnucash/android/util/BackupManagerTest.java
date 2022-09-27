@@ -74,7 +74,7 @@ public class BackupManagerTest {
      */
     private String createNewBookWithDefaultAccounts(){
         try {
-            return GncXmlImporter.parse(GnuCashApplication.getAppContext().getResources().openRawResource(R.raw.default_accounts));
+            return GncXmlImporter.parse(GnuCashApplication.Companion.getAppContext().getResources().openRawResource(R.raw.default_accounts));
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Could not create default accounts");

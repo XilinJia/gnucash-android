@@ -153,7 +153,7 @@ public class PreferenceActivity extends PasscodeLockActivity implements
      * @return Shared preferences
      */
     public static SharedPreferences getBookSharedPreferences(String bookUID){
-        Context context = GnuCashApplication.getAppContext();
+        Context context = GnuCashApplication.Companion.getAppContext();
         return context.getSharedPreferences(bookUID, Context.MODE_PRIVATE);
     }
 

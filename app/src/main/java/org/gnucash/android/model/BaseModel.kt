@@ -22,6 +22,7 @@ import java.util.*
 /**
  * Abstract class representing the base data model which is persisted to the database.
  * All other models should extend this base model.
+ * @author Xilin Jia <https://github.com/XilinJia> [Kotlin code created (Copyright (C) 2022)]
  */
 abstract class BaseModel {
     /**
@@ -79,8 +80,8 @@ abstract class BaseModel {
      * A unique ID will be generated on demand with a call to [.getMUID]
      */
     init {
-        mCreatedTimestamp = TimestampHelper.getTimestampFromNow()
-        mModifiedTimestamp = TimestampHelper.getTimestampFromNow()
+        mCreatedTimestamp = TimestampHelper.timestampFromNow
+        mModifiedTimestamp = TimestampHelper.timestampFromNow
     }
 
     /**

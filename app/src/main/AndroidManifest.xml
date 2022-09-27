@@ -172,7 +172,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".receivers.PeriodicJobReceiver" android:exported="false">
+                android:name=".receivers.PeriodicJobReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="org.gnucash.android.action_backup" />
                 <action android:name="org.gnucash.android.action_scheduled_actions" />

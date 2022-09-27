@@ -31,7 +31,7 @@ import java.sql.Timestamp
  * if the platform locale cannot be determined.
  *
  * @author Ngewi Fet <ngewif></ngewif>@gmail.com>
- * @author Xilin Jia <https://github.com/XilinJia> []Kotlin code created (Copyright (C) 2022)]
+ * @author Xilin Jia <https://github.com/XilinJia> [Kotlin code created (Copyright (C) 2022)]
  * @see AccountType
  */
 class Account : BaseModel {
@@ -348,7 +348,7 @@ class Account : BaseModel {
 
         //================= BEGIN ACCOUNT BALANCE INFO =================================
         val balance = balance.toPlainString()
-        val formattedCurrentTimeString = OfxHelper.getFormattedCurrentTime()
+        val formattedCurrentTimeString = OfxHelper.formattedCurrentTime
         val balanceAmount = doc.createElement(OfxHelper.TAG_BALANCE_AMOUNT)
         balanceAmount.appendChild(doc.createTextNode(balance))
         val dtasof = doc.createElement(OfxHelper.TAG_DATE_AS_OF)

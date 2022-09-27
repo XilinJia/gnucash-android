@@ -270,7 +270,7 @@ public class BookManagerFragment extends ListFragment implements
         }
 
         private void setStatisticsText(View view, String bookUID) {
-            DatabaseHelper dbHelper = new DatabaseHelper(GnuCashApplication.getAppContext(), bookUID);
+            DatabaseHelper dbHelper = new DatabaseHelper(GnuCashApplication.Companion.getAppContext(), bookUID);
             SQLiteDatabase db = dbHelper.getReadableDatabase();
             TransactionsDbAdapter trnAdapter = new TransactionsDbAdapter(db, new SplitsDbAdapter(db));
             int transactionCount = (int) trnAdapter.getRecordsCount();

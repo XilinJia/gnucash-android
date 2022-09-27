@@ -96,7 +96,7 @@ public class GncXmlHandlerTest {
     }
 
     private void setUpDbAdapters(String bookUID) {
-        DatabaseHelper databaseHelper = new DatabaseHelper(GnuCashApplication.getAppContext(), bookUID);
+        DatabaseHelper databaseHelper = new DatabaseHelper(GnuCashApplication.Companion.getAppContext(), bookUID);
         SQLiteDatabase mainDb = databaseHelper.getReadableDatabase();
         mTransactionsDbAdapter = new TransactionsDbAdapter(mainDb, new SplitsDbAdapter(mainDb));
         mAccountsDbAdapter = new AccountsDbAdapter(mainDb, mTransactionsDbAdapter);

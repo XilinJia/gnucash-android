@@ -70,7 +70,7 @@ public class BackupTest {
      */
     private void loadDefaultAccounts(){
         try {
-            String bookUID = GncXmlImporter.parse(GnuCashApplication.getAppContext().getResources().openRawResource(R.raw.default_accounts));
+            String bookUID = GncXmlImporter.parse(GnuCashApplication.Companion.getAppContext().getResources().openRawResource(R.raw.default_accounts));
             BooksDbAdapter.getInstance().setActive(bookUID);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();

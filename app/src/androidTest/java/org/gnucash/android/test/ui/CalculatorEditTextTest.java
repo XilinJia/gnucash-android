@@ -88,7 +88,7 @@ public class CalculatorEditTextTest {
     @BeforeClass
     public static void prepTestCase(){
         String activeBookUID = BooksDbAdapter.getInstance().getActiveBookUID();
-        mDbHelper = new DatabaseHelper(GnuCashApplication.getAppContext(), activeBookUID);
+        mDbHelper = new DatabaseHelper(GnuCashApplication.Companion.getAppContext(), activeBookUID);
 
         SQLiteDatabase mDb;
         try {
@@ -105,7 +105,7 @@ public class CalculatorEditTextTest {
         mTransactionsDbAdapter  = TransactionsDbAdapter.getInstance();
         mAccountsDbAdapter      = AccountsDbAdapter.getInstance();
 
-        AccountsActivityTest.preventFirstRunDialogs(GnuCashApplication.getAppContext());
+        AccountsActivityTest.preventFirstRunDialogs(GnuCashApplication.Companion.getAppContext());
     }
 
     @Before

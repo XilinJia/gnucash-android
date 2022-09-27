@@ -23,6 +23,7 @@ import android.provider.BaseColumns;
  *
  * @author Ngewi Fet <ngewif@gmail.com>
  */
+//XJ TODO: conversion to kotlin not too straightforward due to static member inheritance in Java code
 public class DatabaseSchema {
 
     /**

@@ -456,7 +456,7 @@ class Split : BaseModel, Parcelable {
          * `account`, otherwise +`amount`
          */
         private fun formattedAmount(amount: Money?, accountUID: String?, splitType: TransactionType?): Money {
-            val isDebitAccount = AccountsDbAdapter.getInstance().getAccountType(accountUID!!).hasDebitNormalBalance()
+            val isDebitAccount = AccountsDbAdapter.instance.getAccountType(accountUID!!).hasDebitNormalBalance()
             val absAmount = amount!!.abs()
             val isDebitSplit = splitType === TransactionType.DEBIT
             return if (isDebitAccount) {

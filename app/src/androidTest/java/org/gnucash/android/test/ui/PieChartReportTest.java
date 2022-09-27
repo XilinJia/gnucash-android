@@ -45,7 +45,7 @@ import org.gnucash.android.model.TransactionType;
 import org.gnucash.android.test.ui.util.DisableAnimationsRule;
 import org.gnucash.android.ui.report.BaseReportFragment;
 import org.gnucash.android.ui.report.ReportsActivity;
-import org.gnucash.android.ui.report.piechart.PieChartFragment;
+import org.gnucash.android.ui.report.PieChartFragment;
 import org.gnucash.android.ui.settings.PreferenceActivity;
 import org.gnucash.android.util.BookUtils;
 import org.joda.time.LocalDateTime;
@@ -119,7 +119,7 @@ public class PieChartReportTest {
 
     @BeforeClass
     public static void prepareTestCase() throws Exception {
-        Context context = GnuCashApplication.getAppContext();
+        Context context = GnuCashApplication.Companion.getAppContext();
         oldActiveBookUID = BooksDbAdapter.getInstance().getActiveBookUID();
         testBookUID = GncXmlImporter.parse(context.getResources().openRawResource(R.raw.default_accounts));
 

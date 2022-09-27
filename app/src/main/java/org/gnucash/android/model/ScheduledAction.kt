@@ -412,9 +412,9 @@ class ScheduledAction    //all actions are enabled by default
      */
     fun repeatString(): String {
         val ruleBuilder = StringBuilder(mRecurrence!!.repeatString())
-        val context = GnuCashApplication.getAppContext()
+        val context = GnuCashApplication.appContext
         if (mEndDate <= 0 && mTotalFrequency > 0) {
-            ruleBuilder.append(", ").append(context.getString(R.string.repeat_x_times, mTotalFrequency))
+            ruleBuilder.append(", ").append(context?.getString(R.string.repeat_x_times, mTotalFrequency))
         }
         return ruleBuilder.toString()
     }

@@ -167,7 +167,7 @@ class Commodity(
                 "JPY" -> JPY
                 "AUD" -> AUD
                 "CAD" -> CAD
-                else -> CommoditiesDbAdapter.getInstance().getCommodity(currencyCode)
+                else -> CommoditiesDbAdapter.instance.getCommodity(currencyCode!!)!!
             }
         }
     }

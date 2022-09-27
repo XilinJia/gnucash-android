@@ -124,7 +124,7 @@ public class BooksDbAdapterTest {
     @Test
     public void deletingBook_shouldDeleteDbFile(){
         String bookUID = createNewBookWithDefaultAccounts();
-        File dbPath = GnuCashApplication.getAppContext().getDatabasePath(bookUID);
+        File dbPath = GnuCashApplication.Companion.getAppContext().getDatabasePath(bookUID);
         assertThat(dbPath).exists();
         BooksDbAdapter booksDbAdapter = BooksDbAdapter.getInstance();
         assertThat(booksDbAdapter.getRecord(bookUID)).isNotNull();
@@ -202,7 +202,7 @@ public class BooksDbAdapterTest {
      */
     private String createNewBookWithDefaultAccounts(){
         try {
-            return GncXmlImporter.parse(GnuCashApplication.getAppContext().getResources().openRawResource(R.raw.default_accounts));
+            return GncXmlImporter.parse(GnuCashApplication.Companion.getAppContext().getResources().openRawResource(R.raw.default_accounts));
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Could not create default accounts");

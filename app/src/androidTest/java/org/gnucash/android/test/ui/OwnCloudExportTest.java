@@ -154,7 +154,7 @@ public class OwnCloudExportTest {
      */
     public static boolean hasActiveInternetConnection(){
         ConnectivityManager connectivityManager
-                = (ConnectivityManager) GnuCashApplication.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                = (ConnectivityManager) GnuCashApplication.Companion.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }

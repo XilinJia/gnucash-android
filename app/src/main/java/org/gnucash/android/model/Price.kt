@@ -21,7 +21,7 @@ class Price : BaseModel {
     private var mValueDenom: Long = 0
 
     constructor() {
-        mDate = TimestampHelper.getTimestampFromNow()
+        mDate = TimestampHelper.timestampFromNow
     }
 
     /**
@@ -32,7 +32,7 @@ class Price : BaseModel {
     constructor(commodityUID: String?, currencyUID: String?) {
         mCommodityUID = commodityUID
         mCurrencyUID = currencyUID
-        mDate = TimestampHelper.getTimestampFromNow()
+        mDate = TimestampHelper.timestampFromNow
     }
 
     /**

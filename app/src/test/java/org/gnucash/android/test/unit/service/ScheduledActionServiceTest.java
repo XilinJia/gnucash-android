@@ -90,7 +90,7 @@ public class ScheduledActionServiceTest {
 
     public void createAccounts(){
         try {
-            String bookUID = GncXmlImporter.parse(GnuCashApplication.getAppContext().getResources().openRawResource(R.raw.default_accounts));
+            String bookUID = GncXmlImporter.parse(GnuCashApplication.Companion.getAppContext().getResources().openRawResource(R.raw.default_accounts));
             BookUtils.loadBook(bookUID);
             //initAdapters(bookUID);
         } catch (ParserConfigurationException | SAXException | IOException e) {

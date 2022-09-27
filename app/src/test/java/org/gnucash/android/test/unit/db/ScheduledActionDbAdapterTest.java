@@ -68,7 +68,7 @@ public class ScheduledActionDbAdapterTest {
         recurrence.setMMultiplier(2);
         scheduledAction.setMRecurrence(recurrence);
         scheduledAction.setMTotalFrequency(4);
-        Resources res = GnuCashApplication.getAppContext().getResources();
+        Resources res = GnuCashApplication.Companion.getAppContext().getResources();
         String repeatString = res.getQuantityString(R.plurals.label_every_x_months, 2, 2) + ", " +
                 res.getString(R.string.repeat_x_times, 4);
 

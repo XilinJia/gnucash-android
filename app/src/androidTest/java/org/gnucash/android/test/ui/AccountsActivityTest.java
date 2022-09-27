@@ -131,10 +131,10 @@ public class AccountsActivityTest {
 
     @BeforeClass
     public static void prepTest(){
-        preventFirstRunDialogs(GnuCashApplication.getAppContext());
+        preventFirstRunDialogs(GnuCashApplication.Companion.getAppContext());
 
         String activeBookUID = BooksDbAdapter.getInstance().getActiveBookUID();
-        mDbHelper = new DatabaseHelper(GnuCashApplication.getAppContext(), activeBookUID);
+        mDbHelper = new DatabaseHelper(GnuCashApplication.Companion.getAppContext(), activeBookUID);
         try {
             mDb = mDbHelper.getWritableDatabase();
         } catch (SQLException e) {

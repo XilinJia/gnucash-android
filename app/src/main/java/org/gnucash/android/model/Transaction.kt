@@ -376,7 +376,7 @@ class Transaction : BaseModel {
             val acctId = doc.createElement(OfxHelper.TAG_ACCOUNT_ID)
             acctId.appendChild(doc.createTextNode(transferAccountUID))
             val accttype = doc.createElement(OfxHelper.TAG_ACCOUNT_TYPE)
-            val acctDbAdapter = AccountsDbAdapter.getInstance()
+            val acctDbAdapter = AccountsDbAdapter.instance
             val ofxAccountType = convertToOfxAccountType(
                 acctDbAdapter.getAccountType(
                     transferAccountUID
@@ -455,7 +455,7 @@ class Transaction : BaseModel {
         @JvmStatic
         @JvmOverloads
         fun computeBalance(accountUID: String, splitList: List<Split>): Money {
-            val accountsDbAdapter = AccountsDbAdapter.getInstance()
+            val accountsDbAdapter = AccountsDbAdapter.instance
             val accountType = accountsDbAdapter.getAccountType(accountUID)
             val accountCurrencyCode = accountsDbAdapter.getAccountCurrencyCode(accountUID)
             val isDebitAccount = accountType.hasDebitNormalBalance()

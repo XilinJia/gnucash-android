@@ -113,11 +113,11 @@ class Recurrence(periodType: PeriodType) : BaseModel() {
      */
     fun repeatString(): String {
         val repeatBuilder = StringBuilder(frequencyRepeatString())
-        val context = GnuCashApplication.getAppContext()
-        val dayOfWeek = SimpleDateFormat("EEEE", GnuCashApplication.getDefaultLocale())
+        val context = GnuCashApplication.appContext
+        val dayOfWeek = SimpleDateFormat("EEEE", GnuCashApplication.defaultLocale)
             .format(Date(mPeriodStart.time))
         if (mPeriodType === PeriodType.WEEK) {
-            repeatBuilder.append(" ").append(context.getString(R.string.repeat_on_weekday, dayOfWeek))
+            repeatBuilder.append(" ").append(context?.getString(R.string.repeat_on_weekday, dayOfWeek))
         }
         if (mPeriodEnd != null) {
             val endDateString = SimpleDateFormat.getDateInstance().format(
@@ -125,7 +125,7 @@ class Recurrence(periodType: PeriodType) : BaseModel() {
                     mPeriodEnd!!.time
                 )
             )
-            repeatBuilder.append(", ").append(context.getString(R.string.repeat_until_date, endDateString))
+            repeatBuilder.append(", ").append(context?.getString(R.string.repeat_until_date, endDateString))
         }
         return repeatBuilder.toString()
     }
@@ -360,7 +360,7 @@ class Recurrence(periodType: PeriodType) : BaseModel() {
      * @return String describing the period type
      */
     private fun frequencyRepeatString(): String {
-        val res = GnuCashApplication.getAppContext().resources
+        val res = GnuCashApplication.appContext!!.resources
         return when (mPeriodType) {
             PeriodType.HOUR -> res.getQuantityString(
                 R.plurals.label_every_x_hours,

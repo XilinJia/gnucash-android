@@ -92,7 +92,7 @@ public class AccountsDbAdapterTest{
             mAccountsDbAdapter = AccountsDbAdapter.getInstance();
             mCommoditiesDbAdapter = CommoditiesDbAdapter.getInstance();
         } else {
-            DatabaseHelper databaseHelper = new DatabaseHelper(GnuCashApplication.getAppContext(), bookUID);
+            DatabaseHelper databaseHelper = new DatabaseHelper(GnuCashApplication.Companion.getAppContext(), bookUID);
             SQLiteDatabase db = databaseHelper.getWritableDatabase();
             mSplitsDbAdapter = new SplitsDbAdapter(db);
             mTransactionsDbAdapter = new TransactionsDbAdapter(db, mSplitsDbAdapter);
@@ -521,7 +521,7 @@ public class AccountsDbAdapterTest{
      */
     private void loadDefaultAccounts(){
         try {
-            String bookUID = GncXmlImporter.parse(GnuCashApplication.getAppContext().getResources().openRawResource(R.raw.default_accounts));
+            String bookUID = GncXmlImporter.parse(GnuCashApplication.Companion.getAppContext().getResources().openRawResource(R.raw.default_accounts));
             initAdapters(bookUID);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
