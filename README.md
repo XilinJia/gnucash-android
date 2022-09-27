@@ -16,6 +16,8 @@ The debug app runs fine so far on my phone.
 
 2022-09-26: models codes converted to Kotlin
 
+2022-09-27: most codes are now in Kotlin
+
 ---------------------------------------------------
 
 # Introduction
