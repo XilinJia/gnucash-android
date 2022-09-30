@@ -98,7 +98,7 @@ class BudgetDetailFragment : Fragment(), Refreshable {
         val budget = mBudgetsDbAdapter!!.getRecord(mBudgetUID!!)
         mBudgetNameTextView!!.text = budget.mName
         val description = budget.mDescription
-        if (description != null && !description.isEmpty()) mBudgetDescriptionTextView!!.text = description else {
+        if (!description.isNullOrEmpty()) mBudgetDescriptionTextView!!.text = description else {
             mBudgetDescriptionTextView!!.visibility = View.GONE
         }
         mBudgetRecurrence!!.text = budget.mRecurrence!!.repeatString()
@@ -121,8 +121,8 @@ class BudgetDetailFragment : Fragment(), Refreshable {
         actionBar.title = "Budget: $budgetName"
     }
 
-    override fun refresh(budgetUID: String?) {
-        mBudgetUID = budgetUID
+    override fun refresh(uid: String?) {
+        mBudgetUID = uid
         refresh()
     }
 
@@ -153,10 +153,9 @@ class BudgetDetailFragment : Fragment(), Refreshable {
 
     inner class BudgetAmountAdapter : RecyclerView.Adapter<BudgetAmountAdapter.BudgetAmountViewHolder>() {
         private val mBudgetAmounts: List<BudgetAmount>
-        private val mBudget: Budget
+        private val mBudget: Budget = mBudgetsDbAdapter!!.getRecord(mBudgetUID!!)
 
         init {
-            mBudget = mBudgetsDbAdapter!!.getRecord(mBudgetUID!!)
             mBudgetAmounts = mBudget.compactedBudgetAmounts()
         }
 

@@ -38,8 +38,8 @@ class ColorPickerPalette : TableLayout {
     private var mMarginSize = 0
     private var mNumColumns = 0
 
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
-    constructor(context: Context?) : super(context) {}
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context?) : super(context)
 
     /**
      * Initialize the size, columns, and listener.  Size should be a pre-defined size (SIZE_LARGE
@@ -133,8 +133,7 @@ class ColorPickerPalette : TableLayout {
         rowNumber: Int, index: Int, rowElements: Int, selected: Boolean,
         swatch: View
     ) {
-        val accessibilityIndex: Int
-        accessibilityIndex = if (rowNumber % 2 == 0) {
+        val accessibilityIndex: Int = if (rowNumber % 2 == 0) {
             // We're in a regular-ordered row
             index
         } else {
@@ -142,8 +141,7 @@ class ColorPickerPalette : TableLayout {
             val rowMax = (rowNumber + 1) * mNumColumns
             rowMax - rowElements
         }
-        val description: String
-        description = if (selected) {
+        val description: String = if (selected) {
             String.format(mDescriptionSelected!!, accessibilityIndex)
         } else {
             String.format(mDescription!!, accessibilityIndex)

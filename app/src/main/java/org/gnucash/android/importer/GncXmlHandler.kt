@@ -606,7 +606,7 @@ class GncXmlHandler : DefaultHandler() {
             }
 
             GncXmlHelper.TAG_GDATE -> try {
-                val date = GncXmlHelper.DATE_FORMATTER.parse(characterString).time
+                val date = GncXmlHelper.DATE_FORMATTER.parse(characterString)!!.time
                 if (mIsScheduledStart && mScheduledAction != null) {
                     mScheduledAction!!.mCreatedTimestamp = Timestamp(date)
                     mIsScheduledStart = false
@@ -685,7 +685,7 @@ class GncXmlHandler : DefaultHandler() {
                 mPrice = null
             }
 
-            GncXmlHelper.TAG_BUDGET -> if (mBudget!!.getMBudgetAmounts().size > 0) //ignore if no budget amounts exist for the budget
+            GncXmlHelper.TAG_BUDGET -> if (mBudget!!.getMBudgetAmounts().isNotEmpty()) //ignore if no budget amounts exist for the budget
                 mBudgetList!!.add(mBudget!!)
 
             GncXmlHelper.TAG_BUDGET_NAME -> mBudget!!.setMName(characterString)
@@ -722,7 +722,7 @@ class GncXmlHandler : DefaultHandler() {
 
         // Add all account without a parent to ROOT, and collect top level imbalance accounts
         for (account in mAccountList!!) {
-            mapFullName[account!!.mUID] = null
+            mapFullName[account.mUID] = null
             var topLevel = false
             if (account.mParentAccountUID == null && account.mAccountType !== AccountType.ROOT) {
                 account.mParentAccountUID = mRootAccount!!.mUID
@@ -751,7 +751,7 @@ class GncXmlHandler : DefaultHandler() {
         }
         val stack = Stack<Account?>()
         for (account in mAccountList!!) {
-            if (mapFullName[account!!.mUID] != null) {
+            if (mapFullName[account.mUID] != null) {
                 continue
             }
             stack.push(account)
@@ -786,7 +786,7 @@ class GncXmlHandler : DefaultHandler() {
             }
         }
         for (account in mAccountList!!) {
-            account!!.mFullName = mapFullName[account.mUID]
+            account.mFullName = mapFullName[account.mUID]
         }
         var mostAppearedCurrency = ""
         var mostCurrencyAppearance = 0
@@ -885,9 +885,7 @@ class GncXmlHandler : DefaultHandler() {
     private fun handleEndOfTemplateNumericSlot(characterString: String, splitType: TransactionType) {
         try {
             // HACK: Check for bug #562. If a value has already been set, ignore the one just read
-            if (mSplit!!.mValue!!.equals(
-                    Money(BigDecimal.ZERO, mSplit!!.mValue!!.mCommodity)
-                )
+            if (mSplit!!.mValue!! == Money(BigDecimal.ZERO, mSplit!!.mValue!!.mCommodity)
             ) {
                 val amountBigD = parseSplitAmount(characterString)
                 val amount = Money(amountBigD, getCommodityForAccount(mSplit!!.mAccountUID))
@@ -939,7 +937,7 @@ class GncXmlHandler : DefaultHandler() {
         val actionUID = scheduledAction.getMActionUID()
         while (lastRuntime + period.also { lastRuntime = it } <= System.currentTimeMillis()) {
             for (templateTransaction in mTemplateTransactions!!) {
-                if (templateTransaction!!.mUID == actionUID) {
+                if (templateTransaction.mUID == actionUID) {
                     val transaction = Transaction(templateTransaction, true)
                     transaction.setMTimestamp(lastRuntime)
                     transaction.mScheduledActionUID = scheduledAction.mUID

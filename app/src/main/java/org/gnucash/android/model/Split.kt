@@ -159,7 +159,7 @@ class Split : BaseModel, Parcelable {
      * as both the value and the quantity of this split.
      * @param accountUID String UID of owning account
      */
-    constructor(amount: Money, accountUID: String?) : this(amount, Money(amount), accountUID) {}
+    constructor(amount: Money, accountUID: String?) : this(amount, Money(amount), accountUID)
 
     /**
      * Clones the `sourceSplit` to create a new instance with same fields
@@ -356,14 +356,14 @@ class Split : BaseModel, Parcelable {
      * Two splits are considered equal if all their properties excluding
      * timestamps (created, modified, reconciled) are equal.
      *
-     * @param o Other split to compare for equality
+     * @param other Other split to compare for equality
      * @return `true` if this split is equal to `o`, `false` otherwise
      */
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        if (!super.equals(o)) return false
-        val split = o as Split
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        if (!super.equals(other)) return false
+        val split = other as Split
         if (mReconcileState != split.mReconcileState) return false
         if (!mValue!!.equals(split.mValue)) return false
         if (!mQuantity!!.equals(split.mQuantity)) return false
@@ -525,7 +525,7 @@ class Split : BaseModel, Parcelable {
          */
         @JvmField
         val CREATOR: Creator<Split?> = object : Creator<Split?> {
-            override fun createFromParcel(source: Parcel): Split? {
+            override fun createFromParcel(source: Parcel): Split {
                 return Split(source)
             }
 

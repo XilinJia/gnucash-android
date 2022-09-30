@@ -60,6 +60,7 @@ class PasscodeLockScreenActivity : AppCompatActivity(), OnPasscodeEnteredListene
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         setResult(RESULT_CANCELED)
         if (UxArgument.DISABLE_PASSCODE == intent.getStringExtra(UxArgument.DISABLE_PASSCODE)) {

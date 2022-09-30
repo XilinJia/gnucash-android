@@ -114,24 +114,24 @@ class AccountsDbAdapter : DatabaseAdapter<Account> {
     /**
      * Adds an account to the database.
      * If an account already exists in the database with the same GUID, it is replaced.
-     * @param account [Account] to be inserted to database
+     * @param model [Account] to be inserted to database
      */
-    override fun addRecord(account: Account, updateMethod: UpdateMethod) {
+    override fun addRecord(model: Account, updateMethod: UpdateMethod) {
         Log.d(LOG_TAG, "Replace account to db")
         //in-case the account already existed, we want to update the templates based on it as well
-        val templateTransactions = mTransactionsAdapter.getScheduledTransactionsForAccount(account.mUID!!)
-        super.addRecord(account, updateMethod)
-        val accountUID = account.mUID
+        val templateTransactions = mTransactionsAdapter.getScheduledTransactionsForAccount(model.mUID!!)
+        super.addRecord(model, updateMethod)
+        val accountUID = model.mUID
         //now add transactions if there are any
-        if (account.mAccountType !== AccountType.ROOT) {
+        if (model.mAccountType !== AccountType.ROOT) {
             //update the fully qualified account name
             updateRecord(accountUID!!, AccountEntry.COLUMN_FULL_NAME, getFullyQualifiedAccountName(accountUID))
-            for (t in account.getMTransactionsList()) {
-                t.mCommodity = account.getMCommodity()
+            for (t in model.getMTransactionsList()) {
+                t.mCommodity = model.getMCommodity()
                 mTransactionsAdapter.addRecord(t, updateMethod)
             }
             for (transaction in templateTransactions) {
-                mTransactionsAdapter.addRecord(transaction!!, UpdateMethod.update)
+                mTransactionsAdapter.addRecord(transaction, UpdateMethod.update)
             }
         }
     }
@@ -143,54 +143,54 @@ class AccountsDbAdapter : DatabaseAdapter<Account> {
      * This function will NOT try to determine the full name
      * of the accounts inserted, full names should be generated prior to the insert.
      * <br></br>All or none of the accounts will be inserted;
-     * @param accountList [Account] to be inserted to database
+     * @param modelList [Account] to be inserted to database
      * @return number of rows inserted
      */
-    override fun bulkAddRecords(accountList: List<Account>, updateMethod: UpdateMethod): Long {
+    override fun bulkAddRecords(modelList: List<Account>, updateMethod: UpdateMethod): Long {
         //scheduled transactions are not fetched from the database when getting account transactions
         //so we retrieve those which affect this account and then re-save them later
         //this is necessary because the database has ON DELETE CASCADE between accounts and splits
         //and all accounts are editing via SQL REPLACE
 
         //// TODO: 20.04.2016 Investigate if we can safely remove updating the transactions when bulk updating accounts
-        val transactionList: MutableList<Transaction> = ArrayList(accountList.size * 2)
-        for (account in accountList) {
+        val transactionList: MutableList<Transaction> = ArrayList(modelList.size * 2)
+        for (account in modelList) {
             transactionList.addAll(account.getMTransactionsList())
             transactionList.addAll(mTransactionsAdapter.getScheduledTransactionsForAccount(account.mUID!!))
         }
-        val nRow = super.bulkAddRecords(accountList, updateMethod)
-        if (nRow > 0 && !transactionList.isEmpty()) {
+        val nRow = super.bulkAddRecords(modelList, updateMethod)
+        if (nRow > 0 && transactionList.isNotEmpty()) {
             mTransactionsAdapter.bulkAddRecords(transactionList, updateMethod)
         }
         return nRow
     }
 
-    override fun setBindings(stmt: SQLiteStatement, account: Account): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: Account): SQLiteStatement {
         stmt.clearBindings()
-        stmt.bindString(1, account.mName)
-        if (account.mDescription != null) stmt.bindString(2, account.mDescription)
-        stmt.bindString(3, account.mAccountType.name)
-        stmt.bindString(4, account.getMCommodity().mMnemonic)
-        if (account.getMColor() != Account.DEFAULT_COLOR) {
-            stmt.bindString(5, account.colorHexString)
+        stmt.bindString(1, model.mName)
+        stmt.bindString(2, model.mDescription)
+        stmt.bindString(3, model.mAccountType.name)
+        stmt.bindString(4, model.getMCommodity().mMnemonic)
+        if (model.getMColor() != Account.DEFAULT_COLOR) {
+            stmt.bindString(5, model.colorHexString)
         }
-        stmt.bindLong(6, (if (account.isFavorite) 1 else 0).toLong())
-        stmt.bindString(7, account.mFullName)
-        stmt.bindLong(8, (if (account.isPlaceholderAccount) 1 else 0).toLong())
-        stmt.bindString(9, TimestampHelper.getUtcStringFromTimestamp(account.mCreatedTimestamp))
-        stmt.bindLong(10, (if (account.isHidden) 1 else 0).toLong())
-        stmt.bindString(11, account.getMCommodity().mUID)
-        var parentAccountUID = account.mParentAccountUID
-        if (parentAccountUID == null && account.mAccountType !== AccountType.ROOT) {
+        stmt.bindLong(6, (if (model.isFavorite) 1 else 0).toLong())
+        stmt.bindString(7, model.mFullName)
+        stmt.bindLong(8, (if (model.isPlaceholderAccount) 1 else 0).toLong())
+        stmt.bindString(9, TimestampHelper.getUtcStringFromTimestamp(model.mCreatedTimestamp))
+        stmt.bindLong(10, (if (model.isHidden) 1 else 0).toLong())
+        stmt.bindString(11, model.getMCommodity().mUID)
+        var parentAccountUID = model.mParentAccountUID
+        if (parentAccountUID == null && model.mAccountType !== AccountType.ROOT) {
             parentAccountUID = orCreateGnuCashRootAccountUID
         }
         if (parentAccountUID != null) {
             stmt.bindString(12, parentAccountUID)
         }
-        if (account.mDefaultTransferAccountUID != null) {
-            stmt.bindString(13, account.mDefaultTransferAccountUID)
+        if (model.mDefaultTransferAccountUID != null) {
+            stmt.bindString(13, model.mDefaultTransferAccountUID)
         }
-        stmt.bindString(14, account.mUID)
+        stmt.bindString(14, model.mUID)
         return stmt
     }
 
@@ -256,7 +256,7 @@ class AccountsDbAdapter : DatabaseAdapter<Account> {
      */
     fun reassignDescendantAccounts(accountUID: String, newParentAccountUID: String) {
         val descendantAccountUIDs: List<String?> = getDescendantAccountUIDs(accountUID, null, null)
-        if (descendantAccountUIDs.size > 0) {
+        if (descendantAccountUIDs.isNotEmpty()) {
             val descendantAccounts = getSimpleAccountList(
                 AccountEntry.COLUMN_UID + " IN ('" + TextUtils.join("','", descendantAccountUIDs) + "')",
                 null,
@@ -264,8 +264,7 @@ class AccountsDbAdapter : DatabaseAdapter<Account> {
             )
             val mapAccounts = HashMap<String?, Account>()
             for (account in descendantAccounts) mapAccounts[account.mUID] = account
-            val parentAccountFullName: String
-            parentAccountFullName = if (getAccountType(newParentAccountUID) === AccountType.ROOT) {
+            val parentAccountFullName: String = if (getAccountType(newParentAccountUID) === AccountType.ROOT) {
                 ""
             } else {
                 getAccountFullName(newParentAccountUID)
@@ -276,7 +275,7 @@ class AccountsDbAdapter : DatabaseAdapter<Account> {
                 if (accountUID == acct!!.mParentAccountUID) {
                     // direct descendant
                     acct.mParentAccountUID = newParentAccountUID
-                    if (parentAccountFullName == null || parentAccountFullName.isEmpty()) {
+                    if (parentAccountFullName.isEmpty()) {
                         acct.mFullName = acct.mName
                     } else {
                         acct.mFullName = parentAccountFullName + ACCOUNT_NAME_SEPARATOR + acct.mName
@@ -366,11 +365,11 @@ class AccountsDbAdapter : DatabaseAdapter<Account> {
     /**
      * Builds an account instance with the provided cursor and loads its corresponding transactions.
      *
-     * @param c Cursor pointing to account record in database
+     * @param cursor Cursor pointing to account record in database
      * @return [Account] object constructed from database record
      */
-    override fun buildModelInstance(c: Cursor): Account {
-        val account = buildSimpleAccountInstance(c)
+    override fun buildModelInstance(cursor: Cursor): Account {
+        val account = buildSimpleAccountInstance(cursor)
         account.setMTransactionsList(mTransactionsAdapter.getAllTransactionsForAccount(account.mUID!!).toMutableList())
         return account
     }
@@ -937,7 +936,7 @@ class AccountsDbAdapter : DatabaseAdapter<Account> {
             SplitEntry.TABLE_NAME + "." + SplitEntry.COLUMN_ACCOUNT_UID,  //groupby
             null,  //haveing
             "MAX ( " + TransactionEntry.TABLE_NAME + "." + TransactionEntry.COLUMN_TIMESTAMP + " ) DESC",  // order
-            Integer.toString(numberOfRecent) // limit;
+            numberOfRecent.toString() // limit;
         )
     }
 
@@ -1283,7 +1282,7 @@ class AccountsDbAdapter : DatabaseAdapter<Account> {
                 val context = GnuCashApplication.appContext
                 val parentEquity = context?.getString(R.string.account_name_equity)!!.trim { it <= ' ' }
                 //German locale has no parent Equity account
-                return if (parentEquity.length > 0) {
+                return if (parentEquity.isNotEmpty()) {
                     (parentEquity + ACCOUNT_NAME_SEPARATOR
                             + context.getString(R.string.account_name_opening_balances))
                 } else context.getString(R.string.account_name_opening_balances)

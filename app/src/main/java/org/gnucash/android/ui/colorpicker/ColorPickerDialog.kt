@@ -32,16 +32,16 @@ import org.gnucash.android.ui.colorpicker.ColorPickerSwatch.OnColorSelectedListe
  * @author Xilin Jia <https://github.com/XilinJia> [Kotlin code created (Copyright (C) 2022)]
  */
 class ColorPickerDialog : DialogFragment(), OnColorSelectedListener {
-    protected var mAlertDialog: AlertDialog? = null
-    protected var mTitleResId = R.string.color_picker_default_title
+    private var mAlertDialog: AlertDialog? = null
+    private var mTitleResId = R.string.color_picker_default_title
     var colors: IntArray? = null
-        protected set
-    protected var mSelectedColor = 0
-    protected var mColumns = 0
-    protected var mSize = 0
+        private set
+    private var mSelectedColor = 0
+    private var mColumns = 0
+    private var mSize = 0
     private var mPalette: ColorPickerPalette? = null
     private var mProgress: ProgressBar? = null
-    protected var mListener: OnColorSelectedListener? = null
+    private var mListener: OnColorSelectedListener? = null
     fun initialize(titleResId: Int, colors: IntArray, selectedColor: Int, columns: Int, size: Int) {
         setArguments(titleResId, columns, size)
         setColors(colors, selectedColor)
@@ -120,7 +120,7 @@ class ColorPickerDialog : DialogFragment(), OnColorSelectedListener {
     }
 
     fun setColors(colors: IntArray, selectedColor: Int) {
-        if (this.colors != colors || mSelectedColor != selectedColor) {
+        if (!this.colors.contentEquals(colors) || mSelectedColor != selectedColor) {
             this.colors = colors
             mSelectedColor = selectedColor
             refreshPalette()
@@ -129,7 +129,7 @@ class ColorPickerDialog : DialogFragment(), OnColorSelectedListener {
 
     @JvmName("setColors1")
     fun setColors(colors: IntArray) {
-        if (this.colors != colors) {
+        if (!this.colors.contentEquals(colors)) {
             this.colors = colors
             refreshPalette()
         }
@@ -159,11 +159,11 @@ class ColorPickerDialog : DialogFragment(), OnColorSelectedListener {
     companion object {
         const val SIZE_LARGE = 1
         const val SIZE_SMALL = 2
-        protected const val KEY_TITLE_ID = "title_id"
-        protected const val KEY_COLORS = "colors"
-        protected const val KEY_SELECTED_COLOR = "selected_color"
-        protected const val KEY_COLUMNS = "columns"
-        protected const val KEY_SIZE = "size"
+        private const val KEY_TITLE_ID = "title_id"
+        private const val KEY_COLORS = "colors"
+        private const val KEY_SELECTED_COLOR = "selected_color"
+        private const val KEY_COLUMNS = "columns"
+        private const val KEY_SIZE = "size"
         fun newInstance(
             titleResId: Int, colors: IntArray, selectedColor: Int,
             columns: Int, size: Int

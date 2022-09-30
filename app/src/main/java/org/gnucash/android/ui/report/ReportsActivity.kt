@@ -137,10 +137,10 @@ class ReportsActivity : BaseDrawerActivity(), OnItemSelectedListener, DatePicker
         mAccountTypeSpinner!!.adapter = dataAdapter
         mAccountTypeSpinner!!.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(adapterView: AdapterView<*>?, view: View, position: Int, id: Long) {
-                when (position) {
-                    0 -> accountType = AccountType.EXPENSE
-                    1 -> accountType = AccountType.INCOME
-                    else -> accountType = AccountType.EXPENSE
+                accountType = when (position) {
+                    0 -> AccountType.EXPENSE
+                    1 -> AccountType.INCOME
+                    else -> AccountType.EXPENSE
                 }
                 updateAccountTypeOnFragments()
             }
@@ -158,8 +158,7 @@ class ReportsActivity : BaseDrawerActivity(), OnItemSelectedListener, DatePicker
     override fun onAttachFragment(fragment: Fragment) {
         super.onAttachFragment(fragment)
         if (fragment is BaseReportFragment) {
-            val reportFragment = fragment
-            updateReportTypeSpinner(reportFragment.getReportType(), getString(reportFragment.getTitle()))
+            updateReportTypeSpinner(fragment.getReportType(), getString(fragment.getTitle()))
         }
     }
 

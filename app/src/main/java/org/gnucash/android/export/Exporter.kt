@@ -25,7 +25,6 @@ import org.gnucash.android.BuildConfig
 import org.gnucash.android.app.GnuCashApplication
 import org.gnucash.android.db.DatabaseSchema
 import org.gnucash.android.db.adapter.*
-import org.gnucash.android.export.Exporter.ExporterException
 import java.io.File
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -72,7 +71,7 @@ abstract class Exporter(
     @JvmField
     protected var mBudgetsDbAdapter: BudgetsDbAdapter? = null
     @JvmField
-    protected val mContext: Context
+    protected val mContext: Context = GnuCashApplication.appContext!!
     private var mExportCacheFilePath: String?
 
     /**
@@ -87,7 +86,6 @@ abstract class Exporter(
     var mBookUID: String
 
     init {
-        mContext = GnuCashApplication.appContext!!
         if (db == null) {
             mAccountsDbAdapter = AccountsDbAdapter.instance
             mTransactionsDbAdapter = TransactionsDbAdapter.instance
@@ -120,14 +118,14 @@ abstract class Exporter(
      * @throws ExporterException if an error occurs during export
      */
     @Throws(ExporterException::class)
-    abstract fun generateExport(): List<String?>?
+    abstract fun generateExport(): List<String>?
 
     /**
      * Recursively delete all files in a directory
      * @param directory File descriptor for directory
      */
     private fun purgeDirectory(directory: File) {
-        for (file in directory.listFiles()) {
+        for (file in directory.listFiles()!!) {
             if (file.isDirectory) purgeDirectory(file) else file.delete()
         }
     }// The file name contains a timestamp, so ensure it doesn't change with multiple calls to
@@ -140,7 +138,7 @@ abstract class Exporter(
      * @return Absolute path to file
      */
     protected val exportCacheFilePath: String
-        protected get() {
+        get() {
             // The file name contains a timestamp, so ensure it doesn't change with multiple calls to
             // avoid issues like #448
             if (mExportCacheFilePath == null) {
@@ -161,18 +159,16 @@ abstract class Exporter(
         get() = "text/plain"
 
     class ExporterException : RuntimeException {
-        constructor(params: ExportParams) : super("Failed to generate export with parameters:  $params") {}
+        constructor(params: ExportParams) : super("Failed to generate export with parameters:  $params")
         constructor(
             params: ExportParams,
             msg: String
-        ) : super("Failed to generate export with parameters: $params - $msg") {
-        }
+        ) : super("Failed to generate export with parameters: $params - $msg")
 
         constructor(params: ExportParams, throwable: Throwable) : super(
             "Failed to generate " + params.exportFormat.toString() + "-" + throwable.message,
             throwable
-        ) {
-        }
+        )
     }
 
     companion object {
@@ -238,7 +234,7 @@ abstract class Exporter(
             }
             try {
                 val date = EXPORT_FILENAME_DATE_FORMAT.parse(tokens[0] + "_" + tokens[1])
-                timeMillis = date.time
+                timeMillis = date!!.time
             } catch (e: ParseException) {
                 Log.e("Exporter", "Error parsing time from file name: " + e.message)
                 Crashlytics.logException(e)
@@ -254,7 +250,7 @@ abstract class Exporter(
          */
         @JvmStatic
         fun getExportFolderPath(bookUID: String): String {
-            val path = BASE_FOLDER_PATH + "/" + bookUID + "/exports/"
+            val path = "$BASE_FOLDER_PATH/$bookUID/exports/"
             val file = File(path)
             if (!file.exists()) file.mkdirs()
             return path

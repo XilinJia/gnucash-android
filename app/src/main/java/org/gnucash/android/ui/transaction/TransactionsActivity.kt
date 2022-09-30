@@ -137,10 +137,7 @@ class TransactionsActivity : BaseDrawerActivity(), Refreshable, OnAccountClicked
                     mTabLayout!!.addTab(mTabLayout!!.newTab().setText(R.string.section_header_transactions))
                 }
             }
-            if (view != null) {
-                // Hide the favorite icon of the selected account to avoid clutter
-                (view as TextView).setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-            }
+            (view as TextView).setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
             //refresh any fragments in the tab with the new account UID
             refresh()
         }
@@ -163,8 +160,7 @@ class TransactionsActivity : BaseDrawerActivity(), Refreshable, OnAccountClicked
                 mFragmentPageReferenceMap.put(i, transactionsListFragment as Refreshable)
                 return transactionsListFragment
             }
-            val currentFragment: Fragment
-            currentFragment = when (i) {
+            val currentFragment: Fragment = when (i) {
                 INDEX_SUB_ACCOUNTS_FRAGMENT -> prepareSubAccountsListFragment()
                 INDEX_TRANSACTIONS_FRAGMENT -> prepareTransactionsListFragment()
                 else -> prepareTransactionsListFragment()
@@ -178,7 +174,7 @@ class TransactionsActivity : BaseDrawerActivity(), Refreshable, OnAccountClicked
             mFragmentPageReferenceMap.remove(position)
         }
 
-        override fun getPageTitle(position: Int): CharSequence? {
+        override fun getPageTitle(position: Int): CharSequence {
             return if (mIsPlaceholderAccount) getString(R.string.section_header_subaccounts) else when (position) {
                 INDEX_SUB_ACCOUNTS_FRAGMENT -> getString(R.string.section_header_subaccounts)
                 INDEX_TRANSACTIONS_FRAGMENT -> getString(R.string.section_header_transactions)
@@ -211,7 +207,7 @@ class TransactionsActivity : BaseDrawerActivity(), Refreshable, OnAccountClicked
             val args = Bundle()
             args.putString(UxArgument.SELECTED_ACCOUNT_UID, currentAccountUID)
             transactionsListFragment.arguments = args
-            Log.i(TAG, "Opening transactions for account:  " + currentAccountUID)
+            Log.i(TAG, "Opening transactions for account:  $currentAccountUID")
             return transactionsListFragment
         }
     }
@@ -219,9 +215,9 @@ class TransactionsActivity : BaseDrawerActivity(), Refreshable, OnAccountClicked
     /**
      * Refreshes the fragments currently in the transactions activity
      */
-    override fun refresh(accountUID: String?) {
+    override fun refresh(uid: String?) {
         for (i in 0 until mFragmentPageReferenceMap.size()) {
-            mFragmentPageReferenceMap.valueAt(i).refresh(accountUID)
+            mFragmentPageReferenceMap.valueAt(i).refresh(uid)
         }
         if (mPagerAdapter != null) mPagerAdapter!!.notifyDataSetChanged()
         AccountBalanceTask(mSumTextView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, currentAccountUID)
@@ -275,21 +271,19 @@ class TransactionsActivity : BaseDrawerActivity(), Refreshable, OnAccountClicked
         } else {
             mViewPager!!.currentItem = INDEX_TRANSACTIONS_FRAGMENT
         }
-        mCreateFloatingButton!!.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View) {
-                when (mViewPager!!.currentItem) {
-                    INDEX_SUB_ACCOUNTS_FRAGMENT -> {
-                        val addAccountIntent = Intent(this@TransactionsActivity, FormActivity::class.java)
-                        addAccountIntent.action = Intent.ACTION_INSERT_OR_EDIT
-                        addAccountIntent.putExtra(UxArgument.FORM_TYPE, FormActivity.FormType.ACCOUNT.name)
-                        addAccountIntent.putExtra(UxArgument.PARENT_ACCOUNT_UID, currentAccountUID)
-                        startActivityForResult(addAccountIntent, AccountsActivity.REQUEST_EDIT_ACCOUNT)
-                    }
-
-                    INDEX_TRANSACTIONS_FRAGMENT -> createNewTransaction(currentAccountUID!!)
+        mCreateFloatingButton!!.setOnClickListener {
+            when (mViewPager!!.currentItem) {
+                INDEX_SUB_ACCOUNTS_FRAGMENT -> {
+                    val addAccountIntent = Intent(this@TransactionsActivity, FormActivity::class.java)
+                    addAccountIntent.action = Intent.ACTION_INSERT_OR_EDIT
+                    addAccountIntent.putExtra(UxArgument.FORM_TYPE, FormActivity.FormType.ACCOUNT.name)
+                    addAccountIntent.putExtra(UxArgument.PARENT_ACCOUNT_UID, currentAccountUID)
+                    startActivityForResult(addAccountIntent, AccountsActivity.REQUEST_EDIT_ACCOUNT)
                 }
+
+                INDEX_TRANSACTIONS_FRAGMENT -> createNewTransaction(currentAccountUID!!)
             }
-        })
+        }
     }
 
     override fun onResume() {
@@ -426,7 +420,7 @@ class TransactionsActivity : BaseDrawerActivity(), Refreshable, OnAccountClicked
         /**
          * Logging tag
          */
-        protected const val TAG = "TransactionsActivity"
+        private const val TAG = "TransactionsActivity"
 
         /**
          * ViewPager index for sub-accounts fragment
@@ -472,9 +466,7 @@ class TransactionsActivity : BaseDrawerActivity(), Refreshable, OnAccountClicked
         fun getPrettyDateFormat(context: Context?, dateMillis: Long): String {
             val transactionTime = LocalDate(dateMillis)
             val today = LocalDate()
-            var prettyDateText: String? = null
-            prettyDateText =
-                if (transactionTime.compareTo(today.minusDays(1)) >= 0 && transactionTime.compareTo(today.plusDays(1)) <= 0) {
+            val prettyDateText: String? = if (transactionTime >= today.minusDays(1) && transactionTime <= today.plusDays(1)) {
                     DateUtils.getRelativeTimeSpanString(
                         dateMillis,
                         System.currentTimeMillis(),

@@ -92,7 +92,7 @@ class FormActivity : PasscodeLockActivity() {
             FormType.SPLIT_EDITOR -> showSplitEditorFragment(intent.extras)
             FormType.BUDGET -> showBudgetFormFragment(intent.extras)
             FormType.BUDGET_AMOUNT_EDITOR -> showBudgetAmountEditorFragment(intent.extras)
-            else -> throw IllegalArgumentException("No form display type specified")
+//            else -> throw IllegalArgumentException("No form display type specified") redundant by XJ
         }
     }
 

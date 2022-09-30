@@ -45,14 +45,7 @@ class AccountCreator : BroadcastReceiver() {
         val currencyCode = args.getString(Account.EXTRA_CURRENCY_CODE)
         if (currencyCode != null) {
             val commodity = getInstance(currencyCode)
-            if (commodity != null) {
-                account.setMCommodity(commodity)
-            } else {
-                throw IllegalArgumentException(
-                    "Commodity with '" + currencyCode
-                            + "' currency code not found in the database"
-                )
-            }
+            account.setMCommodity(commodity)
         }
         val uid = args.getString(Intent.EXTRA_UID)
         if (uid != null) account.mUID = uid

@@ -42,7 +42,7 @@ class DatabaseHelper
  * @param databaseName Name of the database
  */
     (context: Context?, databaseName: String?) :
-    SQLiteOpenHelper(context, databaseName, null, DatabaseSchema.DATABASE_VERSION) {
+    SQLiteOpenHelper(context, databaseName, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase) {
         createDatabaseTables(db)
     }
@@ -330,8 +330,8 @@ class DatabaseHelper
             return ("CREATE TRIGGER update_time_trigger "
                     + "  AFTER UPDATE ON " + tableName + " FOR EACH ROW"
                     + "  BEGIN " + "UPDATE " + tableName
-                    + "  SET " + DatabaseSchema.CommonColumns.COLUMN_MODIFIED_AT + " = CURRENT_TIMESTAMP"
-                    + "  WHERE OLD." + DatabaseSchema.CommonColumns.COLUMN_UID + " = NEW." + DatabaseSchema.CommonColumns.COLUMN_UID + ";"
+                    + "  SET " + CommonColumns.COLUMN_MODIFIED_AT + " = CURRENT_TIMESTAMP"
+                    + "  WHERE OLD." + CommonColumns.COLUMN_UID + " = NEW." + CommonColumns.COLUMN_UID + ";"
                     + "  END;")
         }
     }

@@ -77,7 +77,7 @@ class PieChartFragment : BaseReportFragment() {
 
     override fun generateReport() {
         val pieData = data
-        if (pieData != null && pieData.yValCount != 0) {
+        if (pieData != null && pieData.yValCount != 0) {    // TODO: always true? XJ
             mChartDataPresent = true
             mChart!!.data = if (mGroupSmallerSlices) groupSmallerSlices(pieData, activity) else pieData
             val sum = mChart!!.data.yValueSum
@@ -107,13 +107,13 @@ class PieChartFragment : BaseReportFragment() {
      * @return `PieData` instance
      */
     private val data: PieData
-        private get() {
+        get() {
             val dataSet = PieDataSet(null, "")
             val labels: MutableList<String?> = ArrayList()
             val colors: MutableList<Int> = ArrayList()
             for (account in mAccountsDbAdapter!!.simpleAccountList) {
                 if (account.mAccountType === mAccountType && !account.isPlaceholderAccount
-                    && account.getMCommodity().equals(mCommodity)
+                    && account.getMCommodity() == mCommodity
                 ) {
                     val balance = mAccountsDbAdapter!!.getAccountsBalance(
                         listOf(account.mUID),
@@ -121,8 +121,7 @@ class PieChartFragment : BaseReportFragment() {
                     ).asDouble()
                     if (balance > 0) {
                         dataSet.addEntry(Entry(balance.toFloat(), dataSet.entryCount))
-                        var color: Int
-                        color = if (mUseAccountColor) {
+                        val color: Int = if (mUseAccountColor) {
                             if (account.getMColor() != Account.DEFAULT_COLOR) account.getMColor() else ReportsActivity.COLORS[(dataSet.entryCount - 1) % ReportsActivity.COLORS.size]
                         } else {
                             ReportsActivity.COLORS[(dataSet.entryCount - 1) % ReportsActivity.COLORS.size]
@@ -142,7 +141,7 @@ class PieChartFragment : BaseReportFragment() {
      * @return a `PieData` instance for situation when no user data available
      */
     private val emptyData: PieData
-        private get() {
+        get() {
             val dataSet = PieDataSet(null, resources.getString(R.string.label_chart_no_data))
             dataSet.addEntry(Entry(1f, 0))
             dataSet.color = NO_DATA_COLOR
@@ -223,7 +222,6 @@ class PieChartFragment : BaseReportFragment() {
     }
 
     override fun onValueSelected(e: Entry, dataSetIndex: Int, h: Highlight) {
-        if (e == null) return
         val label = mChart!!.data.xVals[e.xIndex]
         val value = e.getVal()
         val percent = value / mChart!!.data.yValueSum * 100

@@ -21,7 +21,6 @@ import com.crashlytics.android.Crashlytics
 import org.gnucash.android.R
 import org.gnucash.android.export.ExportParams
 import org.gnucash.android.export.Exporter
-import org.gnucash.android.export.Exporter.ExporterException
 import org.gnucash.android.model.Account
 import org.gnucash.android.model.Split
 import org.gnucash.android.model.TransactionType
@@ -64,7 +63,7 @@ class CsvTransactionsExporter : Exporter {
     }
 
     @Throws(ExporterException::class)
-    override fun generateExport(): List<String?>? {
+    override fun generateExport(): List<String> {
         val outputFile = exportCacheFilePath
         try {
             CsvWriter(FileWriter(outputFile), "" + mCsvSeparator).use { csvWriter -> generateExport(csvWriter) }
@@ -73,7 +72,7 @@ class CsvTransactionsExporter : Exporter {
             Crashlytics.logException(ex)
             throw ExporterException(mExportParams, ex)
         }
-        return Arrays.asList(outputFile)
+        return listOf(outputFile)
     }
 
     /**
@@ -82,10 +81,9 @@ class CsvTransactionsExporter : Exporter {
      */
     @Throws(IOException::class)
     private fun writeSplitsToCsv(splits: List<Split>, writer: CsvWriter) {
-        var index = 0
         val uidAccountMap: MutableMap<String?, Account?> = HashMap()
-        for (split in splits) {
-            if (index++ > 0) { // the first split is on the same line as the transactions. But after that, we
+        for ((index, split) in splits.withIndex()) {
+            if (index > 0) { // the first split is on the same line as the transactions. But after that, we
                 writer.write(
                     "" + mCsvSeparator + mCsvSeparator + mCsvSeparator + mCsvSeparator
                             + mCsvSeparator + mCsvSeparator + mCsvSeparator + mCsvSeparator
@@ -121,7 +119,7 @@ class CsvTransactionsExporter : Exporter {
     @Throws(ExporterException::class)
     private fun generateExport(csvWriter: CsvWriter) {
         try {
-            val names = Arrays.asList(*mContext.resources.getStringArray(R.array.csv_transaction_headers))
+            val names = listOf(*mContext.resources.getStringArray(R.array.csv_transaction_headers))
             for (i in names.indices) {
                 csvWriter.writeToken(names[i])
             }

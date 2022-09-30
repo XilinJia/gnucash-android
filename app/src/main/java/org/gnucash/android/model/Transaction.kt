@@ -257,7 +257,7 @@ class Transaction : BaseModel {
     private fun imbalance(): Money {
         var imbalance = createZeroInstance(mCommodity!!.mMnemonic)
         for (split in mSplitList) {
-            if (!split.mQuantity!!.mCommodity!!.equals(mCommodity)) {
+            if (split.mQuantity!!.mCommodity!! != mCommodity) {
                 // this may happen when importing XML exported from GNCA before 2.0.0
                 // these transactions should only be imported from XML exported from GNC desktop
                 // so imbalance split should not be generated for them
@@ -334,7 +334,7 @@ class Transaction : BaseModel {
      */
     fun toOFX(doc: Document, accountUID: String): Element {
         val balance = computeBalance(accountUID)
-        val transactionType = if (balance!!.isNegative) TransactionType.DEBIT else TransactionType.CREDIT
+        val transactionType = if (balance.isNegative) TransactionType.DEBIT else TransactionType.CREDIT
         val transactionNode = doc.createElement(OfxHelper.TAG_STATEMENT_TRANSACTION)
         val typeNode = doc.createElement(OfxHelper.TAG_TRANSACTION_TYPE)
         typeNode.appendChild(doc.createTextNode(transactionType.toString()))
@@ -358,7 +358,7 @@ class Transaction : BaseModel {
         val name = doc.createElement(OfxHelper.TAG_NAME)
         name.appendChild(doc.createTextNode(mDescription))
         transactionNode.appendChild(name)
-        if (mNotes != null && mNotes!!.length > 0) {
+        if (mNotes != null && mNotes!!.isNotEmpty()) {
             val memo = doc.createElement(OfxHelper.TAG_MEMO)
             memo.appendChild(doc.createTextNode(mNotes))
             transactionNode.appendChild(memo)
@@ -402,31 +402,27 @@ class Transaction : BaseModel {
         /**
          * Key for passing the account unique Identifier as an argument through an [Intent]
          */
-        @JvmField
         @Deprecated("use {@link Split}s instead")
-        val EXTRA_ACCOUNT_UID = "org.gnucash.android.extra.account_uid"
+        const val EXTRA_ACCOUNT_UID = "org.gnucash.android.extra.account_uid"
 
         /**
          * Key for specifying the double entry account
          */
-        @JvmField
         @Deprecated("use {@link Split}s instead")
-        val EXTRA_DOUBLE_ACCOUNT_UID = "org.gnucash.android.extra.double_account_uid"
+        const val EXTRA_DOUBLE_ACCOUNT_UID = "org.gnucash.android.extra.double_account_uid"
 
         /**
          * Key for identifying the amount of the transaction through an Intent
          */
-        @JvmField
         @Deprecated("use {@link Split}s instead")
-        val EXTRA_AMOUNT = "org.gnucash.android.extra.amount"
+        const val EXTRA_AMOUNT = "org.gnucash.android.extra.amount"
 
         /**
          * Extra key for the transaction type.
          * This value should typically be set by calling [TransactionType.name]
          */
-        @JvmField
         @Deprecated("use {@link Split}s instead")
-        val EXTRA_TRANSACTION_TYPE = "org.gnucash.android.extra.transaction_type"
+        const val EXTRA_TRANSACTION_TYPE = "org.gnucash.android.extra.transaction_type"
 
         /**
          * Argument key for passing splits as comma-separated multi-line list and each line is a split.
@@ -453,7 +449,6 @@ class Transaction : BaseModel {
          * @see .computeBalance
          */
         @JvmStatic
-        @JvmOverloads
         fun computeBalance(accountUID: String, splitList: List<Split>): Money {
             val accountsDbAdapter = AccountsDbAdapter.instance
             val accountType = accountsDbAdapter.getAccountType(accountUID)
@@ -462,7 +457,7 @@ class Transaction : BaseModel {
             var balance = createZeroInstance(accountCurrencyCode)
             for (split in splitList) {
                 if (split.mAccountUID != accountUID) continue
-                var amount: Money = if (split.mValue!!.mCommodity!!.mMnemonic == accountCurrencyCode) {
+                val amount: Money = if (split.mValue!!.mCommodity!!.mMnemonic == accountCurrencyCode) {
                     split.mValue!!
                 } else {
                     //if this split belongs to the account, then either its value or quantity is in the account currency
@@ -495,8 +490,7 @@ class Transaction : BaseModel {
          */
         @JvmStatic
         fun typeForBalance(accountType: AccountType, shouldReduceBalance: Boolean): TransactionType {
-            val type: TransactionType
-            type = if (accountType.hasDebitNormalBalance()) {
+            val type: TransactionType = if (accountType.hasDebitNormalBalance()) {
                 if (shouldReduceBalance) TransactionType.CREDIT else TransactionType.DEBIT
             } else {
                 if (shouldReduceBalance) TransactionType.DEBIT else TransactionType.CREDIT

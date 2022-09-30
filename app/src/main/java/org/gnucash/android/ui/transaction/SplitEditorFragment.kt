@@ -99,7 +99,7 @@ class SplitEditorFragment : Fragment() {
         // But the user may have already created some splits before. Let's check
         val splitList: List<Split> = arguments!!.getParcelableArrayList(UxArgument.SPLIT_LIST)!!
         initArgs()
-        if (!splitList.isEmpty()) {
+        if (splitList.isNotEmpty()) {
             //aha! there are some splits. Let's load those instead
             loadSplitViews(splitList)
             mImbalanceWatcher.afterTextChanged(Editable.Factory.getInstance().newEditable(""))
@@ -221,7 +221,7 @@ class SplitEditorFragment : Fragment() {
         init {
             ButterKnife.bind(this, splitView)
             this.splitView = splitView
-            if (split != null && !split.mQuantity!!.equals(split.mValue)) quantity = split.mQuantity
+            if (split != null && split.mQuantity!! != split.mValue) quantity = split.mQuantity
             setListeners(split)
         }
 
@@ -253,7 +253,7 @@ class SplitEditorFragment : Fragment() {
                 splitTypeSwitch!!.setChecked(split.mSplitType)
             }
             accountsSpinner!!.onItemSelectedListener = SplitAccountListener(splitTypeSwitch, this)
-            splitTypeSwitch!!.addOnCheckedChangeListener { buttonView, isChecked ->
+            splitTypeSwitch!!.addOnCheckedChangeListener { _, _ ->
                 mImbalanceWatcher.afterTextChanged(Editable.Factory.getInstance().newEditable(""))
             }
             splitAmountEditText!!.addTextChangedListener(mImbalanceWatcher)
@@ -271,8 +271,7 @@ class SplitEditorFragment : Fragment() {
                 val amountString = splitAmountEditText!!.cleanString
                 if (amountString.isEmpty()) return BigDecimal.ZERO
                 val expressionBuilder = ExpressionBuilder(amountString)
-                val expression: Expression?
-                expression = try {
+                val expression: Expression? = try {
                     expressionBuilder.build()
                 } catch (e: RuntimeException) {
                     return BigDecimal.ZERO

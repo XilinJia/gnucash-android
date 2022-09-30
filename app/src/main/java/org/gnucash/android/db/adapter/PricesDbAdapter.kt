@@ -29,20 +29,20 @@ class PricesDbAdapter
         PriceEntry.COLUMN_VALUE_DENOM
     )
 ) {
-    protected override fun setBindings(stmt: SQLiteStatement, price: Price): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: Price): SQLiteStatement {
         stmt.clearBindings()
-        stmt.bindString(1, price.mCommodityUID)
-        stmt.bindString(2, price.mCurrencyUID)
-        stmt.bindString(3, price.mDate.toString())
-        if (price.mSource != null) {
-            stmt.bindString(4, price.mSource)
+        stmt.bindString(1, model.mCommodityUID)
+        stmt.bindString(2, model.mCurrencyUID)
+        stmt.bindString(3, model.mDate.toString())
+        if (model.mSource != null) {
+            stmt.bindString(4, model.mSource)
         }
-        if (price.mType != null) {
-            stmt.bindString(5, price.mType)
+        if (model.mType != null) {
+            stmt.bindString(5, model.mType)
         }
-        stmt.bindLong(6, price.getMValueNum())
-        stmt.bindLong(7, price.getMValueDenom())
-        stmt.bindString(8, price.mUID)
+        stmt.bindLong(6, model.getMValueNum())
+        stmt.bindLong(7, model.getMValueDenom())
+        stmt.bindString(8, model.mUID)
         return stmt
     }
 

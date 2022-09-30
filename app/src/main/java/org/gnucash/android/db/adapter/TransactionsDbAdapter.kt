@@ -70,22 +70,22 @@ class TransactionsDbAdapter(db: SQLiteDatabase?, val splitDbAdapter: SplitsDbAda
      * Adds an transaction to the database.
      * If a transaction already exists in the database with the same unique ID,
      * then the record will just be updated instead
-     * @param transaction [Transaction] to be inserted to database
+     * @param model [Transaction] to be inserted to database
      */
-    override fun addRecord(transaction: Transaction, updateMethod: UpdateMethod) {
+    override fun addRecord(model: Transaction, updateMethod: UpdateMethod) {
         Log.d(LOG_TAG, "Adding transaction to the db via " + updateMethod.name)
         mDb.beginTransaction()
         try {
-            val imbalanceSplit = transaction.createAutoBalanceSplit()
+            val imbalanceSplit = model.createAutoBalanceSplit()
             if (imbalanceSplit != null) {
                 val imbalanceAccountUID = AccountsDbAdapter(mDb, this)
-                    .getOrCreateImbalanceAccountUID(transaction.mCommodity!!)
+                    .getOrCreateImbalanceAccountUID(model.mCommodity!!)
                 imbalanceSplit.mAccountUID = imbalanceAccountUID
             }
-            super.addRecord(transaction, updateMethod)
+            super.addRecord(model, updateMethod)
             Log.d(LOG_TAG, "Adding splits for transaction")
-            val splitUIDs = ArrayList<String?>(transaction.getMSplitList().size)
-            for (split in transaction.getMSplitList()) {
+            val splitUIDs = ArrayList<String?>(model.getMSplitList().size)
+            for (split in model.getMSplitList()) {
                 Log.d(LOG_TAG, "Replace transaction split in db")
                 if (imbalanceSplit === split) {
                     splitDbAdapter.addRecord(split, UpdateMethod.insert)
@@ -94,12 +94,12 @@ class TransactionsDbAdapter(db: SQLiteDatabase?, val splitDbAdapter: SplitsDbAda
                 }
                 splitUIDs.add(split.mUID)
             }
-            Log.d(LOG_TAG, transaction.getMSplitList().size.toString() + " splits added")
+            Log.d(LOG_TAG, model.getMSplitList().size.toString() + " splits added")
             val deleted = mDb.delete(
                 SplitEntry.TABLE_NAME,
                 SplitEntry.COLUMN_TRANSACTION_UID + " = ? AND "
                         + SplitEntry.COLUMN_UID + " NOT IN ('" + TextUtils.join("' , '", splitUIDs) + "')",
-                arrayOf(transaction.mUID)
+                arrayOf(model.mUID)
             ).toLong()
             Log.d(LOG_TAG, "$deleted splits deleted")
             mDb.setTransactionSuccessful()
@@ -117,19 +117,19 @@ class TransactionsDbAdapter(db: SQLiteDatabase?, val splitDbAdapter: SplitsDbAda
      * then the record will just be updated instead. Recurrence Transactions will not
      * be inserted, instead schedule Transaction would be called. If an exception
      * occurs, no transaction would be inserted.
-     * @param transactionList [Transaction] transactions to be inserted to database
+     * @param modelList [Transaction] transactions to be inserted to database
      * @return Number of transactions inserted
      */
-    override fun bulkAddRecords(transactionList: List<Transaction>, updateMethod: UpdateMethod): Long {
+    override fun bulkAddRecords(modelList: List<Transaction>, updateMethod: UpdateMethod): Long {
         var start = System.nanoTime()
-        val rowInserted = super.bulkAddRecords(transactionList, updateMethod)
+        val rowInserted = super.bulkAddRecords(modelList, updateMethod)
         val end = System.nanoTime()
         Log.d(javaClass.simpleName, String.format("bulk add transaction time %d ", end - start))
-        val splitList: MutableList<Split> = ArrayList(transactionList.size * 3)
-        for (transaction in transactionList) {
+        val splitList: MutableList<Split> = ArrayList(modelList.size * 3)
+        for (transaction in modelList) {
             splitList.addAll(transaction.getMSplitList())
         }
-        if (rowInserted != 0L && !splitList.isEmpty()) {
+        if (rowInserted != 0L && splitList.isNotEmpty()) {
             try {
                 start = System.nanoTime()
                 val nSplits = splitDbAdapter.bulkAddRecords(splitList, updateMethod)
@@ -148,21 +148,21 @@ class TransactionsDbAdapter(db: SQLiteDatabase?, val splitDbAdapter: SplitsDbAda
         return rowInserted
     }
 
-    protected override fun setBindings(stmt: SQLiteStatement, transaction: Transaction): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: Transaction): SQLiteStatement {
         stmt.clearBindings()
-        stmt.bindString(1, transaction.getMDescription())
-        stmt.bindString(2, transaction.mNotes)
-        stmt.bindLong(3, transaction.mTimestamp)
-        stmt.bindLong(4, (if (transaction.mIsExported) 1 else 0).toLong())
-        stmt.bindString(5, transaction.mMnemonic)
-        stmt.bindString(6, transaction.mCommodity!!.mUID)
-        stmt.bindString(7, TimestampHelper.getUtcStringFromTimestamp(transaction.mCreatedTimestamp))
-        if (transaction.mScheduledActionUID == null) stmt.bindNull(8) else stmt.bindString(
+        stmt.bindString(1, model.getMDescription())
+        stmt.bindString(2, model.mNotes)
+        stmt.bindLong(3, model.mTimestamp)
+        stmt.bindLong(4, (if (model.mIsExported) 1 else 0).toLong())
+        stmt.bindString(5, model.mMnemonic)
+        stmt.bindString(6, model.mCommodity!!.mUID)
+        stmt.bindString(7, TimestampHelper.getUtcStringFromTimestamp(model.mCreatedTimestamp))
+        if (model.mScheduledActionUID == null) stmt.bindNull(8) else stmt.bindString(
             8,
-            transaction.mScheduledActionUID
+            model.mScheduledActionUID
         )
-        stmt.bindLong(9, (if (transaction.mIsTemplate) 1 else 0).toLong())
-        stmt.bindString(10, transaction.mUID)
+        stmt.bindLong(9, (if (model.mIsTemplate) 1 else 0).toLong())
+        stmt.bindString(10, model.mUID)
         return stmt
     }
 
@@ -397,22 +397,22 @@ class TransactionsDbAdapter(db: SQLiteDatabase?, val splitDbAdapter: SplitsDbAda
     /**
      * Builds a transaction instance with the provided cursor.
      * The cursor should already be pointing to the transaction record in the database
-     * @param c Cursor pointing to transaction record in database
+     * @param cursor Cursor pointing to transaction record in database
      * @return [Transaction] object constructed from database record
      */
-    override fun buildModelInstance(c: Cursor): Transaction {
-        val name = c.getString(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_DESCRIPTION))
+    override fun buildModelInstance(cursor: Cursor): Transaction {
+        val name = cursor.getString(cursor.getColumnIndexOrThrow(TransactionEntry.COLUMN_DESCRIPTION))
         val transaction = Transaction(name)
-        populateBaseModelAttributes(c, transaction)
-        transaction.setMTimestamp(c.getLong(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_TIMESTAMP)))
-        transaction.mNotes = c.getString(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_NOTES))
-        transaction.mIsExported = c.getInt(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_EXPORTED)) == 1
-        transaction.mIsTemplate = c.getInt(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_TEMPLATE)) == 1
-        val currencyCode = c.getString(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_CURRENCY))
+        populateBaseModelAttributes(cursor, transaction)
+        transaction.setMTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(TransactionEntry.COLUMN_TIMESTAMP)))
+        transaction.mNotes = cursor.getString(cursor.getColumnIndexOrThrow(TransactionEntry.COLUMN_NOTES))
+        transaction.mIsExported = cursor.getInt(cursor.getColumnIndexOrThrow(TransactionEntry.COLUMN_EXPORTED)) == 1
+        transaction.mIsTemplate = cursor.getInt(cursor.getColumnIndexOrThrow(TransactionEntry.COLUMN_TEMPLATE)) == 1
+        val currencyCode = cursor.getString(cursor.getColumnIndexOrThrow(TransactionEntry.COLUMN_CURRENCY))
         transaction.mCommodity = mCommoditiesDbAdapter.getCommodity(currencyCode)
         transaction.mScheduledActionUID =
-            c.getString(c.getColumnIndexOrThrow(TransactionEntry.COLUMN_SCHEDX_ACTION_UID))
-        val transactionID = c.getLong(c.getColumnIndexOrThrow(TransactionEntry._ID))
+            cursor.getString(cursor.getColumnIndexOrThrow(TransactionEntry.COLUMN_SCHEDX_ACTION_UID))
+        val transactionID = cursor.getLong(cursor.getColumnIndexOrThrow(TransactionEntry._ID))
         transaction.setMSplitList(splitDbAdapter.getSplitsForTransaction(transactionID).toMutableList())
         return transaction
     }
@@ -459,11 +459,8 @@ class TransactionsDbAdapter(db: SQLiteDatabase?, val splitDbAdapter: SplitsDbAda
      */
     fun getTransactionsCount(accountUID: String): Int {
         val cursor = fetchAllTransactionsForAccount(accountUID)
-        var count = 0
-        if (cursor == null) return count else {
-            count = cursor.count
-            cursor.close()
-        }
+        val count: Int = cursor.count
+        cursor.close()
         return count
     }
 
@@ -502,7 +499,6 @@ class TransactionsDbAdapter(db: SQLiteDatabase?, val splitDbAdapter: SplitsDbAda
      * @return Number of splits belonging to the transaction
      */
     fun getSplitCount(transactionUID: String): Long {
-        if (transactionUID == null) return 0
         val sql = ("SELECT COUNT(*) FROM " + SplitEntry.TABLE_NAME
                 + " WHERE " + SplitEntry.COLUMN_TRANSACTION_UID + "= '" + transactionUID + "'")
         val statement = mDb.compileStatement(sql)
@@ -532,7 +528,7 @@ class TransactionsDbAdapter(db: SQLiteDatabase?, val splitDbAdapter: SplitsDbAda
         val selectionArgs = arrayOf(accountUID)
         val sortOrder = TransactionEntry.TABLE_NAME + "." + TransactionEntry.COLUMN_TIMESTAMP + " DESC"
         val groupBy = TransactionEntry.COLUMN_DESCRIPTION
-        val limit = Integer.toString(5)
+        val limit = 5.toString()
         return queryBuilder.query(mDb, projectionIn, selection, selectionArgs, groupBy, null, sortOrder, limit)
     }
 

@@ -239,8 +239,7 @@ class WidgetConfigurationActivity : Activity() {
                 return
             }
             val accountsDbAdapter = AccountsDbAdapter(getDatabase(bookUID))
-            val account: Account
-            account = try {
+            val account: Account = try {
                 accountsDbAdapter.getRecord(accountUID)
             } catch (e: IllegalArgumentException) {
                 Log.i("WidgetConfiguration", "Account not found, resetting widget $appWidgetId")

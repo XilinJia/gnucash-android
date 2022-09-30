@@ -61,12 +61,12 @@ class SplitsDbAdapter(db: SQLiteDatabase?) : DatabaseAdapter<Split>(
     /**
      * Adds a split to the database.
      * The transactions belonging to the split are marked as exported
-     * @param split [org.gnucash.android.model.Split] to be recorded in DB
+     * @param model [org.gnucash.android.model.Split] to be recorded in DB
      */
-    override fun addRecord(split: Split, updateMethod: UpdateMethod) {
+    override fun addRecord(model: Split, updateMethod: UpdateMethod) {
         Log.d(LOG_TAG, "Replace transaction split in db")
-        super.addRecord(split, updateMethod)
-        val transactionId = getTransactionID(split.mTransactionUID)
+        super.addRecord(model, updateMethod)
+        val transactionId = getTransactionID(model.mTransactionUID)
         //when a split is updated, we want mark the transaction as not exported
         updateRecord(
             TransactionEntry.TABLE_NAME, transactionId,
@@ -82,22 +82,22 @@ class SplitsDbAdapter(db: SQLiteDatabase?) : DatabaseAdapter<Split>(
         )
     }
 
-    protected override fun setBindings(stmt: SQLiteStatement, split: Split): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: Split): SQLiteStatement {
         stmt.clearBindings()
-        if (split.mMemo != null) {
-            stmt.bindString(1, split.mMemo)
+        if (model.mMemo != null) {
+            stmt.bindString(1, model.mMemo)
         }
-        stmt.bindString(2, split.mSplitType!!.name)
-        stmt.bindLong(3, split.mValue!!.numerator())
-        stmt.bindLong(4, split.mValue!!.denominator())
-        stmt.bindLong(5, split.mQuantity!!.numerator())
-        stmt.bindLong(6, split.mQuantity!!.denominator())
-        stmt.bindString(7, split.mCreatedTimestamp.toString())
-        stmt.bindString(8, split.mReconcileState.toString())
-        stmt.bindString(9, split.mReconcileDate.toString())
-        stmt.bindString(10, split.mAccountUID)
-        stmt.bindString(11, split.mTransactionUID)
-        stmt.bindString(12, split.mUID)
+        stmt.bindString(2, model.mSplitType!!.name)
+        stmt.bindLong(3, model.mValue!!.numerator())
+        stmt.bindLong(4, model.mValue!!.denominator())
+        stmt.bindLong(5, model.mQuantity!!.numerator())
+        stmt.bindLong(6, model.mQuantity!!.denominator())
+        stmt.bindString(7, model.mCreatedTimestamp.toString())
+        stmt.bindString(8, model.mReconcileState.toString())
+        stmt.bindString(9, model.mReconcileDate.toString())
+        stmt.bindString(10, model.mAccountUID)
+        stmt.bindString(11, model.mTransactionUID)
+        stmt.bindString(12, model.mUID)
         return stmt
     }
 
@@ -130,7 +130,7 @@ class SplitsDbAdapter(db: SQLiteDatabase?) : DatabaseAdapter<Split>(
         split.mSplitType = TransactionType.valueOf(typeName)
         split.mMemo = memo
         split.mReconcileState = reconcileState[0]
-        if (reconcileDate != null && !reconcileDate.isEmpty()) split.mReconcileDate =
+        if (reconcileDate != null && reconcileDate.isNotEmpty()) split.mReconcileDate =
             TimestampHelper.getTimestampFromUtcString(reconcileDate)
         return split
     }
@@ -174,7 +174,7 @@ class SplitsDbAdapter(db: SQLiteDatabase?) : DatabaseAdapter<Split>(
         accountUIDList: List<String?>, currencyCode: String, hasDebitNormalBalance: Boolean,
         startTimestamp: Long, endTimestamp: Long
     ): Money {
-        if (accountUIDList.size == 0) {
+        if (accountUIDList.isEmpty()) {
             return Money("0", currencyCode)
         }
         val cursor: Cursor
@@ -407,7 +407,7 @@ class SplitsDbAdapter(db: SQLiteDatabase?) : DatabaseAdapter<Split>(
 
     override fun deleteRecord(rowId: Long): Boolean {
         val split = getRecord(rowId)
-        val transactionUID = split!!.mTransactionUID
+        val transactionUID = split.mTransactionUID
         var result = mDb.delete(SplitEntry.TABLE_NAME, SplitEntry._ID + "=" + rowId, null) > 0
         if (!result) //we didn't delete for whatever reason, invalid rowId etc
             return false

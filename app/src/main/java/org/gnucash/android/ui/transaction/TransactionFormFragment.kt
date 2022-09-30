@@ -45,7 +45,6 @@ import org.gnucash.android.db.DatabaseSchema
 import org.gnucash.android.db.adapter.*
 import org.gnucash.android.model.*
 import org.gnucash.android.model.Commodity.Companion.getInstance
-import org.gnucash.android.model.Commodity
 import org.gnucash.android.model.Money.Companion.createZeroInstance
 import org.gnucash.android.model.Money
 import org.gnucash.android.model.Split
@@ -246,7 +245,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
         val fromCommodity = getInstance(mTransactionsDbAdapter!!.getAccountCurrencyCode(mAccountUID!!))
         val id = mTransferAccountSpinner!!.selectedItemId
         val targetCurrencyCode = mAccountsDbAdapter!!.getMMnemonic(mAccountsDbAdapter!!.getUID(id))
-        if ((fromCommodity.equals(getInstance(targetCurrencyCode))
+        if ((fromCommodity == getInstance(targetCurrencyCode)
                     || !mAmountEditText!!.isInputModified) || mSplitQuantity != null
         ) //if both accounts have same currency
             return
@@ -291,8 +290,8 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
             var userInteraction = false
             override fun onItemSelected(adapterView: AdapterView<*>?, view: View, position: Int, id: Long) {
                 removeFavoriteIconFromSelectedView(view as TextView)
-                if (mSplitsList!!.size == 2) { //when handling simple transfer to one account
-                    for (split in mSplitsList!!) {
+                if (mSplitsList.size == 2) { //when handling simple transfer to one account
+                    for (split in mSplitsList) {
                         if (split.mAccountUID != mAccountUID) {
                             split.mAccountUID = mAccountsDbAdapter!!.getUID(id)
                         }
@@ -375,7 +374,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
                 mAccountUID!!
             )
         }
-        mDescriptionEditText!!.onItemClickListener = OnItemClickListener { adapterView, view, position, id ->
+        mDescriptionEditText!!.onItemClickListener = OnItemClickListener { _, _, _, id ->
             mTransaction = Transaction(mTransactionsDbAdapter!!.getRecord(id), true)
             mTransaction!!.setMTimestamp(System.currentTimeMillis())
             //we check here because next method will modify it and we want to catch user-modification
@@ -384,12 +383,12 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
             val splitList = mTransaction!!.getMSplitList()
             val isSplitPair = splitList.size == 2 && splitList[0].isPairOf(splitList[1])
             if (isSplitPair) {
-                mSplitsList!!.clear()
+                mSplitsList.clear()
                 if (!amountEntered) //if user already entered an amount
                     mAmountEditText!!.setValue(splitList[0].mValue!!.asBigDecimal())
             } else {
                 if (amountEntered) { //if user entered own amount, clear loaded splits and use the user value
-                    mSplitsList!!.clear()
+                    mSplitsList.clear()
                     setDoubleEntryViewsVisibility(View.VISIBLE)
                 } else {
                     if (mUseDoubleEntry) { //don't hide the view in single entry mode
@@ -426,11 +425,11 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
 
         //TODO: deep copy the split list. We need a copy so we can modify with impunity
         mSplitsList = ArrayList(mTransaction!!.getMSplitList())
-        toggleAmountInputEntryMode(mSplitsList!!.size <= 2)
-        if (mSplitsList!!.size == 2) {
-            for (split in mSplitsList!!) {
+        toggleAmountInputEntryMode(mSplitsList.size <= 2)
+        if (mSplitsList.size == 2) {
+            for (split in mSplitsList) {
                 if (split.mAccountUID == mAccountUID) {
-                    if (!split.mQuantity!!.mCommodity!!.equals(mTransaction!!.mCommodity)) {
+                    if (split.mQuantity!!.mCommodity!! != mTransaction!!.mCommodity) {
                         mSplitQuantity = split.mQuantity
                     }
                 }
@@ -438,7 +437,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
         }
         //if there are more than two splits (which is the default for one entry), then
         //disable editing of the transfer account. User should open editor
-        if (mSplitsList.size == 2 && mSplitsList.get(0).isPairOf(mSplitsList.get(1))) {
+        if (mSplitsList.size == 2 && mSplitsList[0].isPairOf(mSplitsList[1])) {
             for (split in mTransaction!!.getMSplitList()) {
                 //two splits, one belongs to this account and the other to another account
                 if (mUseDoubleEntry && split.mAccountUID != mAccountUID) {
@@ -455,7 +454,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
         mAmountEditText!!.commodity = commodity
         mSaveTemplateCheckbox!!.isChecked = mTransaction!!.mIsTemplate
         val scheduledActionUID = arguments!!.getString(UxArgument.SCHEDULED_ACTION_UID)
-        if (scheduledActionUID != null && !scheduledActionUID.isEmpty()) {
+        if (!scheduledActionUID.isNullOrEmpty()) {
             val scheduledAction = ScheduledActionDbAdapter.instance.getRecord(scheduledActionUID)
             mRecurrenceRule = scheduledAction.ruleString()
             mEventRecurrence.parse(mRecurrenceRule)
@@ -552,7 +551,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
         } else {
             var biggestAmount = createZeroInstance(mTransaction!!.mMnemonic)
             for (split in mTransaction!!.getMSplitList()) {
-                if (split.mValue!!.asBigDecimal().compareTo(biggestAmount.asBigDecimal()) > 0)
+                if (split.mValue!!.asBigDecimal() > biggestAmount.asBigDecimal())
                     biggestAmount = split.mValue!!
             }
             baseAmountString = biggestAmount.toPlainString()
@@ -574,7 +573,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
             var dateMillis: Long = 0
             try {
                 val date = DATE_FORMATTER.parse(mDateTextView!!.text.toString())
-                dateMillis = date.time
+                dateMillis = date!!.time
             } catch (e: ParseException) {
                 Log.e(tag, "Error converting input time to Date object")
             }
@@ -592,7 +591,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
             var timeMillis: Long = 0
             try {
                 val date = TIME_FORMATTER.parse(mTimeTextView!!.text.toString())
-                timeMillis = date.time
+                timeMillis = date!!.time
             } catch (e: ParseException) {
                 Log.e(tag, "Error converting input time to Date object")
             }
@@ -630,7 +629,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
      * If the Split Editor has been used and there is more than one split, then it returns [.mSplitsList]
      * @return List of splits in the view or [.mSplitsList] is there are more than 2 splits in the transaction
      */
-    private fun extractSplitsFromView(): List<Split>? {
+    private fun extractSplitsFromView(): List<Split> {
         if (mTransactionTypeSwitch!!.visibility != View.VISIBLE) {
             return mSplitsList
         }
@@ -655,12 +654,12 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
         val split1: Split
         val split2: Split
         // Try to preserve the other split attributes.
-        if (mSplitsList!!.size >= 2) {
-            split1 = mSplitsList!![0]
+        if (mSplitsList.size >= 2) {
+            split1 = mSplitsList[0]
             split1.setMValue(value)
             split1.mQuantity = value
             split1.mAccountUID = mAccountUID
-            split2 = mSplitsList!![1]
+            split2 = mSplitsList[1]
             split2.setMValue(value)
             split2.mQuantity = quantity
             split2.mAccountUID = transferAcctUID
@@ -682,9 +681,8 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
      * @return GUID of transfer account
      */
     private val transferAccountUID: String
-        private get() {
-            val transferAcctUID: String
-            transferAcctUID = if (mUseDoubleEntry) {
+        get() {
+            val transferAcctUID: String = if (mUseDoubleEntry) {
                 val transferAcctId = mTransferAccountSpinner!!.selectedItemId
                 mAccountsDbAdapter!!.getUID(transferAcctId)!!
             } else {
@@ -716,7 +714,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
         transaction.setMTimestamp(cal.timeInMillis)
         transaction.mCommodity = commodity
         transaction.mNotes = notes
-        transaction.setMSplitList(splits!!.toMutableList())
+        transaction.setMSplitList(splits.toMutableList())
         transaction.mIsExported = false //not necessary as exports use timestamps now. Because, legacy
         return transaction
     }
@@ -739,7 +737,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
      * @return `true` if multi-currency transaction, `false` otherwise
      */
     private val isMultiCurrencyTransaction: Boolean
-        private get() {
+        get() {
             if (!mUseDoubleEntry) return false
             val transferAcctUID = mAccountsDbAdapter!!.getUID(mTransferAccountSpinner!!.selectedItemId)
             val currencyCode = mAccountsDbAdapter!!.getAccountCurrencyCode(mAccountUID!!)
@@ -807,7 +805,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
         scheduledAction.setMRecurrence(recurrence!!)
         val scheduledActionUID = arguments!!.getString(UxArgument.SCHEDULED_ACTION_UID)
         if (scheduledActionUID != null) { //if we are editing an existing schedule
-            if (recurrence == null) {
+            if (recurrence == null) {   // TODO: always false? XJ
                 scheduledActionDbAdapter.deleteRecord(scheduledActionUID)
             } else {
                 scheduledAction.mUID = scheduledActionUID
@@ -816,7 +814,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
                     .show()
             }
         } else {
-            if (recurrence != null) {
+            if (recurrence != null) {   // TODO: always true? XJ
                 scheduledAction.setMActionUID(transactionUID)
                 scheduledActionDbAdapter.addRecord(scheduledAction, DatabaseAdapter.UpdateMethod.replace)
                 Toast.makeText(activity, R.string.toast_scheduled_recurring_transaction, Toast.LENGTH_SHORT).show()
@@ -881,7 +879,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
      */
     fun setSplitList(splitList: MutableList<Split>) {
         mSplitsList = splitList
-        val balance = computeBalance(mAccountUID!!, mSplitsList!!)
+        val balance = computeBalance(mAccountUID!!, mSplitsList)
         mAmountEditText!!.setValue(balance.asBigDecimal())
         mTransactionTypeSwitch!!.isChecked = balance.isNegative
     }
@@ -985,11 +983,11 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
          * @return Stripped string with all non-digits removed
          */
         fun stripCurrencyFormatting(s: String): String {
-            if (s.length == 0) return s
+            if (s.isEmpty()) return s
             //remove all currency formatting and anything else which is not a number
             val sign = s.trim { it <= ' ' }.substring(0, 1)
             var stripped = s.trim { it <= ' ' }.replace("\\D*".toRegex(), "")
-            if (stripped.length == 0) return ""
+            if (stripped.isEmpty()) return ""
             if (sign == "+" || sign == "-") {
                 stripped = sign + stripped
             }

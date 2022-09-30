@@ -282,7 +282,7 @@ class BudgetListFragment : Fragment(), Refreshable, LoaderManager.LoaderCallback
      * @param context Application context
      */
         (context: Context?) : DatabaseCursorLoader(context) {
-        override fun loadInBackground(): Cursor? {
+        override fun loadInBackground(): Cursor {
             mDatabaseAdapter = BudgetsDbAdapter.instance
             return mDatabaseAdapter!!.fetchAllRecords(null, null, DatabaseSchema.BudgetEntry.COLUMN_NAME + " ASC")
         }

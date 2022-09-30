@@ -250,15 +250,18 @@ abstract class BaseReportFragment : Fragment(), OnChartValueSelectedListener, Re
     override fun refresh() {
         if (mReportGenerator != null) mReportGenerator!!.cancel(true)
         mReportGenerator = object : AsyncTask<Void, Void, Void>() {
+            @Deprecated("Deprecated in Java")
             override fun onPreExecute() {
                 mReportsActivity!!.progressBar!!.visibility = View.VISIBLE
             }
 
-            protected override fun doInBackground(vararg params: Void): Void? {
+            @Deprecated("Deprecated in Java")
+            override fun doInBackground(vararg params: Void): Void? {
                 generateReport()
                 return null
             }
 
+            @Deprecated("Deprecated in Java")
             override fun onPostExecute(aVoid: Void?) {
                 displayReport()
                 mReportsActivity!!.progressBar!!.visibility = View.GONE

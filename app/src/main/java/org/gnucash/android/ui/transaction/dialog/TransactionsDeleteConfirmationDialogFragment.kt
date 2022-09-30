@@ -48,7 +48,7 @@ class TransactionsDeleteConfirmationDialogFragment : DialogFragment() {
             .setTitle(title).setMessage(message)
             .setPositiveButton(
                 R.string.alert_dialog_ok_delete
-            ) { dialog, whichButton ->
+            ) { _, _ ->
                 val transactionsDbAdapter = TransactionsDbAdapter.instance
                 if (rowId == 0L) {
                     BackupManager.backupActiveBook() //create backup before deleting everything
@@ -71,7 +71,7 @@ class TransactionsDeleteConfirmationDialogFragment : DialogFragment() {
             }
             .setNegativeButton(
                 R.string.alert_dialog_cancel
-            ) { dialog, whichButton -> dismiss() }
+            ) { _, _ -> dismiss() }
             .create()
     }
 

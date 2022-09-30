@@ -44,16 +44,16 @@ class CommoditiesDbAdapter(db: SQLiteDatabase?) : DatabaseAdapter<Commodity>(
         Commodity.DEFAULT_COMMODITY = getCommodity(GnuCashApplication.defaultCurrencyCode!!)!!
     }
 
-    protected override fun setBindings(stmt: SQLiteStatement, commodity: Commodity): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: Commodity): SQLiteStatement {
         stmt.clearBindings()
-        stmt.bindString(1, commodity.mFullname)
-        stmt.bindString(2, commodity.mNamespace.name)
-        stmt.bindString(3, commodity.mMnemonic)
-        stmt.bindString(4, commodity.mLocalSymbol)
-        stmt.bindString(5, commodity.mCusip)
-        stmt.bindLong(6, commodity.mSmallestFraction.toLong())
-        stmt.bindLong(7, commodity.mQuoteFlag.toLong())
-        stmt.bindString(8, commodity.mUID)
+        stmt.bindString(1, model.mFullname)
+        stmt.bindString(2, model.mNamespace.name)
+        stmt.bindString(3, model.mMnemonic)
+        stmt.bindString(4, model.mLocalSymbol)
+        stmt.bindString(5, model.mCusip)
+        stmt.bindLong(6, model.mSmallestFraction.toLong())
+        stmt.bindLong(7, model.mQuoteFlag.toLong())
+        stmt.bindString(8, model.mUID)
         return stmt
     }
 

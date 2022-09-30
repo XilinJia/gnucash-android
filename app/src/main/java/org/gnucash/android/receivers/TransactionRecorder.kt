@@ -83,7 +83,7 @@ class TransactionRecorder : BroadcastReceiver() {
         if (splits != null) {
             val stringReader = StringReader(splits)
             val bufferedReader = BufferedReader(stringReader)
-            var line: String? = null
+            var line: String?
             try {
                 while (bufferedReader.readLine().also { line = it } != null) {
                     val split = parseSplit(line!!)

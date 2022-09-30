@@ -43,14 +43,14 @@ class CheckableLinearLayout : LinearLayout, Checkable {
      */
     private var mIsChecked = false
 
-    constructor(context: Context?) : super(context) {}
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
-    constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle) {}
+    constructor(context: Context?) : super(context)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
     /**
      * Find any instance of a [Checkable] amongst the children of the linear layout and store a reference to it
      */
-    override fun onFinishInflate() {
+    override fun onFinishInflate() {    // TODO: redundant? XJ
         super.onFinishInflate()
 
         //this prevents us from opening transactions since simply clicking on the item checks the checkable and

@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.Objects;
 
 /**
  * Moves all files from one directory  into another.
@@ -76,7 +77,7 @@ public class RecursiveMoveFiles implements Runnable {
         int copyCount = 0;
         if (src.isDirectory() && src.listFiles() != null){
             dst.mkdirs(); //we assume it works everytime. Great, right?
-            for (File file : src.listFiles()) {
+            for (File file : Objects.requireNonNull(src.listFiles())) {
                 File target = new File(dst, file.getName());
                  copyCount += recursiveMove(file, target);
             }

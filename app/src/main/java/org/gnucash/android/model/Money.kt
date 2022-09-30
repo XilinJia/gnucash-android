@@ -57,7 +57,7 @@ class Money : Comparable<Money> {
      * Rounding mode to be applied when performing operations
      * Defaults to [RoundingMode.HALF_EVEN]
      */
-    protected var ROUNDING_MODE = RoundingMode.HALF_EVEN
+    private var ROUNDING_MODE = RoundingMode.HALF_EVEN
 
     /**
      * Creates a new money amount
@@ -168,7 +168,7 @@ class Money : Comparable<Money> {
      * @return Scale of amount as integer
      */
     private val scale: Int
-        private get() {
+        get() {
             var scale = mCommodity!!.smallestFractionDigits()
             if (scale < 0) {
                 scale = mAmount!!.scale()
@@ -218,9 +218,8 @@ class Money : Comparable<Money> {
     @JvmOverloads
     fun formattedString(locale: Locale = Locale.getDefault()): String {
         val currencyFormat = NumberFormat.getCurrencyInstance(locale)
-        val symbol: String
         //if we want to show US Dollars for locales which also use Dollars, for example, Canada
-        symbol = if (mCommodity!!.equals(Commodity.USD) && locale != Locale.US) {
+        val symbol: String = if (mCommodity!! == Commodity.USD && locale != Locale.US) {
             "US$"
         } else {
             mCommodity!!.symbol
@@ -267,7 +266,7 @@ class Money : Comparable<Money> {
      * @throws CurrencyMismatchException if the `Money` objects to be added have different Currencies
      */
     fun add(addend: Money): Money {
-        if (!mCommodity!!.equals(addend.mCommodity)) throw CurrencyMismatchException()
+        if (mCommodity!! != addend.mCommodity) throw CurrencyMismatchException()
         val bigD = mAmount!!.add(addend.mAmount)
         return Money(bigD, mCommodity)
     }
@@ -281,7 +280,7 @@ class Money : Comparable<Money> {
      * @throws CurrencyMismatchException if the `Money` objects to be added have different Currencies
      */
     fun subtract(subtrahend: Money): Money {
-        if (!mCommodity!!.equals(subtrahend.mCommodity)) throw CurrencyMismatchException()
+        if (mCommodity!! != subtrahend.mCommodity) throw CurrencyMismatchException()
         val bigD = mAmount!!.subtract(subtrahend.mAmount)
         return Money(bigD, mCommodity)
     }
@@ -297,7 +296,7 @@ class Money : Comparable<Money> {
      * @throws CurrencyMismatchException if the `Money` objects to be added have different Currencies
      */
     fun divide(divisor: Money): Money {
-        if (!mCommodity!!.equals(divisor.mCommodity)) throw CurrencyMismatchException()
+        if (mCommodity!! != divisor.mCommodity) throw CurrencyMismatchException()
         val bigD = mAmount!!.divide(divisor.mAmount, mCommodity!!.smallestFractionDigits(), ROUNDING_MODE)
         return Money(bigD, mCommodity)
     }
@@ -322,7 +321,7 @@ class Money : Comparable<Money> {
      * @throws CurrencyMismatchException if the `Money` objects to be added have different Currencies
      */
     fun multiply(money: Money): Money {
-        if (!mCommodity!!.equals(money.mCommodity)) throw CurrencyMismatchException()
+        if (mCommodity!! != money.mCommodity) throw CurrencyMismatchException()
         val bigD = mAmount!!.multiply(money.mAmount)
         return Money(bigD, mCommodity)
     }
@@ -397,21 +396,21 @@ class Money : Comparable<Money> {
 
     /** //FIXME: equality failing for money objects
      * Two Money objects are only equal if their amount (value) and currencies are equal
-     * @param obj Object to compare with
+     * @param other Object to compare with
      * @return `true` if the objects are equal, `false` otherwise
      */
-    override fun equals(obj: Any?): Boolean {
-        if (this === obj) return true
-        if (obj == null) return false
-        if (javaClass != obj.javaClass) return false
-        val other = obj as Money
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null) return false
+        if (javaClass != other.javaClass) return false
+        val other = other as Money
         if (mAmount != other.mAmount) return false
-        return if (!mCommodity!!.equals(other.mCommodity)) false else true
+        return mCommodity!! == other.mCommodity
     }
 
-    override fun compareTo(another: Money): Int {
-        if (!mCommodity!!.equals(another.mCommodity)) throw CurrencyMismatchException()
-        return mAmount!!.compareTo(another.mAmount)
+    override fun compareTo(other: Money): Int {
+        if (mCommodity!! != other.mCommodity) throw CurrencyMismatchException()
+        return mAmount!!.compareTo(other.mAmount)
     }
 
     /**
@@ -469,11 +468,10 @@ class Money : Comparable<Money> {
 		@JvmStatic
 		fun getBigDecimal(numerator: Long, denominator: Long): BigDecimal {
             var denominator = denominator
-            val scale: Int
             if (numerator == 0L && denominator == 0L) {
                 denominator = 1
             }
-            scale = Integer.numberOfTrailingZeros(denominator.toInt())
+            val scale: Int = Integer.numberOfTrailingZeros(denominator.toInt())
             return BigDecimal(BigInteger.valueOf(numerator), scale)
         }
 

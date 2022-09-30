@@ -183,7 +183,7 @@ class BudgetFormFragment : Fragment(), OnRecurrenceSetListener, CalendarDatePick
      * @return `true` if the budget can be saved, `false` otherwise
      */
     private fun canSave(): Boolean {
-        if (mEventRecurrence.until != null && mEventRecurrence.until.length > 0
+        if (mEventRecurrence.until != null && mEventRecurrence.until.isNotEmpty()
             || mEventRecurrence.count <= 0
         ) {
             Toast.makeText(
@@ -195,8 +195,8 @@ class BudgetFormFragment : Fragment(), OnRecurrenceSetListener, CalendarDatePick
         }
         mBudgetAmounts = extractBudgetAmounts()
         val budgetName = mBudgetNameInput!!.text.toString()
-        val canSave = (mRecurrenceRule != null && !budgetName.isEmpty()
-                && !mBudgetAmounts!!.isEmpty())
+        val canSave = (mRecurrenceRule != null && budgetName.isNotEmpty()
+                && mBudgetAmounts!!.isNotEmpty())
         if (!canSave) {
             if (budgetName.isEmpty()) {
                 mNameTextInputLayout!!.error = "A name is required"
@@ -263,7 +263,7 @@ class BudgetFormFragment : Fragment(), OnRecurrenceSetListener, CalendarDatePick
         var dateMillis: Long = 0
         try {
             val date = TransactionFormFragment.DATE_FORMATTER.parse((v as TextView).text.toString())
-            dateMillis = date.time
+            dateMillis = date!!.time
         } catch (e: ParseException) {
             Log.e(tag, "Error converting input time to Date object")
         }
@@ -329,7 +329,7 @@ class BudgetFormFragment : Fragment(), OnRecurrenceSetListener, CalendarDatePick
         } else {
             mAddBudgetAmount!!.text = "Add Budget Amounts"
             mBudgetAmountLayout!!.visibility = View.VISIBLE
-            if (!mBudgetAmounts!!.isEmpty()) {
+            if (mBudgetAmounts!!.isNotEmpty()) {
                 val budgetAmount = mBudgetAmounts!![0]
                 mBudgetAmountInput!!.setValue(budgetAmount.mAmount!!.asBigDecimal())
                 mBudgetAccountSpinner!!.setSelection(mAccountsCursorAdapter!!.getPosition(budgetAmount.mAccountUID!!))

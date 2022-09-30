@@ -38,11 +38,10 @@ class TransactionTypeSwitch : SwitchCompat {
 
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(
         context!!, attrs, defStyle
-    ) {
-    }
+    )
 
-    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs) {}
-    constructor(context: Context?) : super(context!!) {}
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs)
+    constructor(context: Context?) : super(context!!) 
 
     /**
      * Set a checked change listener to monitor the amount view and currency views and update the display (color & balance accordingly)

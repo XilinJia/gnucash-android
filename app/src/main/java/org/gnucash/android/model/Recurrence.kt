@@ -289,8 +289,7 @@ class Recurrence(periodType: PeriodType) : BaseModel() {
         get() {
             if (mPeriodEnd == null) return -1
             val multiple = mMultiplier
-            val jodaPeriod: ReadablePeriod
-            jodaPeriod = when (mPeriodType) {
+            val jodaPeriod: ReadablePeriod = when (mPeriodType) {
                 PeriodType.HOUR -> Hours.hours(multiple)
                 PeriodType.DAY -> Days.days(multiple)
                 PeriodType.WEEK -> Weeks.weeks(multiple)

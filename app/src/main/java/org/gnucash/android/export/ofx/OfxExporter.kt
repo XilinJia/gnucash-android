@@ -24,7 +24,6 @@ import org.gnucash.android.R
 import org.gnucash.android.app.GnuCashApplication
 import org.gnucash.android.export.ExportParams
 import org.gnucash.android.export.Exporter
-import org.gnucash.android.export.Exporter.ExporterException
 import org.gnucash.android.model.Account
 import org.gnucash.android.util.PreferencesHelper
 import org.gnucash.android.util.TimestampHelper
@@ -108,8 +107,7 @@ class OfxExporter : Exporter {
     private fun generateOfxExport(): String {
         val docFactory = DocumentBuilderFactory
             .newInstance()
-        val docBuilder: DocumentBuilder
-        docBuilder = try {
+        val docBuilder: DocumentBuilder = try {
             docFactory.newDocumentBuilder()
         } catch (e: ParserConfigurationException) {
             throw ExporterException(mExportParams, e)
@@ -139,7 +137,7 @@ class OfxExporter : Exporter {
     }
 
     @Throws(ExporterException::class)
-    override fun generateExport(): List<String?>? {
+    override fun generateExport(): List<String> {
         mAccountsList = mAccountsDbAdapter!!.getExportableAccounts(mExportParams.exportStartTime)
         if (mAccountsList.isNullOrEmpty()) return ArrayList() // Nothing to export, so no files generated
         var writer: BufferedWriter? = null
@@ -158,7 +156,7 @@ class OfxExporter : Exporter {
                 }
             }
         }
-        val exportedFiles: MutableList<String?> = ArrayList()
+        val exportedFiles: MutableList<String> = ArrayList()
         exportedFiles.add(exportCacheFilePath)
         return exportedFiles
     }

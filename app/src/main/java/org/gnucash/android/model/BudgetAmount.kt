@@ -111,7 +111,7 @@ class BudgetAmount : BaseModel, Parcelable {
     companion object {
         @JvmField
         val CREATOR: Creator<BudgetAmount?> = object : Creator<BudgetAmount?> {
-            override fun createFromParcel(source: Parcel): BudgetAmount? {
+            override fun createFromParcel(source: Parcel): BudgetAmount {
                 return BudgetAmount(source)
             }
 

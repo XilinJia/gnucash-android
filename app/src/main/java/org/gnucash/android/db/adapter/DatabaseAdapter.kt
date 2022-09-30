@@ -85,8 +85,8 @@ abstract class DatabaseAdapter<Model : BaseModel>(
         //todo: would it be useful to add the split reconciled_state and reconciled_date to this view?
         mDb.execSQL(
             "CREATE TEMP VIEW IF NOT EXISTS trans_split_acct AS SELECT "
-                    + TransactionEntry.TABLE_NAME + "." + DatabaseSchema.CommonColumns.COLUMN_MODIFIED_AT + " AS "
-                    + TransactionEntry.TABLE_NAME + "_" + DatabaseSchema.CommonColumns.COLUMN_MODIFIED_AT + " , "
+                    + TransactionEntry.TABLE_NAME + "." + CommonColumns.COLUMN_MODIFIED_AT + " AS "
+                    + TransactionEntry.TABLE_NAME + "_" + CommonColumns.COLUMN_MODIFIED_AT + " , "
                     + TransactionEntry.TABLE_NAME + "." + TransactionEntry.COLUMN_UID + " AS "
                     + TransactionEntry.TABLE_NAME + "_" + TransactionEntry.COLUMN_UID + " , "
                     + TransactionEntry.TABLE_NAME + "." + TransactionEntry.COLUMN_DESCRIPTION + " AS "
@@ -207,7 +207,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      * @param updateMethod Method to use for adding the record
      */
     open fun addRecord(model: Model, updateMethod: UpdateMethod) {
-        Log.d(LOG_TAG, String.format("Adding %s record to database: ", model!!::class.java.getSimpleName()))
+        Log.d(LOG_TAG, String.format("Adding %s record to database: ", model::class.java.simpleName))
         when (updateMethod) {
             UpdateMethod.insert -> synchronized(insertStatement) { setBindings(insertStatement, model).execute() }
             UpdateMethod.update -> synchronized(updateStatement) { setBindings(updateStatement, model).execute() }
@@ -267,10 +267,10 @@ abstract class DatabaseAdapter<Model : BaseModel>(
         Log.i(
             LOG_TAG, String.format(
                 "Bulk adding %d %s records to the database", modelList.size,
-                if (modelList.size == 0) "null" else modelList[0]!!::class.java.getSimpleName()
+                modelList[0]::class.java.simpleName
             )
         )
-        var nRow: Long = 0
+        val nRow: Long
         try {
             mDb.beginTransaction()
             nRow = doAddModels(modelList, updateMethod)
@@ -299,7 +299,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      * @return SQLiteStatement for replacing a record in the database
      */
     protected val replaceStatement: SQLiteStatement
-        protected get() {
+        get() {
             var stmt = mReplaceStatement
             if (stmt == null) {
                 synchronized(this) {
@@ -308,7 +308,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
                         stmt = mDb.compileStatement(
                             "REPLACE INTO " + mTableName + " ( "
                                     + TextUtils.join(" , ", mColumns) + " , "
-                                    + DatabaseSchema.CommonColumns.COLUMN_UID
+                                    + CommonColumns.COLUMN_UID
                                     + " ) VALUES ( "
                                     + String(CharArray(mColumns.size)).replace("\u0000", "? , ")
                                     + "?)"
@@ -320,7 +320,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
             return stmt!!
         }
     protected val updateStatement: SQLiteStatement
-        protected get() {
+        get() {
             var stmt = mUpdateStatement
             if (stmt == null) {
                 synchronized(this) {
@@ -329,7 +329,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
                         stmt = mDb.compileStatement(
                             "UPDATE " + mTableName + " SET "
                                     + TextUtils.join(" = ? , ", mColumns) + " = ? WHERE "
-                                    + DatabaseSchema.CommonColumns.COLUMN_UID
+                                    + CommonColumns.COLUMN_UID
                                     + " = ?"
                         )
                         mUpdateStatement = stmt
@@ -339,7 +339,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
             return stmt!!
         }
     protected val insertStatement: SQLiteStatement
-        protected get() {
+        get() {
             var stmt = mInsertStatement
             if (stmt == null) {
                 synchronized(this) {
@@ -348,7 +348,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
                         stmt = mDb.compileStatement(
                             "INSERT INTO " + mTableName + " ( "
                                     + TextUtils.join(" , ", mColumns) + " , "
-                                    + DatabaseSchema.CommonColumns.COLUMN_UID
+                                    + CommonColumns.COLUMN_UID
                                     + " ) VALUES ( "
                                     + String(CharArray(mColumns.size)).replace("\u0000", "? , ")
                                     + "?)"
@@ -425,9 +425,9 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      * @return [android.content.ContentValues] with the data to be inserted into the db
      */
     protected fun extractBaseModelAttributes(contentValues: ContentValues, model: Model): ContentValues {
-        contentValues.put(DatabaseSchema.CommonColumns.COLUMN_UID, model!!.mUID)
+        contentValues.put(CommonColumns.COLUMN_UID, model.mUID)
         contentValues.put(
-            DatabaseSchema.CommonColumns.COLUMN_CREATED_AT, TimestampHelper.getUtcStringFromTimestamp(
+            CommonColumns.COLUMN_CREATED_AT, TimestampHelper.getUtcStringFromTimestamp(
                 model.mCreatedTimestamp
             )
         )
@@ -444,9 +444,9 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      * @param model Model instance to be initialized
      */
     protected fun populateBaseModelAttributes(cursor: Cursor, model: BaseModel) {
-        val uid = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.CommonColumns.COLUMN_UID))
-        val created = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.CommonColumns.COLUMN_CREATED_AT))
-        val modified = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.CommonColumns.COLUMN_MODIFIED_AT))
+        val uid = cursor.getString(cursor.getColumnIndexOrThrow(CommonColumns.COLUMN_UID))
+        val created = cursor.getString(cursor.getColumnIndexOrThrow(CommonColumns.COLUMN_CREATED_AT))
+        val modified = cursor.getString(cursor.getColumnIndexOrThrow(CommonColumns.COLUMN_MODIFIED_AT))
         model.mUID = uid
         model.mCreatedTimestamp = TimestampHelper.getTimestampFromUtcString(created)
         model.mModifiedTimestamp = TimestampHelper.getTimestampFromUtcString(modified)
@@ -459,7 +459,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      */
     fun fetchRecord(rowId: Long): Cursor {
         return mDb.query(
-            mTableName, null, DatabaseSchema.CommonColumns._ID + "=" + rowId,
+            mTableName, null, CommonColumns._ID + "=" + rowId,
             null, null, null, null
         )
     }
@@ -473,7 +473,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
         return mDb.query(
             mTableName,
             null,
-            DatabaseSchema.CommonColumns.COLUMN_UID + "=?",
+            CommonColumns.COLUMN_UID + "=?",
             arrayOf(uid),
             null,
             null,
@@ -507,7 +507,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      */
     open fun deleteRecord(rowId: Long): Boolean {
         Log.d(LOG_TAG, "Deleting record with id $rowId from $mTableName")
-        return mDb.delete(mTableName, DatabaseSchema.CommonColumns._ID + "=" + rowId, null) > 0
+        return mDb.delete(mTableName, CommonColumns._ID + "=" + rowId, null) > 0
     }
 
     /**
@@ -526,14 +526,13 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      */
     fun getID(uid: String): Long {
         val cursor = mDb.query(
-            mTableName, arrayOf(DatabaseSchema.CommonColumns._ID),
-            DatabaseSchema.CommonColumns.COLUMN_UID + " = ?", arrayOf(uid),
+            mTableName, arrayOf(CommonColumns._ID),
+            CommonColumns.COLUMN_UID + " = ?", arrayOf(uid),
             null, null, null
         )
-        var result: Long = -1
-        result = try {
+        val result: Long = try {
             if (cursor.moveToFirst()) {
-                cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseSchema.CommonColumns._ID))
+                cursor.getLong(cursor.getColumnIndexOrThrow(CommonColumns._ID))
             } else {
                 throw IllegalArgumentException("$mTableName with GUID $uid does not exist in the db")
             }
@@ -551,14 +550,13 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      */
     fun getUID(id: Long): String? {
         val cursor = mDb.query(
-            mTableName, arrayOf(DatabaseSchema.CommonColumns.COLUMN_UID),
-            DatabaseSchema.CommonColumns._ID + " = " + id,
+            mTableName, arrayOf(CommonColumns.COLUMN_UID),
+            CommonColumns._ID + " = " + id,
             null, null, null, null
         )
-        var uid: String? = null
-        uid = try {
+        val uid: String? = try {
             if (cursor.moveToFirst()) {
-                cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.CommonColumns.COLUMN_UID))
+                cursor.getString(cursor.getColumnIndexOrThrow(CommonColumns.COLUMN_UID))
             } else {
                 throw IllegalArgumentException("$mTableName Record ID $id does not exist in the db")
             }
@@ -597,15 +595,15 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      * @return GUID of commodity
      */
     fun getCommodityUID(currencyCode: String): String {
-        val where = DatabaseSchema.CommodityEntry.COLUMN_MNEMONIC + "= ?"
+        val where = CommodityEntry.COLUMN_MNEMONIC + "= ?"
         val whereArgs = arrayOf(currencyCode)
         val cursor = mDb.query(
-            DatabaseSchema.CommodityEntry.TABLE_NAME, arrayOf(DatabaseSchema.CommodityEntry.COLUMN_UID),
+            CommodityEntry.TABLE_NAME, arrayOf(CommodityEntry.COLUMN_UID),
             where, whereArgs, null, null, null
         )
         return try {
             if (cursor.moveToNext()) {
-                cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.CommodityEntry.COLUMN_UID))
+                cursor.getString(cursor.getColumnIndexOrThrow(CommodityEntry.COLUMN_UID))
             } else {
                 throw IllegalArgumentException("Currency code not found in commodities")
             }
@@ -621,7 +619,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      * @throws java.lang.IllegalArgumentException if accountUID does not exist in DB,
      */
     fun getAccountType(accountUID: String): AccountType {
-        var type = ""
+        val type: String
         val c = mDb.query(
             AccountEntry.TABLE_NAME, arrayOf(AccountEntry.COLUMN_TYPE),
             AccountEntry.COLUMN_UID + "=?", arrayOf(accountUID), null, null, null
@@ -654,7 +652,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
         }
         return mDb.update(
             tableName, contentValues,
-            DatabaseSchema.CommonColumns._ID + "=" + recordId, null
+            CommonColumns._ID + "=" + recordId, null
         )
     }
 
@@ -666,7 +664,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      * @return Number of records affected
      */
     fun updateRecord(uid: String, columnKey: String, newValue: String?): Int {
-        return updateRecords(DatabaseSchema.CommonColumns.COLUMN_UID + "= ?", arrayOf(uid), columnKey, newValue)
+        return updateRecords(CommonColumns.COLUMN_UID + "= ?", arrayOf(uid), columnKey, newValue)
     }
 
     /**
@@ -676,7 +674,7 @@ abstract class DatabaseAdapter<Model : BaseModel>(
      * @return Number of records updated
      */
     fun updateRecord(uid: String, contentValues: ContentValues): Int {
-        return mDb.update(mTableName, contentValues, DatabaseSchema.CommonColumns.COLUMN_UID + "=?", arrayOf(uid))
+        return mDb.update(mTableName, contentValues, CommonColumns.COLUMN_UID + "=?", arrayOf(uid))
     }
 
     /**

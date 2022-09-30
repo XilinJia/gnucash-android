@@ -180,7 +180,7 @@ object MigrationHelper {
     val moveExportedFilesToNewDefaultLocation = Runnable {
         val oldExportFolder = File(Environment.getExternalStorageDirectory().toString() + "/gnucash")
         if (oldExportFolder.exists()) {
-            for (src in oldExportFolder.listFiles()) {
+            for (src in oldExportFolder.listFiles()!!) {
                 if (src.isDirectory) continue
                 val dst = File(Exporter.LEGACY_BASE_FOLDER_PATH + "/exports/" + src.name)
                 try {
@@ -196,7 +196,7 @@ object MigrationHelper {
         }
         val oldBackupFolder = File(oldExportFolder, "backup")
         if (oldBackupFolder.exists()) {
-            for (src in File(oldExportFolder, "backup").listFiles()) {
+            for (src in File(oldExportFolder, "backup").listFiles()!!) {
                 val dst = File(Exporter.LEGACY_BASE_FOLDER_PATH + "/backups/" + src.name)
                 try {
                     moveFile(src, dst)
@@ -310,7 +310,7 @@ object MigrationHelper {
      * @return New database version (6) if upgrade successful, old version (5) if unsuccessful
      */
     fun upgradeDbToVersion6(db: SQLiteDatabase): Int {
-        var oldVersion = 5
+        val oldVersion: Int
         val addFullAccountNameQuery = (" ALTER TABLE " + AccountEntry.TABLE_NAME
                 + " ADD COLUMN " + AccountEntry.COLUMN_FULL_NAME + " varchar(255) ")
         db.execSQL(addFullAccountNameQuery)
@@ -344,7 +344,7 @@ object MigrationHelper {
      * @return The new database version if upgrade was successful, or the old db version if it failed
      */
     fun upgradeDbToVersion7(db: SQLiteDatabase): Int {
-        var oldVersion = 6
+        val oldVersion: Int
         db.beginTransaction()
         oldVersion = try {
             // backup transaction table
@@ -460,7 +460,7 @@ object MigrationHelper {
      */
     fun upgradeDbToVersion8(db: SQLiteDatabase): Int {
         Log.i(DatabaseHelper.LOG_TAG, "Upgrading database to version 8")
-        var oldVersion = 7
+        val oldVersion: Int
         File(Exporter.LEGACY_BASE_FOLDER_PATH + "/backups/").mkdirs()
         File(Exporter.LEGACY_BASE_FOLDER_PATH + "/exports/").mkdirs()
         //start moving the files in background thread before we do the database stuff
@@ -651,8 +651,8 @@ object MigrationHelper {
                 } else {
                     rootAccountUID = generateUID()
                     contentValues.clear()
-                    contentValues.put(DatabaseSchema.CommonColumns.COLUMN_UID, rootAccountUID)
-                    contentValues.put(DatabaseSchema.CommonColumns.COLUMN_CREATED_AT, timestamp)
+                    contentValues.put(CommonColumns.COLUMN_UID, rootAccountUID)
+                    contentValues.put(CommonColumns.COLUMN_CREATED_AT, timestamp)
                     contentValues.put(AccountEntry.COLUMN_NAME, "ROOT")
                     contentValues.put(AccountEntry.COLUMN_TYPE, "ROOT")
                     contentValues.put(AccountEntry.COLUMN_CURRENCY, Money.DEFAULT_CURRENCY_CODE)
@@ -699,8 +699,8 @@ object MigrationHelper {
                 //scheduledAction.setStartTime(timestampT.getTime()); //the start time is when the transaction was created
                 //scheduledAction.setLastRun(System.currentTimeMillis()); //prevent this from being executed at the end of migration
                 contentValues.clear()
-                contentValues.put(DatabaseSchema.CommonColumns.COLUMN_UID, generateUID())
-                contentValues.put(DatabaseSchema.CommonColumns.COLUMN_CREATED_AT, timestamp)
+                contentValues.put(CommonColumns.COLUMN_UID, generateUID())
+                contentValues.put(CommonColumns.COLUMN_CREATED_AT, timestamp)
                 contentValues.put(
                     ScheduledActionEntry.COLUMN_ACTION_UID,
                     cursor.getString(cursor.getColumnIndexOrThrow(TransactionEntry.COLUMN_UID))
@@ -778,8 +778,8 @@ object MigrationHelper {
                             } else {
                                 imbalanceAccountUID = generateUID()
                                 contentValues.clear()
-                                contentValues.put(DatabaseSchema.CommonColumns.COLUMN_UID, imbalanceAccountUID)
-                                contentValues.put(DatabaseSchema.CommonColumns.COLUMN_CREATED_AT, timestamp)
+                                contentValues.put(CommonColumns.COLUMN_UID, imbalanceAccountUID)
+                                contentValues.put(CommonColumns.COLUMN_CREATED_AT, timestamp)
                                 contentValues.put(AccountEntry.COLUMN_NAME, imbalanceAccountName)
                                 contentValues.put(AccountEntry.COLUMN_TYPE, "BANK")
                                 contentValues.put(AccountEntry.COLUMN_CURRENCY, currencyCode)
@@ -800,8 +800,8 @@ object MigrationHelper {
                         }
                         val TransactionUID = cursor.getString(cursor.getColumnIndexOrThrow("trans_uid"))
                         contentValues.clear()
-                        contentValues.put(DatabaseSchema.CommonColumns.COLUMN_UID, generateUID())
-                        contentValues.put(DatabaseSchema.CommonColumns.COLUMN_CREATED_AT, timestamp)
+                        contentValues.put(CommonColumns.COLUMN_UID, generateUID())
+                        contentValues.put(CommonColumns.COLUMN_CREATED_AT, timestamp)
                         contentValues.put("amount", decimalImbalance.abs().toPlainString())
                         contentValues.put(
                             SplitEntry.COLUMN_TYPE,
@@ -854,7 +854,7 @@ object MigrationHelper {
      */
     fun upgradeDbToVersion9(db: SQLiteDatabase): Int {
         Log.i(DatabaseHelper.LOG_TAG, "Upgrading database to version 9")
-        var oldVersion = 8
+        val oldVersion: Int
         db.beginTransaction()
         try {
             db.execSQL(
@@ -1101,7 +1101,7 @@ object MigrationHelper {
      */
     fun upgradeDbToVersion10(db: SQLiteDatabase): Int {
         Log.i(DatabaseHelper.LOG_TAG, "Upgrading database to version 9")
-        var oldVersion = 9
+        val oldVersion: Int
         db.beginTransaction()
         try {
             val cursor = db.query(
@@ -1155,7 +1155,7 @@ object MigrationHelper {
      */
     fun upgradeDbToVersion11(db: SQLiteDatabase): Int {
         Log.i(DatabaseHelper.LOG_TAG, "Upgrading database to version 9")
-        var oldVersion = 10
+        val oldVersion: Int
         db.beginTransaction()
         try {
             val cursor = db.query(
@@ -1251,7 +1251,7 @@ object MigrationHelper {
      */
     fun upgradeDbToVersion13(db: SQLiteDatabase): Int {
         Log.i(DatabaseHelper.LOG_TAG, "Upgrading database to version 13")
-        var oldVersion = 12
+        val oldVersion: Int
         db.beginTransaction()
         try {
             db.execSQL(
@@ -1532,7 +1532,7 @@ object MigrationHelper {
         }
         if (srcDir.listFiles() == null) //nothing to see here, move along
             return
-        for (src in srcDir.listFiles()) {
+        for (src in srcDir.listFiles()!!) {
             if (src.isDirectory) {
                 val dst = File(dstDir, src.name)
                 dst.mkdir()
@@ -1571,7 +1571,7 @@ object MigrationHelper {
             try {
                 moveDirectory(srcDir, dstDir)
                 val readmeFile = File(Exporter.LEGACY_BASE_FOLDER_PATH, "README.txt")
-                var writer: FileWriter? = null
+                val writer: FileWriter?
                 writer = FileWriter(readmeFile)
                 writer.write(
                     """
@@ -1611,7 +1611,7 @@ object MigrationHelper {
      */
     fun upgradeDbToVersion15(db: SQLiteDatabase): Int {
         Log.i(DatabaseHelper.LOG_TAG, "Upgrading database to version 15")
-        var dbVersion = 14
+        val dbVersion: Int
         db.beginTransaction()
         dbVersion = try {
             val contentValues = ContentValues()

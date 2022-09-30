@@ -165,9 +165,9 @@ object GncXmlHelper {
      */
     @JvmStatic
     @Throws(ParseException::class)
-    fun parseDate(dateString: String?): Long {
+    fun parseDate(dateString: String): Long {
         val date = TIME_FORMATTER.parse(dateString)
-        return date.time
+        return date!!.time
     }
 
     /**
@@ -203,7 +203,7 @@ object GncXmlHelper {
     fun formatSplitAmount(amount: BigDecimal, commodity: Commodity): String {
         val denomInt = commodity.mSmallestFraction
         val denom = BigDecimal(denomInt)
-        val denomString = Integer.toString(denomInt)
+        val denomString = denomInt.toString()
         val numerator =
             TransactionFormFragment.stripCurrencyFormatting(amount.multiply(denom).stripTrailingZeros().toPlainString())
         return "$numerator/$denomString"

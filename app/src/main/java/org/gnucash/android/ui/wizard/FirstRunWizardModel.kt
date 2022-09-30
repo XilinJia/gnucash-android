@@ -33,7 +33,7 @@ class FirstRunWizardModel(context: Context?) : AbstractWizardModel(context) {
         val defaultCurrencyCode = GnuCashApplication.defaultCurrencyCode
         val defaultCurrencyPage = BranchPage(this, mContext.getString(R.string.wizard_title_default_currency))
         val currencies = arrayOf(defaultCurrencyCode, "CHF", "EUR", "GBP", "USD")
-        val currencySet: Set<String> = TreeSet(Arrays.asList(*currencies))
+        val currencySet: Set<String> = TreeSet(mutableListOf(*currencies))
         defaultCurrencyPage.setChoices(*currencySet.toTypedArray())
         defaultCurrencyPage.isRequired = true
         defaultCurrencyPage.setValue(defaultCurrencyCode)

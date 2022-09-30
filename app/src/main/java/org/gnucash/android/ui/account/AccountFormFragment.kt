@@ -46,7 +46,6 @@ import org.gnucash.android.model.Account
 import org.gnucash.android.model.AccountType
 import org.gnucash.android.model.Money
 import org.gnucash.android.ui.colorpicker.ColorPickerDialog
-import org.gnucash.android.ui.colorpicker.ColorPickerSwatch
 import org.gnucash.android.ui.colorpicker.ColorPickerSwatch.OnColorSelectedListener
 import org.gnucash.android.ui.colorpicker.ColorSquare
 import org.gnucash.android.ui.common.UxArgument
@@ -237,7 +236,7 @@ class AccountFormFragment
             }
 
             override fun afterTextChanged(s: Editable) {
-                if (s.toString().length > 0) {
+                if (s.toString().isNotEmpty()) {
                     mTextInputLayout!!.isErrorEnabled = false
                 }
             }
@@ -253,11 +252,11 @@ class AccountFormFragment
             }
         }
         mParentAccountSpinner!!.isEnabled = false
-        mParentCheckBox!!.setOnCheckedChangeListener { buttonView, isChecked ->
+        mParentCheckBox!!.setOnCheckedChangeListener { _, isChecked ->
             mParentAccountSpinner!!.isEnabled = isChecked
         }
         mDefaultTransferAccountSpinner!!.isEnabled = false
-        mDefaultTransferAccountCheckBox!!.setOnCheckedChangeListener { compoundButton, isChecked ->
+        mDefaultTransferAccountCheckBox!!.setOnCheckedChangeListener { _, isChecked ->
             mDefaultTransferAccountSpinner!!.isEnabled = isChecked
         }
         mColorSquare!!.setOnClickListener { showColorPickerDialog() }
@@ -371,7 +370,7 @@ class AccountFormFragment
      */
     private fun setAccountTypeSelection(accountType: AccountType) {
         val accountTypeEntries = resources.getStringArray(R.array.key_account_type_entries)
-        val accountTypeIndex = Arrays.asList(*accountTypeEntries).indexOf(accountType.name)
+        val accountTypeIndex = listOf(*accountTypeEntries).indexOf(accountType.name)
         mAccountTypeSpinner!!.setSelection(accountTypeIndex)
     }
 
@@ -443,7 +442,7 @@ class AccountFormFragment
      * @return Integer array of colors used for accounts
      */
     private val accountColorOptions: IntArray
-        private get() {
+        get() {
             val res = resources
             val colorTypedArray = res.obtainTypedArray(R.array.account_colors)
             val colorOptions = IntArray(colorTypedArray.length())
@@ -533,7 +532,7 @@ class AccountFormFragment
         if (mAccount != null) {  //if editing an account
             mDescendantAccountUIDs = mAccountsDbAdapter!!.getDescendantAccountUIDs(mAccount!!.mUID, null, null)
             val rootAccountUID = mAccountsDbAdapter!!.orCreateGnuCashRootAccountUID
-            val descendantAccountUIDs: MutableList<String?> = ArrayList(mDescendantAccountUIDs)
+            val descendantAccountUIDs: MutableList<String?> = ArrayList(mDescendantAccountUIDs!!)
             if (rootAccountUID != null) descendantAccountUIDs.add(rootAccountUID)
             // limit cyclic account hierarchies.
             condition += (" AND (" + DatabaseSchema.AccountEntry.COLUMN_UID + " NOT IN ( '"
@@ -578,10 +577,10 @@ class AccountFormFragment
             }
 
             AccountType.TRADING -> "'" + AccountType.TRADING.name + "'"
-            AccountType.ROOT -> Arrays.toString(AccountType.values())
+            AccountType.ROOT -> AccountType.values().contentToString()
                 .replace("\\[|]".toRegex(), "")
 
-            else -> Arrays.toString(AccountType.values()).replace("\\[|]".toRegex(), "")
+//            else -> Arrays.toString(AccountType.values()).replace("\\[|]".toRegex(), "")  redundant by XJ
         }
     }
 
@@ -590,8 +589,8 @@ class AccountFormFragment
      * @return String list of all account types
      */
     private val accountTypeStringList: MutableList<String?>
-        private get() {
-            val accountTypes = Arrays.toString(AccountType.values()).replace("\\[|]".toRegex(), "").split(",".toRegex())
+        get() {
+            val accountTypes = AccountType.values().contentToString().replace("\\[|]".toRegex(), "").split(",".toRegex())
                 .dropLastWhile { it.isEmpty() }
                 .toTypedArray()
             val accountTypesList: MutableList<String?> = ArrayList()
@@ -650,7 +649,7 @@ class AccountFormFragment
         var nameChanged = false
         if (mAccount == null) {
             val name = enteredName
-            if (name.length == 0) {
+            if (name.isEmpty()) {
                 mTextInputLayout!!.isErrorEnabled = true
                 mTextInputLayout!!.error = getString(R.string.toast_no_account_name_entered)
                 return
@@ -696,17 +695,16 @@ class AccountFormFragment
         // update full names
         if (nameChanged || mDescendantAccountUIDs == null || newParentAccountId != parentAccountId) {
             // current account name changed or new Account or parent account changed
-            val newAccountFullName: String?
-            if (newParentAccountId == mRootAccountId) {
-                newAccountFullName = mAccount!!.mName
+            val newAccountFullName: String? = if (newParentAccountId == mRootAccountId) {
+                mAccount!!.mName
             } else {
-                newAccountFullName = mAccountsDbAdapter!!.getAccountFullName(newParentAccountUID!!) +
+                mAccountsDbAdapter!!.getAccountFullName(newParentAccountUID!!) +
                         AccountsDbAdapter.ACCOUNT_NAME_SEPARATOR + mAccount!!.mName
             }
             mAccount!!.mFullName = newAccountFullName
             if (mDescendantAccountUIDs != null) {
                 // modifying existing account, e.t. name changed and/or parent changed
-                if ((nameChanged || parentAccountId != newParentAccountId) && mDescendantAccountUIDs!!.size > 0) {
+                if ((nameChanged || parentAccountId != newParentAccountId) && mDescendantAccountUIDs!!.isNotEmpty()) {
                     // parent change, update all full names of descent accounts
                     accountsToUpdate.addAll(
                         mAccountsDbAdapter!!.getSimpleAccountList(
@@ -742,7 +740,7 @@ class AccountFormFragment
      * @return [org.gnucash.android.model.AccountType] currently selected
      */
     private val selectedAccountType: AccountType
-        private get() {
+        get() {
             val selectedAccountTypeIndex = mAccountTypeSpinner!!.selectedItemPosition
             val accountTypeEntries = resources.getStringArray(R.array.key_account_type_entries)
             return AccountType.valueOf(accountTypeEntries[selectedAccountTypeIndex])
@@ -753,7 +751,7 @@ class AccountFormFragment
      * @return Name of the account which has been entered in the EditText
      */
     private val enteredName: String
-        private get() = mNameEditText!!.text.toString().trim { it <= ' ' }
+        get() = mNameEditText!!.text.toString().trim { it <= ' ' }
 
     companion object {
         /**

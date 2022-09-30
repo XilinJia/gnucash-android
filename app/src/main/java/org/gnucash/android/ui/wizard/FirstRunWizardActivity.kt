@@ -93,10 +93,7 @@ class FirstRunWizardActivity : AppCompatActivity(), PageFragmentCallbacks, Revie
         mPager!!.adapter = mPagerAdapter
         mStepPagerStrip!!.setOnPageSelectedListener(OnPageSelectedListener { position ->
                 var position = position
-                position = Math.min(
-                    mPagerAdapter!!.count - 1,
-                    position
-                )
+                position = (mPagerAdapter!!.count - 1).coerceAtMost(position)
                 if (mPager!!.currentItem != position) {
                     mPager!!.currentItem = position
                 }
@@ -122,15 +119,19 @@ class FirstRunWizardActivity : AppCompatActivity(), PageFragmentCallbacks, Revie
                 mAccountOptions = getString(R.string.wizard_option_let_me_handle_it) //default value, do nothing
                 var feedbackOption = getString(R.string.wizard_option_disable_crash_reports)
                 for (reviewItem in reviewItems) {
-                    val title = reviewItem.title
-                    if (title == getString(R.string.wizard_title_default_currency)) {
-                        mCurrencyCode = reviewItem.displayValue
-                    } else if (title == getString(R.string.wizard_title_select_currency)) {
-                        mCurrencyCode = reviewItem.displayValue
-                    } else if (title == getString(R.string.wizard_title_account_setup)) {
-                        mAccountOptions = reviewItem.displayValue
-                    } else if (title == getString(R.string.wizard_title_feedback_options)) {
-                        feedbackOption = reviewItem.displayValue
+                    when (reviewItem.title) {
+                        getString(R.string.wizard_title_default_currency) -> {
+                            mCurrencyCode = reviewItem.displayValue
+                        }
+                        getString(R.string.wizard_title_select_currency) -> {
+                            mCurrencyCode = reviewItem.displayValue
+                        }
+                        getString(R.string.wizard_title_account_setup) -> {
+                            mAccountOptions = reviewItem.displayValue
+                        }
+                        getString(R.string.wizard_title_feedback_options) -> {
+                            feedbackOption = reviewItem.displayValue
+                        }
                     }
                 }
                 GnuCashApplication.setDefaultCurrencyCode(mCurrencyCode!!)
@@ -189,17 +190,21 @@ class FirstRunWizardActivity : AppCompatActivity(), PageFragmentCallbacks, Revie
      */
     private fun createAccountsAndFinish() {
         removeFirstRunFlag()
-        if (mAccountOptions == getString(R.string.wizard_option_create_default_accounts)) {
-            //save the UID of the active book, and then delete it after successful import
-            val bookUID = instance.activeBookUID
-            createDefaultAccounts(mCurrencyCode, this@FirstRunWizardActivity)
-            instance.deleteBook(bookUID) //a default book is usually created
-            finish()
-        } else if (mAccountOptions == getString(R.string.wizard_option_import_my_accounts)) {
-            startXmlFileChooser(this)
-        } else { //user prefers to handle account creation themselves
-            start(this)
-            finish()
+        when (mAccountOptions) {
+            getString(R.string.wizard_option_create_default_accounts) -> {
+                //save the UID of the active book, and then delete it after successful import
+                val bookUID = instance.activeBookUID
+                createDefaultAccounts(mCurrencyCode, this@FirstRunWizardActivity)
+                instance.deleteBook(bookUID) //a default book is usually created
+                finish()
+            }
+            getString(R.string.wizard_option_import_my_accounts) -> {
+                startXmlFileChooser(this)
+            }
+            else -> { //user prefers to handle account creation themselves
+                start(this)
+                finish()
+            }
         }
     }
 
@@ -230,7 +235,7 @@ class FirstRunWizardActivity : AppCompatActivity(), PageFragmentCallbacks, Revie
             mNextButton!!.setTextColor(ContextCompat.getColor(this, R.color.theme_accent))
             mNextButton!!.isEnabled = position != mPagerAdapter!!.cutOffPage
         }
-        mPrevButton!!.setVisibility(if (position <= 0) View.INVISIBLE else View.VISIBLE)
+        mPrevButton!!.visibility = if (position <= 0) View.INVISIBLE else View.VISIBLE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -333,7 +338,7 @@ class FirstRunWizardActivity : AppCompatActivity(), PageFragmentCallbacks, Revie
         }
 
         override fun getCount(): Int {
-            return Math.min(mCutOffPage + 1, if (mCurrentPageSequence == null) 1 else mCurrentPageSequence!!.size + 1)
+            return (mCutOffPage + 1).coerceAtMost(if (mCurrentPageSequence == null) 1 else mCurrentPageSequence!!.size + 1)
         }
 
         var cutOffPage: Int

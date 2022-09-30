@@ -40,7 +40,6 @@ enum class ExportFormat(
             OFX -> ".ofx"
             XML -> ".gnca"
             CSVA, CSVT -> ".csv"
-            else -> ".txt"
         }
 
     override fun toString(): String {

@@ -86,13 +86,13 @@ abstract class BaseModel {
 
     /**
      * Two instances are considered equal if their GUID's are the same
-     * @param o BaseModel instance to compare
+     * @param other BaseModel instance to compare
      * @return `true` if both instances are equal, `false` otherwise
      */
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o !is BaseModel) return false
-        return mUID == o.mUID
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is BaseModel) return false
+        return mUID == other.mUID
     }
 
     override fun hashCode(): Int {

@@ -100,7 +100,7 @@ class AccountsActivity : BaseDrawerActivity(), OnAccountClickedListener {
     ) {
         override fun getItem(i: Int): Fragment {
             var currentFragment = mFragmentPageReferenceMap[i] as AccountsListFragment
-            if (currentFragment == null) {
+            if (currentFragment == null) {  // TODO: this is always false? XJ
                 currentFragment = when (i) {
                     INDEX_RECENT_ACCOUNTS_FRAGMENT -> AccountsListFragment.newInstance(
                         AccountsListFragment.DisplayMode.RECENT
@@ -126,7 +126,7 @@ class AccountsActivity : BaseDrawerActivity(), OnAccountClickedListener {
             mFragmentPageReferenceMap.remove(position)
         }
 
-        override fun getPageTitle(position: Int): CharSequence? {
+        override fun getPageTitle(position: Int): CharSequence {
             return when (position) {
                 INDEX_RECENT_ACCOUNTS_FRAGMENT -> getString(R.string.title_recent_accounts)
                 INDEX_FAVORITE_ACCOUNTS_FRAGMENT -> getString(R.string.title_favorite_accounts)
@@ -140,11 +140,12 @@ class AccountsActivity : BaseDrawerActivity(), OnAccountClickedListener {
         }
     }
 
-    val currentAccountListFragment: AccountsListFragment?
+    val currentAccountListFragment: AccountsListFragment
         get() {
             val index = mViewPager!!.currentItem
             var fragment = mFragmentPageReferenceMap[index] as Fragment
-            if (fragment == null) fragment = mPagerAdapter!!.getItem(index)
+            if (fragment == null) // TODO: always false?  XJ
+                fragment = mPagerAdapter!!.getItem(index)
             return fragment as AccountsListFragment
         }
     override val contentView: Int
@@ -319,7 +320,7 @@ class AccountsActivity : BaseDrawerActivity(), OnAccountClickedListener {
         /**
          * Logging tag
          */
-        protected const val LOG_TAG = "AccountsActivity"
+        private const val LOG_TAG = "AccountsActivity"
 
         /**
          * Number of pages to show
@@ -375,7 +376,7 @@ class AccountsActivity : BaseDrawerActivity(), OnAccountClickedListener {
             return AlertDialog.Builder(context)
                 .setTitle(releaseTitle.toString())
                 .setMessage(R.string.whats_new)
-                .setPositiveButton(R.string.label_dismiss) { dialog, which -> dialog.dismiss() }.show()
+                .setPositiveButton(R.string.label_dismiss) { dialog, _ -> dialog.dismiss() }.show()
         }
 
         /**

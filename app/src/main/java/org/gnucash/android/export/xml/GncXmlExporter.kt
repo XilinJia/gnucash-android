@@ -19,14 +19,12 @@ package org.gnucash.android.export.xml
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.crashlytics.android.Crashlytics
-import org.gnucash.android.db.DatabaseSchema
 import org.gnucash.android.db.DatabaseSchema.*
 import org.gnucash.android.db.adapter.CommoditiesDbAdapter
 import org.gnucash.android.db.adapter.RecurrenceDbAdapter
 import org.gnucash.android.db.adapter.TransactionsDbAdapter
 import org.gnucash.android.export.ExportParams
 import org.gnucash.android.export.Exporter
-import org.gnucash.android.export.Exporter.ExporterException
 import org.gnucash.android.model.*
 import org.gnucash.android.model.BaseModel.Companion.generateUID
 import org.gnucash.android.model.Money.Companion.getBigDecimal
@@ -76,7 +74,7 @@ class GncXmlExporter : Exporter {
         slotType: List<String>?,
         slotValue: List<String>?
     ) {
-        if (slotKey == null || slotType == null || slotValue == null || slotKey.size == 0 || slotType.size != slotKey.size || slotValue.size != slotKey.size) {
+        if (slotKey == null || slotType == null || slotValue == null || slotKey.isEmpty() || slotType.size != slotKey.size || slotValue.size != slotKey.size) {
             return
         }
         for (i in slotKey.indices) {
@@ -97,23 +95,23 @@ class GncXmlExporter : Exporter {
         // gnucash desktop requires that parent account appears before its descendants.
         // sort by full-name to fulfill the request
         val cursor =
-            mAccountsDbAdapter!!.fetchAccounts(null, null, DatabaseSchema.AccountEntry.COLUMN_FULL_NAME + " ASC")
+            mAccountsDbAdapter!!.fetchAccounts(null, null, AccountEntry.COLUMN_FULL_NAME + " ASC")
         while (cursor.moveToNext()) {
             // write account
             xmlSerializer.startTag(null, GncXmlHelper.TAG_ACCOUNT)
             xmlSerializer.attribute(null, GncXmlHelper.ATTR_KEY_VERSION, GncXmlHelper.BOOK_VERSION)
             // account name
             xmlSerializer.startTag(null, GncXmlHelper.TAG_ACCT_NAME)
-            xmlSerializer.text(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_NAME)))
+            xmlSerializer.text(cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_NAME)))
             xmlSerializer.endTag(null, GncXmlHelper.TAG_ACCT_NAME)
             // account guid
             xmlSerializer.startTag(null, GncXmlHelper.TAG_ACCT_ID)
             xmlSerializer.attribute(null, GncXmlHelper.ATTR_KEY_TYPE, GncXmlHelper.ATTR_VALUE_GUID)
-            xmlSerializer.text(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_UID)))
+            xmlSerializer.text(cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_UID)))
             xmlSerializer.endTag(null, GncXmlHelper.TAG_ACCT_ID)
             // account type
             xmlSerializer.startTag(null, GncXmlHelper.TAG_ACCT_TYPE)
-            val acct_type = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_TYPE))
+            val acct_type = cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_TYPE))
             xmlSerializer.text(acct_type)
             xmlSerializer.endTag(null, GncXmlHelper.TAG_ACCT_TYPE)
             // commodity
@@ -123,18 +121,18 @@ class GncXmlExporter : Exporter {
             xmlSerializer.endTag(null, GncXmlHelper.TAG_COMMODITY_SPACE)
             xmlSerializer.startTag(null, GncXmlHelper.TAG_COMMODITY_ID)
             val acctCurrencyCode =
-                cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_CURRENCY))
+                cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_CURRENCY))
             xmlSerializer.text(acctCurrencyCode)
             xmlSerializer.endTag(null, GncXmlHelper.TAG_COMMODITY_ID)
             xmlSerializer.endTag(null, GncXmlHelper.TAG_ACCT_COMMODITY)
             // commodity scu
             val commodity = CommoditiesDbAdapter.instance.getCommodity(acctCurrencyCode)!!
             xmlSerializer.startTag(null, GncXmlHelper.TAG_COMMODITY_SCU)
-            xmlSerializer.text(Integer.toString(commodity.mSmallestFraction))
+            xmlSerializer.text(commodity.mSmallestFraction.toString())
             xmlSerializer.endTag(null, GncXmlHelper.TAG_COMMODITY_SCU)
             // account description
             val description =
-                cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_DESCRIPTION))
+                cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_DESCRIPTION))
             if (description != null && description != "") {
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_ACCT_DESCRIPTION)
                 xmlSerializer.text(description)
@@ -146,31 +144,31 @@ class GncXmlExporter : Exporter {
             val slotValue = ArrayList<String>()
             slotKey.add(GncXmlHelper.KEY_PLACEHOLDER)
             slotType.add(GncXmlHelper.ATTR_VALUE_STRING)
-            slotValue.add(java.lang.Boolean.toString(cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_PLACEHOLDER)) != 0))
-            val color = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_COLOR_CODE))
-            if (color != null && color.length > 0) {
+            slotValue.add(java.lang.Boolean.toString(cursor.getInt(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_PLACEHOLDER)) != 0))
+            val color = cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_COLOR_CODE))
+            if (color != null && color.isNotEmpty()) {
                 slotKey.add(GncXmlHelper.KEY_COLOR)
                 slotType.add(GncXmlHelper.ATTR_VALUE_STRING)
                 slotValue.add(color)
             }
             val defaultTransferAcctUID =
-                cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_DEFAULT_TRANSFER_ACCOUNT_UID))
-            if (defaultTransferAcctUID != null && defaultTransferAcctUID.length > 0) {
+                cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_DEFAULT_TRANSFER_ACCOUNT_UID))
+            if (defaultTransferAcctUID != null && defaultTransferAcctUID.isNotEmpty()) {
                 slotKey.add(GncXmlHelper.KEY_DEFAULT_TRANSFER_ACCOUNT)
                 slotType.add(GncXmlHelper.ATTR_VALUE_STRING)
                 slotValue.add(defaultTransferAcctUID)
             }
             slotKey.add(GncXmlHelper.KEY_FAVORITE)
             slotType.add(GncXmlHelper.ATTR_VALUE_STRING)
-            slotValue.add(java.lang.Boolean.toString(cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_FAVORITE)) != 0))
+            slotValue.add(java.lang.Boolean.toString(cursor.getInt(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_FAVORITE)) != 0))
             xmlSerializer.startTag(null, GncXmlHelper.TAG_ACCT_SLOTS)
             exportSlots(xmlSerializer, slotKey, slotType, slotValue)
             xmlSerializer.endTag(null, GncXmlHelper.TAG_ACCT_SLOTS)
 
             // parent uid
             val parentUID =
-                cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_PARENT_ACCOUNT_UID))
-            if (acct_type != "ROOT" && parentUID != null && parentUID.length > 0) {
+                cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_PARENT_ACCOUNT_UID))
+            if (acct_type != "ROOT" && parentUID != null && parentUID.isNotEmpty()) {
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_PARENT_UID)
                 xmlSerializer.attribute(null, GncXmlHelper.ATTR_KEY_TYPE, GncXmlHelper.ATTR_VALUE_GUID)
                 xmlSerializer.text(parentUID)
@@ -178,7 +176,7 @@ class GncXmlExporter : Exporter {
             } else {
                 Log.d(
                     "export",
-                    "root account : " + cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.AccountEntry.COLUMN_UID))
+                    "root account : " + cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUMN_UID))
                 )
             }
             xmlSerializer.endTag(null, GncXmlHelper.TAG_ACCOUNT)
@@ -349,13 +347,13 @@ class GncXmlExporter : Exporter {
                 val slotType = ArrayList<String>()
                 val slotValue = ArrayList<String>()
                 val notes = cursor.getString(cursor.getColumnIndexOrThrow("trans_notes"))
-                if (notes != null && notes.length > 0) {
+                if (notes != null && notes.isNotEmpty()) {
                     slotKey.add(GncXmlHelper.KEY_NOTES)
                     slotType.add(GncXmlHelper.ATTR_VALUE_STRING)
                     slotValue.add(notes)
                 }
                 val scheduledActionUID = cursor.getString(cursor.getColumnIndexOrThrow("trans_from_sched_action"))
-                if (scheduledActionUID != null && !scheduledActionUID.isEmpty()) {
+                if (scheduledActionUID != null && scheduledActionUID.isNotEmpty()) {
                     slotKey.add(GncXmlHelper.KEY_FROM_SCHED_ACTION)
                     slotType.add(GncXmlHelper.ATTR_VALUE_GUID)
                     slotValue.add(scheduledActionUID)
@@ -375,7 +373,7 @@ class GncXmlExporter : Exporter {
             xmlSerializer.endTag(null, GncXmlHelper.TAG_SPLIT_ID)
             // memo
             val memo = cursor.getString(cursor.getColumnIndexOrThrow("split_memo"))
-            if (memo != null && memo.length > 0) {
+            if (memo != null && memo.isNotEmpty()) {
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_SPLIT_MEMO)
                 xmlSerializer.text(memo)
                 xmlSerializer.endTag(null, GncXmlHelper.TAG_SPLIT_MEMO)
@@ -409,8 +407,7 @@ class GncXmlExporter : Exporter {
             // account guid
             xmlSerializer.startTag(null, GncXmlHelper.TAG_SPLIT_ACCOUNT)
             xmlSerializer.attribute(null, GncXmlHelper.ATTR_KEY_TYPE, GncXmlHelper.ATTR_VALUE_GUID)
-            var splitAccountUID: String?
-            splitAccountUID = if (exportTemplates) {
+            var splitAccountUID: String? = if (exportTemplates) {
                 //get the UID of the template account
                 mTransactionToTemplateAccountMap[curTrxUID]!!.mUID
             } else {
@@ -508,15 +505,15 @@ class GncXmlExporter : Exporter {
             xmlSerializer.text(if (scheduledAction.shouldAutoNotify()) "y" else "n")
             xmlSerializer.endTag(null, GncXmlHelper.TAG_SX_AUTO_CREATE_NOTIFY)
             xmlSerializer.startTag(null, GncXmlHelper.TAG_SX_ADVANCE_CREATE_DAYS)
-            xmlSerializer.text(Integer.toString(scheduledAction.mAdvanceCreateDays))
+            xmlSerializer.text(scheduledAction.mAdvanceCreateDays.toString())
             xmlSerializer.endTag(null, GncXmlHelper.TAG_SX_ADVANCE_CREATE_DAYS)
             xmlSerializer.startTag(null, GncXmlHelper.TAG_SX_ADVANCE_REMIND_DAYS)
-            xmlSerializer.text(Integer.toString(scheduledAction.mAdvanceNotifyDays))
+            xmlSerializer.text(scheduledAction.mAdvanceNotifyDays.toString())
             xmlSerializer.endTag(null, GncXmlHelper.TAG_SX_ADVANCE_REMIND_DAYS)
             xmlSerializer.startTag(null, GncXmlHelper.TAG_SX_INSTANCE_COUNT)
             val scheduledActionUID = cursor.getString(cursor.getColumnIndexOrThrow(ScheduledActionEntry.COLUMN_UID))
             val instanceCount = mScheduledActionDbAdapter!!.getActionInstanceCount(scheduledActionUID)
-            xmlSerializer.text(java.lang.Long.toString(instanceCount))
+            xmlSerializer.text(instanceCount.toString())
             xmlSerializer.endTag(null, GncXmlHelper.TAG_SX_INSTANCE_COUNT)
 
             //start date
@@ -536,18 +533,18 @@ class GncXmlExporter : Exporter {
                 val totalFrequency =
                     cursor.getInt(cursor.getColumnIndexOrThrow(ScheduledActionEntry.COLUMN_TOTAL_FREQUENCY))
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_SX_NUM_OCCUR)
-                xmlSerializer.text(Integer.toString(totalFrequency))
+                xmlSerializer.text(totalFrequency.toString())
                 xmlSerializer.endTag(null, GncXmlHelper.TAG_SX_NUM_OCCUR)
 
                 //remaining occurrences
                 val executionCount =
                     cursor.getInt(cursor.getColumnIndexOrThrow(ScheduledActionEntry.COLUMN_EXECUTION_COUNT))
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_SX_REM_OCCUR)
-                xmlSerializer.text(Integer.toString(totalFrequency - executionCount))
+                xmlSerializer.text((totalFrequency - executionCount).toString())
                 xmlSerializer.endTag(null, GncXmlHelper.TAG_SX_REM_OCCUR)
             }
             val tag = cursor.getString(cursor.getColumnIndexOrThrow(ScheduledActionEntry.COLUMN_TAG))
-            if (tag != null && !tag.isEmpty()) {
+            if (tag != null && tag.isNotEmpty()) {
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_SX_TAG)
                 xmlSerializer.text(tag)
                 xmlSerializer.endTag(null, GncXmlHelper.TAG_SX_TAG)
@@ -614,7 +611,7 @@ class GncXmlExporter : Exporter {
                 // GUID
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_PRICE_ID)
                 xmlSerializer.attribute(null, GncXmlHelper.ATTR_KEY_TYPE, GncXmlHelper.ATTR_VALUE_GUID)
-                xmlSerializer.text(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.CommonColumns.COLUMN_UID)))
+                xmlSerializer.text(cursor.getString(cursor.getColumnIndexOrThrow(CommonColumns.COLUMN_UID)))
                 xmlSerializer.endTag(null, GncXmlHelper.TAG_PRICE_ID)
                 // commodity
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_PRICE_COMMODITY)
@@ -626,7 +623,7 @@ class GncXmlExporter : Exporter {
                     mCommoditiesDbAdapter!!.getMMnemonic(
                         cursor.getString(
                             cursor.getColumnIndexOrThrow(
-                                DatabaseSchema.PriceEntry.COLUMN_COMMODITY_UID
+                                PriceEntry.COLUMN_COMMODITY_UID
                             )
                         )
                     )
@@ -643,7 +640,7 @@ class GncXmlExporter : Exporter {
                     mCommoditiesDbAdapter!!.getMMnemonic(
                         cursor.getString(
                             cursor.getColumnIndexOrThrow(
-                                DatabaseSchema.PriceEntry.COLUMN_CURRENCY_UID
+                                PriceEntry.COLUMN_CURRENCY_UID
                             )
                         )
                     )
@@ -665,10 +662,10 @@ class GncXmlExporter : Exporter {
                 xmlSerializer.endTag(null, GncXmlHelper.TAG_PRICE_TIME)
                 // source
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_PRICE_SOURCE)
-                xmlSerializer.text(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.PriceEntry.COLUMN_SOURCE)))
+                xmlSerializer.text(cursor.getString(cursor.getColumnIndexOrThrow(PriceEntry.COLUMN_SOURCE)))
                 xmlSerializer.endTag(null, GncXmlHelper.TAG_PRICE_SOURCE)
                 // type, optional
-                val type = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseSchema.PriceEntry.COLUMN_TYPE))
+                val type = cursor.getString(cursor.getColumnIndexOrThrow(PriceEntry.COLUMN_TYPE))
                 if (type != null && type != "") {
                     xmlSerializer.startTag(null, GncXmlHelper.TAG_PRICE_TYPE)
                     xmlSerializer.text(type)
@@ -677,8 +674,8 @@ class GncXmlExporter : Exporter {
                 // value
                 xmlSerializer.startTag(null, GncXmlHelper.TAG_PRICE_VALUE)
                 xmlSerializer.text(
-                    cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseSchema.PriceEntry.COLUMN_VALUE_NUM))
-                        .toString() + "/" + cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseSchema.PriceEntry.COLUMN_VALUE_DENOM))
+                    cursor.getLong(cursor.getColumnIndexOrThrow(PriceEntry.COLUMN_VALUE_NUM))
+                        .toString() + "/" + cursor.getLong(cursor.getColumnIndexOrThrow(PriceEntry.COLUMN_VALUE_DENOM))
                 )
                 xmlSerializer.endTag(null, GncXmlHelper.TAG_PRICE_VALUE)
                 xmlSerializer.endTag(null, GncXmlHelper.TAG_PRICE)
@@ -728,7 +725,7 @@ class GncXmlExporter : Exporter {
             xmlSerializer.text(if (budget.mDescription == null) "" else budget.mDescription)
             xmlSerializer.endTag(null, GncXmlHelper.TAG_BUDGET_DESCRIPTION)
             xmlSerializer.startTag(null, GncXmlHelper.TAG_BUDGET_NUM_PERIODS)
-            xmlSerializer.text(java.lang.Long.toString(budget.mNumberOfPeriods))
+            xmlSerializer.text(budget.mNumberOfPeriods.toString())
             xmlSerializer.endTag(null, GncXmlHelper.TAG_BUDGET_NUM_PERIODS)
             xmlSerializer.startTag(null, GncXmlHelper.TAG_BUDGET_RECURRENCE)
             exportRecurrence(xmlSerializer, budget.mRecurrence)
@@ -767,7 +764,7 @@ class GncXmlExporter : Exporter {
     }
 
     @Throws(ExporterException::class)
-    override fun generateExport(): List<String?>? {
+    override fun generateExport(): List<String> {
         var writer: OutputStreamWriter? = null
         val outputFile = exportCacheFilePath
         try {
@@ -787,7 +784,7 @@ class GncXmlExporter : Exporter {
                 }
             }
         }
-        val exportedFiles: MutableList<String?> = ArrayList()
+        val exportedFiles: MutableList<String> = ArrayList()
         exportedFiles.add(outputFile)
         return exportedFiles
     }

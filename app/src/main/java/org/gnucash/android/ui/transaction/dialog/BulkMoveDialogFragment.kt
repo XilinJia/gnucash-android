@@ -117,7 +117,7 @@ class BulkMoveDialogFragment : DialogFragment() {
     /**
      * Binds click listeners for the dialog buttons
      */
-    protected fun setListeners() {
+    private fun setListeners() {
         mCancelButton!!.setOnClickListener { dismiss() }
         mOkButton!!.setOnClickListener(View.OnClickListener {
             if (mTransactionIds == null) {

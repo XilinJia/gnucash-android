@@ -73,7 +73,7 @@ import java.util.*
  * @author Ngewi Fet <ngewif></ngewif>@gmail.com>
  * @author Xilin Jia <https://github.com/XilinJia> [Kotlin code created (Copyright (C) 2022)]
  */
-class ExportFormFragment() : Fragment(), OnRecurrenceSetListener, CalendarDatePickerDialogFragment.OnDateSetListener,
+class ExportFormFragment : Fragment(), OnRecurrenceSetListener, CalendarDatePickerDialogFragment.OnDateSetListener,
     RadialTimePickerDialogFragment.OnTimeSetListener {
     /**
      * Spinner for selecting destination for the exported file.
@@ -259,18 +259,18 @@ class ExportFormFragment() : Fragment(), OnRecurrenceSetListener, CalendarDatePi
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        return when (item.itemId) {
             R.id.menu_save -> {
                 startExport()
-                return true
+                true
             }
 
             android.R.id.home -> {
                 activity!!.finish()
-                return true
+                true
             }
 
-            else -> return super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -347,8 +347,6 @@ class ExportFormFragment() : Fragment(), OnRecurrenceSetListener, CalendarDatePi
         mDestinationSpinner!!.adapter = adapter
         mDestinationSpinner!!.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
-                if (view == null) //the item selection is fired twice by the Android framework. Ignore the first one
-                    return
                 when (position) {
                     0 -> {
                         mExportTarget = ExportTarget.URI
@@ -407,7 +405,7 @@ class ExportFormFragment() : Fragment(), OnRecurrenceSetListener, CalendarDatePi
             var dateMillis: Long = 0
             try {
                 val date = TransactionFormFragment.DATE_FORMATTER.parse(mExportStartDate!!.text.toString())
-                dateMillis = date.time
+                dateMillis = date!!.time
             } catch (e: ParseException) {
                 Log.e(tag, "Error converting input time to Date object")
             }
@@ -421,36 +419,32 @@ class ExportFormFragment() : Fragment(), OnRecurrenceSetListener, CalendarDatePi
             datePickerDialog.setPreselectedDate(year, monthOfYear, dayOfMonth)
             datePickerDialog.show((fragmentManager)!!, "date_picker_fragment")
         })
-        mExportStartTime!!.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View) {
-                var timeMillis: Long = 0
-                try {
-                    val date = TransactionFormFragment.TIME_FORMATTER.parse(mExportStartTime!!.text.toString())
-                    timeMillis = date.time
-                } catch (e: ParseException) {
-                    Log.e(tag, "Error converting input time to Date object")
-                }
-                val calendar = Calendar.getInstance()
-                calendar.timeInMillis = timeMillis
-                val timePickerDialog = RadialTimePickerDialogFragment()
-                timePickerDialog.setOnTimeSetListener(this@ExportFormFragment)
-                timePickerDialog.setStartTime(
-                    calendar[Calendar.HOUR_OF_DAY],
-                    calendar[Calendar.MINUTE]
-                )
-                timePickerDialog.show((fragmentManager)!!, "time_picker_dialog_fragment")
+        mExportStartTime!!.setOnClickListener {
+            var timeMillis: Long = 0
+            try {
+                val date = TransactionFormFragment.TIME_FORMATTER.parse(mExportStartTime!!.text.toString())
+                timeMillis = date!!.time
+            } catch (e: ParseException) {
+                Log.e(tag, "Error converting input time to Date object")
             }
-        })
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = timeMillis
+            val timePickerDialog = RadialTimePickerDialogFragment()
+            timePickerDialog.setOnTimeSetListener(this@ExportFormFragment)
+            timePickerDialog.setStartTime(
+                calendar[Calendar.HOUR_OF_DAY],
+                calendar[Calendar.MINUTE]
+            )
+            timePickerDialog.show((fragmentManager)!!, "time_picker_dialog_fragment")
+        }
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        mExportAllSwitch!!.setOnCheckedChangeListener(object : CompoundButton.OnCheckedChangeListener {
-            override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-                mExportStartDate!!.isEnabled = !isChecked
-                mExportStartTime!!.isEnabled = !isChecked
-                val color = if (isChecked) android.R.color.darker_gray else android.R.color.black
-                mExportStartDate!!.setTextColor(ContextCompat.getColor((context)!!, color))
-                mExportStartTime!!.setTextColor(ContextCompat.getColor((context)!!, color))
-            }
-        })
+        mExportAllSwitch!!.setOnCheckedChangeListener { _, isChecked ->
+            mExportStartDate!!.isEnabled = !isChecked
+            mExportStartTime!!.isEnabled = !isChecked
+            val color = if (isChecked) android.R.color.darker_gray else android.R.color.black
+            mExportStartDate!!.setTextColor(ContextCompat.getColor((context)!!, color))
+            mExportStartTime!!.setTextColor(ContextCompat.getColor((context)!!, color))
+        }
         mExportAllSwitch!!.isChecked = sharedPrefs.getBoolean(getString(R.string.key_export_all_transactions), false)
         mDeleteAllCheckBox!!.isChecked =
             sharedPrefs.getBoolean(getString(R.string.key_delete_transactions_after_export), false)
@@ -466,11 +460,7 @@ class ExportFormFragment() : Fragment(), OnRecurrenceSetListener, CalendarDatePi
         val defaultExportFormat =
             sharedPrefs.getString(getString(R.string.key_default_export_format), ExportFormat.CSVT.name)
         mExportFormat = ExportFormat.valueOf((defaultExportFormat)!!)
-        val radioClickListener: View.OnClickListener = object : View.OnClickListener {
-            override fun onClick(view: View) {
-                onRadioButtonClicked(view)
-            }
-        }
+        val radioClickListener: View.OnClickListener = View.OnClickListener { view -> onRadioButtonClicked(view) }
         val v = view
         assert(v != null)
         mOfxRadioButton!!.setOnClickListener(radioClickListener)
@@ -578,12 +568,12 @@ class ExportFormFragment() : Fragment(), OnRecurrenceSetListener, CalendarDatePi
         /**
          * Request code for intent to pick export file destination
          */
-        private val REQUEST_EXPORT_FILE = 0x14
+        private const val REQUEST_EXPORT_FILE = 0x14
 
         /**
          * Tag for logging
          */
-        private val TAG = "ExportFormFragment"
+        private const val TAG = "ExportFormFragment"
     }
 } // Gotten from: https://stackoverflow.com/a/31720191
 

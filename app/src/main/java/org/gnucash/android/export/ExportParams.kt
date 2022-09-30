@@ -139,7 +139,7 @@ class ExportParams(format: ExportFormat) {
 
     override fun toString(): String {
         return ("Export all transactions created since " + TimestampHelper.getUtcStringFromTimestamp(exportStartTime) + " UTC"
-                + " as " + exportFormat.name + " to " + exportTarget.name + if (exportLocation != null) " (" + exportLocation + ")" else "")
+                + " as " + exportFormat.name + " to " + exportTarget.name + if (exportLocation != null) " ($exportLocation)" else "")
     }
 
     /**

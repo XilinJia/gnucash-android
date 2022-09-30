@@ -48,7 +48,6 @@ import org.gnucash.android.ui.common.Refreshable
 import org.gnucash.android.ui.common.UxArgument
 import org.gnucash.android.ui.homescreen.WidgetConfigurationActivity.Companion.updateAllWidgets
 import org.gnucash.android.ui.settings.PreferenceActivity
-import org.gnucash.android.ui.transaction.TransactionDetailActivity
 import org.gnucash.android.ui.transaction.TransactionsActivity.Companion.displayBalance
 import org.gnucash.android.ui.transaction.TransactionsActivity.Companion.getPrettyDateFormat
 import org.gnucash.android.ui.transaction.dialog.BulkMoveDialogFragment
@@ -118,10 +117,10 @@ class TransactionsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCa
 
     /**
      * Refresh the list with transactions from account with ID `accountId`
-     * @param accountUID GUID of account to load transactions from
+     * @param uid GUID of account to load transactions from
      */
-    override fun refresh(accountUID: String?) {
-        mAccountUID = accountUID
+    override fun refresh(uid: String?) {
+        mAccountUID = uid
         refresh()
     }
 
@@ -190,14 +189,14 @@ class TransactionsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCa
      * [DatabaseCursorLoader] for loading transactions asynchronously from the database
      * @author Ngewi Fet <ngewif></ngewif>@gmail.com>
      */
-    protected class TransactionsCursorLoader(context: Context?, private val accountUID: String?) :
+    private class TransactionsCursorLoader(context: Context?, private val accountUID: String?) :
         DatabaseCursorLoader(context) {
-        override fun loadInBackground(): Cursor? {
+        override fun loadInBackground(): Cursor {
             mDatabaseAdapter = TransactionsDbAdapter.instance
             val c = (mDatabaseAdapter as TransactionsDbAdapter).fetchAllTransactionsForAccount(
                 accountUID!!
             )
-            if (c != null) registerContentObserver(c)
+            registerContentObserver(c)
             return c
         }
     }
@@ -342,7 +341,7 @@ class TransactionsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCa
         /**
          * Logging tag
          */
-        protected const val LOG_TAG = "TransactionListFragment"
+        private const val LOG_TAG = "TransactionListFragment"
 
         const val ITEM_TYPE_COMPACT = 0x111
         const val ITEM_TYPE_FULL = 0x100

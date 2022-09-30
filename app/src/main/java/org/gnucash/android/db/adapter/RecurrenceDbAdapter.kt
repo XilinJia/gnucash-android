@@ -60,15 +60,15 @@ class RecurrenceDbAdapter
         return recurrence
     }
 
-    protected override fun setBindings(stmt: SQLiteStatement, recurrence: Recurrence): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: Recurrence): SQLiteStatement {
         stmt.clearBindings()
-        stmt.bindLong(1, recurrence.mMultiplier.toLong())
-        stmt.bindString(2, recurrence.mPeriodType!!.name)
-        if (!recurrence.byDays().isEmpty()) stmt.bindString(3, byDaysToString(recurrence.byDays()))
+        stmt.bindLong(1, model.mMultiplier.toLong())
+        stmt.bindString(2, model.mPeriodType!!.name)
+        if (model.byDays().isNotEmpty()) stmt.bindString(3, byDaysToString(model.byDays()))
         //recurrence should always have a start date
-        stmt.bindString(4, recurrence.mPeriodStart.toString())
-        if (recurrence.mPeriodEnd != null) stmt.bindString(5, recurrence.mPeriodEnd.toString())
-        stmt.bindString(6, recurrence.mUID)
+        stmt.bindString(4, model.mPeriodStart.toString())
+        if (model.mPeriodEnd != null) stmt.bindString(5, model.mPeriodEnd.toString())
+        stmt.bindString(6, model.mUID)
         return stmt
     }
 

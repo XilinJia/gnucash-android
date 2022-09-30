@@ -54,7 +54,7 @@ class ColorPickerSwatch(
         setOnClickListener(this)
     }
 
-    protected fun setColor(color: Int) {
+    private fun setColor(color: Int) {
         val colorDrawable = arrayOf(context.resources.getDrawable(R.drawable.color_picker_swatch))
         mSwatchImage.setImageDrawable(ColorStateDrawable(colorDrawable, color))
     }

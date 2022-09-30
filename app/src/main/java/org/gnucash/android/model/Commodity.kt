@@ -114,13 +114,13 @@ class Commodity(
      * Overrides [BaseModel.equals] to compare only the currency codes of the commodity.
      *
      * Two commodities are considered equal if they have the same currency code
-     * @param o Commodity instance to compare
+     * @param other Commodity instance to compare
      * @return `true` if both instances have same currency code, `false` otherwise
      */
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        val commodity = o as Commodity
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val commodity = other as Commodity
         return mMnemonic == commodity.mMnemonic
     }
 

@@ -29,7 +29,6 @@ import org.gnucash.android.db.adapter.SplitsDbAdapter
 import org.gnucash.android.db.adapter.TransactionsDbAdapter
 import org.gnucash.android.export.Exporter
 import org.gnucash.android.model.BaseModel
-import org.gnucash.android.model.BaseModel.Companion.generateUID
 import org.gnucash.android.model.Book
 import org.gnucash.android.util.RecursiveMoveFiles
 import java.io.File
@@ -64,7 +63,7 @@ class BookDbHelper(private val mContext: Context) :
             val mainDbPath = mainDb.path
             helper.close()
             val src = File(mainDbPath)
-            val dst = File(src.parent, book.mUID)
+            val dst = File(src.parent, book.mUID!!)
             try {
                 MigrationHelper.moveFile(src, dst)
             } catch (e: IOException) {

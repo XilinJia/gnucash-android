@@ -50,7 +50,7 @@ class CsvWriter : BufferedWriter {
     @Throws(IOException::class)
     fun writeToken(token: String?) {
         var token = token
-        if (token == null || token.isEmpty()) {
+        if (token.isNullOrEmpty()) {
             write(separator)
         } else {
             token = escape(token)
@@ -79,7 +79,7 @@ class CsvWriter : BufferedWriter {
      */
     @Throws(IOException::class)
     fun writeEndToken(token: String?) {
-        if (token != null && !token.isEmpty()) {
+        if (!token.isNullOrEmpty()) {
             write(escape(token))
         }
         newLine()

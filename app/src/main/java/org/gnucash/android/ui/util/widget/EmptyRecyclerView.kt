@@ -28,12 +28,11 @@ import androidx.recyclerview.widget.RecyclerView
 class EmptyRecyclerView : RecyclerView {
     var emptyView: View? = null
 
-    constructor(context: Context?) : super(context!!) {}
-    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs) {}
+    constructor(context: Context?) : super(context!!)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(
         context!!, attrs, defStyle
-    ) {
-    }
+    )
 
     fun checkIfEmpty() {
         if (emptyView != null && adapter != null) {

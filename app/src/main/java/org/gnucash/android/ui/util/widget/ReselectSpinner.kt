@@ -19,12 +19,11 @@ import androidx.appcompat.widget.AppCompatSpinner
  *
  */
 class ReselectSpinner : AppCompatSpinner {
-    constructor(context: Context?) : super(context!!) {}
-    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs) {}
+    constructor(context: Context?) : super(context!!)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context!!, attrs, defStyleAttr
-    ) {
-    }
+    )
 
     override fun setSelection(position: Int) {
         val sameSelected = selectedItemPosition == position

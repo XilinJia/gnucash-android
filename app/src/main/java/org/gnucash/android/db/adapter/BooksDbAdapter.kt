@@ -66,16 +66,16 @@ class BooksDbAdapter
         return book
     }
 
-    protected override fun setBindings(stmt: SQLiteStatement, book: Book): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: Book): SQLiteStatement {
         stmt.clearBindings()
-        val displayName = if (book.mDisplayName == null) generateDefaultBookName() else book.mDisplayName!!
+        val displayName = if (model.mDisplayName == null) generateDefaultBookName() else model.mDisplayName!!
         stmt.bindString(1, displayName)
-        stmt.bindString(2, book.mRootAccountUID)
-        stmt.bindString(3, book.mRootTemplateUID)
-        if (book.mSourceUri != null) stmt.bindString(4, book.mSourceUri.toString())
-        stmt.bindLong(5, if (book.isActive) 1L else 0L)
-        stmt.bindString(6, book.mUID)
-        stmt.bindString(7, TimestampHelper.getUtcStringFromTimestamp(book.mLastSync!!))
+        stmt.bindString(2, model.mRootAccountUID)
+        stmt.bindString(3, model.mRootTemplateUID)
+        if (model.mSourceUri != null) stmt.bindString(4, model.mSourceUri.toString())
+        stmt.bindLong(5, if (model.isActive) 1L else 0L)
+        stmt.bindString(6, model.mUID)
+        stmt.bindString(7, TimestampHelper.getUtcStringFromTimestamp(model.mLastSync!!))
         return stmt
     }
 
@@ -102,7 +102,6 @@ class BooksDbAdapter
      * @return GUID of the currently active book
      */
     fun setActive(bookUID: String): String {
-        if (bookUID == null) return activeBookUID
         val contentValues = ContentValues()
         contentValues.put(BookEntry.COLUMN_ACTIVE, 0)
         mDb.update(mTableName, contentValues, null, null) //disable all
@@ -141,7 +140,7 @@ class BooksDbAdapter
                     val e = NoActiveBookFoundException(
                         """
                      There is no active book in the app.This should NEVER happen, fix your bugs!
-                     ${noActiveBookFoundExceptionInfo}
+                     $noActiveBookFoundExceptionInfo
                      """.trimIndent()
                     )
                     e.printStackTrace()
@@ -152,7 +151,7 @@ class BooksDbAdapter
             }
         }
     private val noActiveBookFoundExceptionInfo: String
-        private get() {
+        get() {
             val info = StringBuilder("UID, created, source\n")
             for (book in allRecords) {
                 info.append(
@@ -214,7 +213,7 @@ class BooksDbAdapter
      * Sets the first book in the database as active.
      */
     private fun setFirstBookAsActive() {
-        val firstBook = allRecords[0]!!
+        val firstBook = allRecords[0]
         firstBook.setMActive(true)
         addRecord(firstBook)
         Log.w(LOG_TAG, "Book " + firstBook.mUID + " set as active.")
@@ -224,7 +223,7 @@ class BooksDbAdapter
      * Returns a list of database names corresponding to book databases.
      */
     private val bookDatabases: List<String>
-        private get() {
+        get() {
             val bookDatabases: MutableList<String> = ArrayList()
             for (database in GnuCashApplication.appContext!!.databaseList()) {
                 if (isBookDatabase(database)) {

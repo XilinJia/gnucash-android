@@ -65,6 +65,7 @@ class CurrencySelectFragment : ListFragment() {
         mCommoditiesDbAdapter = instance
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
         if (activity !is PageFragmentCallbacks) {

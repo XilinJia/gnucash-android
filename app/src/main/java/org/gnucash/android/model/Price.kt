@@ -79,7 +79,7 @@ class Price : BaseModel {
                 num1 = -num1
             }
             var num2 = mValueDenom
-            var commonDivisor: Long = 1
+            val commonDivisor: Long
             while (true) {
                 var r = num1 % num2
                 if (r == 0L) {

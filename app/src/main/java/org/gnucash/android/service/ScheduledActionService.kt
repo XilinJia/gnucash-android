@@ -102,7 +102,7 @@ class ScheduledActionService : JobIntentService() {
                 //the end time of the ScheduledAction is not handled here because
                 //it is handled differently for transactions and backups. See the individual methods.
                 if ((scheduledAction.mStartTime > now //if schedule begins in the future
-                            || !scheduledAction.isEnabled) || totalPlannedExecutions > 0 && executionCount >= totalPlannedExecutions
+                            || !scheduledAction.isEnabled) || totalPlannedExecutions in 1..executionCount
                 ) { //limit was set and we reached or exceeded it
                     Log.i(LOG_TAG, "Skipping scheduled action: $scheduledAction")
                     continue
@@ -189,8 +189,8 @@ class ScheduledActionService : JobIntentService() {
         private fun shouldExecuteScheduledBackup(scheduledAction: ScheduledAction): Boolean {
             val now = System.currentTimeMillis()
             val endTime = scheduledAction.getMEndDate()
-            if (endTime > 0 && endTime < now) return false
-            return if (scheduledAction.computeNextTimeBasedScheduledExecutionTime() > now) false else true
+            if (endTime in (1 until now)) return false
+            return scheduledAction.computeNextTimeBasedScheduledExecutionTime() <= now
         }
 
         /**
@@ -206,8 +206,7 @@ class ScheduledActionService : JobIntentService() {
             var executionCount = 0
             val actionUID = scheduledAction.getMActionUID()
             val transactionsDbAdapter = TransactionsDbAdapter(db, SplitsDbAdapter(db))
-            val trxnTemplate: Transaction
-            trxnTemplate = try {
+            val trxnTemplate: Transaction = try {
                 transactionsDbAdapter.getRecord(actionUID!!)
             } catch (ex: IllegalArgumentException) { //if the record could not be found, abort
                 Log.e(
@@ -220,7 +219,7 @@ class ScheduledActionService : JobIntentService() {
             //if there is an end time in the past, we execute all schedules up to the end time.
             //if the end time is in the future, we execute all schedules until now (current time)
             //if there is no end time, we execute all schedules until now
-            val endTime = if (scheduledAction.getMEndDate() > 0) Math.min(scheduledAction.getMEndDate(), now) else now
+            val endTime = if (scheduledAction.getMEndDate() > 0) scheduledAction.getMEndDate().coerceAtMost(now) else now
             val totalPlannedExecutions = scheduledAction.mTotalFrequency
             val transactions: MutableList<Transaction> = ArrayList()
             val previousExecutionCount = scheduledAction.mExecutionCount // We'll modify it
@@ -233,7 +232,7 @@ class ScheduledActionService : JobIntentService() {
                 transactions.add(recurringTrxn)
                 recurringTrxn.mScheduledActionUID = scheduledAction.mUID
                 scheduledAction.mExecutionCount = ++executionCount //required for computingNextScheduledExecutionTime
-                if (totalPlannedExecutions > 0 && executionCount >= totalPlannedExecutions) break //if we hit the total planned executions set, then abort
+                if (totalPlannedExecutions in (1..executionCount)) break //if we hit the total planned executions set, then abort
                 transactionTime = scheduledAction.computeNextCountBasedScheduledExecutionTime()
             }
             transactionsDbAdapter.bulkAddRecords(transactions, DatabaseAdapter.UpdateMethod.insert)

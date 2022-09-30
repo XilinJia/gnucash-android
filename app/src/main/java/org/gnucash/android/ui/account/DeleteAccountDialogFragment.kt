@@ -164,11 +164,11 @@ class DeleteAccountDialogFragment : DialogFragment() {
     /**
      * Binds click listeners for the dialog buttons
      */
-    protected fun setListeners() {
-        mMoveAccountsRadioButton!!.setOnCheckedChangeListener { buttonView, isChecked ->
+    private fun setListeners() {
+        mMoveAccountsRadioButton!!.setOnCheckedChangeListener { _, isChecked ->
             mAccountsDestinationAccountSpinner!!.isEnabled = isChecked
         }
-        mMoveTransactionsRadioButton!!.setOnCheckedChangeListener { buttonView, isChecked ->
+        mMoveTransactionsRadioButton!!.setOnCheckedChangeListener { _, isChecked ->
             mTransactionsDestinationAccountSpinner!!.isEnabled = isChecked
         }
         mCancelButton!!.setOnClickListener { dismiss() }
@@ -180,7 +180,7 @@ class DeleteAccountDialogFragment : DialogFragment() {
                 //move all the splits
                 SplitsDbAdapter.instance.updateRecords(
                     DatabaseSchema.SplitEntry.COLUMN_ACCOUNT_UID + " = ?",
-                    arrayOf<String>(mOriginAccountUID!!),
+                    arrayOf(mOriginAccountUID!!),
                     DatabaseSchema.SplitEntry.COLUMN_ACCOUNT_UID,
                     accountsDbAdapter.getUID(targetAccountId)
                 )

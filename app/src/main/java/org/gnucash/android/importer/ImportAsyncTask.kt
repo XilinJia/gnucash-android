@@ -29,7 +29,6 @@ import org.gnucash.android.R
 import org.gnucash.android.db.DatabaseSchema
 import org.gnucash.android.db.adapter.BooksDbAdapter
 import org.gnucash.android.importer.GncXmlImporter.parse
-import org.gnucash.android.importer.ImportAsyncTask
 import org.gnucash.android.ui.util.TaskDelegate
 import org.gnucash.android.util.BookUtils
 
@@ -66,7 +65,8 @@ class ImportAsyncTask : AsyncTask<Uri, Void, Boolean> {
         mProgressDialog!!.setProgressPercentFormat(null)
     }
 
-    protected override fun doInBackground(vararg uris: Uri): Boolean {
+    @Deprecated("Deprecated in Java")
+    override fun doInBackground(vararg uris: Uri): Boolean {
         mImportedBookUID = try {
             val accountInputStream = mContext.contentResolver.openInputStream(uris[0])
             parse(accountInputStream)
@@ -108,6 +108,7 @@ class ImportAsyncTask : AsyncTask<Uri, Void, Boolean> {
         return true
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onPostExecute(importSuccess: Boolean) {
         try {
             if (mProgressDialog != null && mProgressDialog!!.isShowing) mProgressDialog!!.dismiss()

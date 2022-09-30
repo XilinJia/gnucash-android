@@ -159,14 +159,14 @@ abstract class BaseDrawerActivity : PasscodeLockActivity(), PopupMenu.OnMenuItem
             R.string.drawer_close /* "close drawer" description */
         ) {
             /** Called when a drawer has settled in a completely closed state.  */
-            override fun onDrawerClosed(view: View) {
-                super.onDrawerClosed(view)
-            }
+//            override fun onDrawerClosed(view: View) {    redundant by XJ
+//                super.onDrawerClosed(view)
+//            }
 
             /** Called when a drawer has settled in a completely open state.  */
-            override fun onDrawerOpened(drawerView: View) {
-                super.onDrawerOpened(drawerView)
-            }
+//            override fun onDrawerOpened(drawerView: View) {  redundant by XJ
+//                super.onDrawerOpened(drawerView)
+//            }
         }
         mDrawerLayout!!.setDrawerListener(mDrawerToggle)
     }

@@ -56,14 +56,14 @@ class BudgetAmountsDbAdapter
         return budgetAmount
     }
 
-    protected override fun setBindings(stmt: SQLiteStatement, budgetAmount: BudgetAmount): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: BudgetAmount): SQLiteStatement {
         stmt.clearBindings()
-        stmt.bindString(1, budgetAmount.mBudgetUID)
-        stmt.bindString(2, budgetAmount.mAccountUID)
-        stmt.bindLong(3, budgetAmount.mAmount!!.numerator())
-        stmt.bindLong(4, budgetAmount.mAmount!!.denominator())
-        stmt.bindLong(5, budgetAmount.mPeriodNum)
-        stmt.bindString(6, budgetAmount.mUID)
+        stmt.bindString(1, model.mBudgetUID)
+        stmt.bindString(2, model.mAccountUID)
+        stmt.bindLong(3, model.mAmount!!.numerator())
+        stmt.bindLong(4, model.mAmount!!.denominator())
+        stmt.bindLong(5, model.mPeriodNum)
+        stmt.bindString(6, model.mUID)
         return stmt
     }
 

@@ -27,7 +27,7 @@ object AmountParser {
         val parsedAmount = formatter.parse(amount, parsePosition) as BigDecimal
 
         // Ensure any mistyping by the user is caught instead of partially parsed
-        if (parsedAmount == null || parsePosition.index < amount.length) throw ParseException(
+        if (parsePosition.index < amount.length) throw ParseException(
             "Parse error",
             parsePosition.errorIndex
         )

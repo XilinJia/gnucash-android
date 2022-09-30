@@ -20,7 +20,6 @@ import com.crashlytics.android.Crashlytics
 import org.gnucash.android.R
 import org.gnucash.android.export.ExportParams
 import org.gnucash.android.export.Exporter
-import org.gnucash.android.export.Exporter.ExporterException
 import java.io.FileWriter
 import java.io.IOException
 import java.util.*
@@ -55,7 +54,7 @@ class CsvAccountExporter : Exporter {
     }
 
     @Throws(ExporterException::class)
-    override fun generateExport(): List<String?>? {
+    override fun generateExport(): List<String> {
         val outputFile = exportCacheFilePath
         try {
             CsvWriter(FileWriter(outputFile), mCsvSeparator.toString() + "").use { writer -> generateExport(writer) }
@@ -64,7 +63,7 @@ class CsvAccountExporter : Exporter {
             Crashlytics.logException(ex)
             throw ExporterException(mExportParams, ex)
         }
-        return Arrays.asList(outputFile)
+        return listOf(outputFile)
     }
 
     /**
@@ -75,7 +74,7 @@ class CsvAccountExporter : Exporter {
     @Throws(ExporterException::class)
     fun generateExport(csvWriter: CsvWriter) {
         try {
-            val names = Arrays.asList(*mContext.resources.getStringArray(R.array.csv_account_headers))
+            val names = listOf(*mContext.resources.getStringArray(R.array.csv_account_headers))
             val accounts = mAccountsDbAdapter!!.allRecords
             for (i in names.indices) {
                 csvWriter.writeToken(names[i])

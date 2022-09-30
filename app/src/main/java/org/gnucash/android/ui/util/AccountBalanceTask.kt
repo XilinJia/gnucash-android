@@ -42,7 +42,8 @@ class AccountBalanceTask(balanceTextView: TextView?) : AsyncTask<String, Void, M
         accountsDbAdapter = instance
     }
 
-    protected override fun doInBackground(vararg params: String): Money? {
+    @Deprecated("Deprecated in Java")
+    override fun doInBackground(vararg params: String): Money? {
         //if the view for which we are doing this job is dead, kill the job as well
         if (accountBalanceTextViewReference.get() == null) {
             cancel(true)
@@ -58,6 +59,7 @@ class AccountBalanceTask(balanceTextView: TextView?) : AsyncTask<String, Void, M
         return balance
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onPostExecute(balance: Money?) {
         if (accountBalanceTextViewReference.get() != null && balance != null) {
             val balanceTextView = accountBalanceTextViewReference.get()

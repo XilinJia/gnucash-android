@@ -155,7 +155,6 @@ class ScheduledActionsListFragment : ListFragment(), LoaderManager.LoaderCallbac
                 R.layout.list_item_scheduled_trxn, null, arrayOf(), intArrayOf()
             )
 
-            else -> throw IllegalArgumentException("Unable to display scheduled actions for the specified action type")
         }
         listAdapter = mCursorAdapter
     }
@@ -225,7 +224,7 @@ class ScheduledActionsListFragment : ListFragment(), LoaderManager.LoaderCallbac
         val transaction = mTransactionsDbAdapter!!.getRecord(id)
 
         //this should actually never happen, but has happened once. So perform check for the future
-        if (transaction.getMSplitList().size == 0) {
+        if (transaction.getMSplitList().isEmpty()) {
             Toast.makeText(activity, R.string.toast_transaction_has_no_splits_and_cannot_open, Toast.LENGTH_SHORT)
                 .show()
             return
@@ -345,7 +344,7 @@ class ScheduledActionsListFragment : ListFragment(), LoaderManager.LoaderCallbac
      * Extends a simple cursor adapter to bind transaction attributes to views
      * @author Ngewi Fet <ngewif></ngewif>@gmail.com>
      */
-    protected inner class ScheduledTransactionsCursorAdapter(
+    private inner class ScheduledTransactionsCursorAdapter(
         context: Context?, layout: Int, c: Cursor?,
         from: Array<String?>?, to: IntArray?
     ) : SimpleCursorAdapter(context, layout, c, from, to, 0) {
@@ -361,7 +360,7 @@ class ScheduledActionsListFragment : ListFragment(), LoaderManager.LoaderCallbac
                 Resources.getSystem().getIdentifier("btn_check_holo_light", "drawable", "android")
             checkbox.setButtonDrawable(id)
             val secondaryText = view.findViewById<View>(R.id.secondary_text) as TextView
-            checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
+            checkbox.setOnCheckedChangeListener { _, isChecked ->
                 listView.setItemChecked(position, isChecked)
                 if (isChecked) {
                     startActionMode()
@@ -436,7 +435,7 @@ class ScheduledActionsListFragment : ListFragment(), LoaderManager.LoaderCallbac
      * Extends a simple cursor adapter to bind transaction attributes to views
      * @author Ngewi Fet <ngewif></ngewif>@gmail.com>
      */
-    protected inner class ScheduledExportCursorAdapter(
+    private inner class ScheduledExportCursorAdapter(
         context: Context?, layout: Int, c: Cursor?,
         from: Array<String?>?, to: IntArray?
     ) : SimpleCursorAdapter(context, layout, c, from, to, 0) {
@@ -452,7 +451,7 @@ class ScheduledActionsListFragment : ListFragment(), LoaderManager.LoaderCallbac
                 Resources.getSystem().getIdentifier("btn_check_holo_light", "drawable", "android")
             checkbox.setButtonDrawable(id)
             val secondaryText = view.findViewById<View>(R.id.secondary_text) as TextView
-            checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
+            checkbox.setOnCheckedChangeListener { _, isChecked ->
                 listView.setItemChecked(position, isChecked)
                 if (isChecked) {
                     startActionMode()
@@ -522,8 +521,8 @@ class ScheduledActionsListFragment : ListFragment(), LoaderManager.LoaderCallbac
      * [DatabaseCursorLoader] for loading recurring transactions asynchronously from the database
      * @author Ngewi Fet <ngewif></ngewif>@gmail.com>
      */
-    protected class ScheduledTransactionsCursorLoader(context: Context?) : DatabaseCursorLoader(context) {
-        override fun loadInBackground(): Cursor? {
+    private class ScheduledTransactionsCursorLoader(context: Context?) : DatabaseCursorLoader(context) {
+        override fun loadInBackground(): Cursor {
             mDatabaseAdapter = TransactionsDbAdapter.instance
             val c = (mDatabaseAdapter as TransactionsDbAdapter).fetchAllScheduledTransactions()
             registerContentObserver(c)
@@ -535,8 +534,8 @@ class ScheduledActionsListFragment : ListFragment(), LoaderManager.LoaderCallbac
      * [DatabaseCursorLoader] for loading recurring transactions asynchronously from the database
      * @author Ngewi Fet <ngewif></ngewif>@gmail.com>
      */
-    protected class ScheduledExportCursorLoader(context: Context?) : DatabaseCursorLoader(context) {
-        override fun loadInBackground(): Cursor? {
+    private class ScheduledExportCursorLoader(context: Context?) : DatabaseCursorLoader(context) {
+        override fun loadInBackground(): Cursor {
             mDatabaseAdapter = ScheduledActionDbAdapter.instance
             val c = mDatabaseAdapter!!.fetchAllRecords(
                 DatabaseSchema.ScheduledActionEntry.COLUMN_TYPE + "=?", arrayOf(ActionType.BACKUP.name), null
@@ -550,7 +549,7 @@ class ScheduledActionsListFragment : ListFragment(), LoaderManager.LoaderCallbac
         /**
          * Logging tag
          */
-        protected const val TAG = "ScheduledActionFragment"
+        private const val TAG = "ScheduledActionFragment"
 
         /**
          * Returns a new instance of the fragment for displayed the scheduled action

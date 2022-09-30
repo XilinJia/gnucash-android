@@ -47,8 +47,7 @@ object RecurrenceParser {
     @JvmStatic
     fun parse(eventRecurrence: EventRecurrence?): Recurrence? {
         if (eventRecurrence == null) return null
-        val periodType: PeriodType
-        periodType = when (eventRecurrence.freq) {
+        val periodType: PeriodType = when (eventRecurrence.freq) {
             EventRecurrence.HOURLY -> PeriodType.HOUR
             EventRecurrence.DAILY -> PeriodType.DAY
             EventRecurrence.WEEKLY -> PeriodType.WEEK
@@ -74,7 +73,7 @@ object RecurrenceParser {
      * @param recurrence Recurrence event to set the end period to
      */
     private fun parseEndTime(eventRecurrence: EventRecurrence, recurrence: Recurrence) {
-        if (eventRecurrence.until != null && eventRecurrence.until.length > 0) {
+        if (eventRecurrence.until != null && eventRecurrence.until.isNotEmpty()) {
             val endTime = Time()
             endTime.parse(eventRecurrence.until)
             recurrence.setMPeriodEnd(Timestamp(endTime.toMillis(false)))

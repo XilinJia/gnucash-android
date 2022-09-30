@@ -145,7 +145,7 @@ class TransferFundsDialogFragment : DialogFragment() {
         }
         mExchangeRateInput!!.addTextChangedListener(textChangeListener)
         mConvertedAmountInput!!.addTextChangedListener(textChangeListener)
-        mConvertedAmountRadioButton!!.setOnCheckedChangeListener { buttonView, isChecked ->
+        mConvertedAmountRadioButton!!.setOnCheckedChangeListener { _, isChecked ->
             mConvertedAmountInput!!.isEnabled = isChecked
             mConvertedAmountInputLayout!!.isErrorEnabled = isChecked
             mExchangeRateRadioButton!!.isChecked = !isChecked
@@ -153,7 +153,7 @@ class TransferFundsDialogFragment : DialogFragment() {
                 mConvertedAmountInput!!.requestFocus()
             }
         }
-        mExchangeRateRadioButton!!.setOnCheckedChangeListener { buttonView, isChecked ->
+        mExchangeRateRadioButton!!.setOnCheckedChangeListener { _, isChecked ->
             mExchangeRateInput!!.isEnabled = isChecked
             mExchangeRateInputLayout!!.isErrorEnabled = isChecked
             mFetchExchangeRateButton!!.isEnabled = isChecked

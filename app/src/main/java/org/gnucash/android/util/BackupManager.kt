@@ -92,7 +92,7 @@ object BackupManager {
      * @return `true` if backup was successful, `false` otherwise
      */
     @JvmStatic
-    fun backupBook(bookUID: String?): Boolean {
+    fun backupBook(bookUID: String): Boolean {
         val outputStream: OutputStream?
         return try {
             var backupFile = getBookBackupFileUri(bookUID)
@@ -128,9 +128,9 @@ object BackupManager {
      * @return the file path for backups of the database.
      * @see .getBackupFolderPath
      */
-    private fun getBackupFilePath(bookUID: String?): String {
-        val book = instance.getRecord(bookUID!!)
-        return (getBackupFolderPath(book.mUID)
+    private fun getBackupFilePath(bookUID: String): String {
+        val book = instance.getRecord(bookUID)
+        return (getBackupFolderPath(book.mUID!!)
                 + buildExportFilename(ExportFormat.XML, book.mDisplayName!!))
     }
 
@@ -142,9 +142,9 @@ object BackupManager {
      *
      * @return Absolute path to backup folder for the book
      */
-    private fun getBackupFolderPath(bookUID: String?): String {
+    private fun getBackupFolderPath(bookUID: String): String {
         val baseFolderPath = GnuCashApplication.appContext!!
-            .getExternalFilesDir(null)!!.getAbsolutePath()
+            .getExternalFilesDir(null)!!.absolutePath
         val path = "$baseFolderPath/$bookUID/backups/"
         val file = File(path)
         if (!file.exists()) file.mkdirs()
@@ -163,12 +163,15 @@ object BackupManager {
     }
 
     @JvmStatic
-    fun getBackupList(bookUID: String?): List<File?> {
+    fun getBackupList(bookUID: String): List<File> {
         val backupFiles = File(getBackupFolderPath(bookUID)).listFiles()
-        Arrays.sort(backupFiles)
-        val backupFilesList = Arrays.asList(*backupFiles)
-        Collections.reverse(backupFilesList)
-        return backupFilesList
+        if (backupFiles != null) {
+            Arrays.sort(backupFiles)
+            val backupFilesList = mutableListOf(*backupFiles)
+            backupFilesList.reverse()
+            return backupFilesList
+        }
+        return listOf()
     }
 
     fun schedulePeriodicBackups(context: Context) {

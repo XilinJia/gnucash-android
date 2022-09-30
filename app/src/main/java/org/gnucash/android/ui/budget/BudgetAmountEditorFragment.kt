@@ -165,7 +165,7 @@ class BudgetAmountEditorFragment : Fragment() {
             R.layout.item_budget_amount,
             mBudgetAmountTableLayout, false
         )
-        val viewHolder: BudgetAmountViewHolder = BudgetAmountViewHolder(budgetAmountView)
+        val viewHolder = BudgetAmountViewHolder(budgetAmountView)
         if (budgetAmount != null) {
             viewHolder.bindViews(budgetAmount)
         }

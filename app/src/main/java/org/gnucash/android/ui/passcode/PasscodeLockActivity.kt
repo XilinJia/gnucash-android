@@ -52,7 +52,7 @@ open class PasscodeLockActivity : AppCompatActivity() {
         val skipPasscode = prefs.getBoolean(UxArgument.SKIP_PASSCODE_SCREEN, false)
         prefs.edit().remove(UxArgument.SKIP_PASSCODE_SCREEN).apply()
         val passCode = prefs.getString(UxArgument.PASSCODE, "")
-        if (isPassEnabled && !isSessionActive && !passCode!!.trim { it <= ' ' }.isEmpty() && !skipPasscode) {
+        if (isPassEnabled && !isSessionActive && passCode!!.trim { it <= ' ' }.isNotEmpty() && !skipPasscode) {
             Log.v(TAG, "Show passcode screen")
             val intent = Intent(this, PasscodeLockScreenActivity::class.java)
                 .setAction(intent.action)
@@ -72,7 +72,7 @@ open class PasscodeLockActivity : AppCompatActivity() {
      * @return `true` if passcode session is active, and `false` otherwise
      */
     private val isSessionActive: Boolean
-        private get() = (System.currentTimeMillis() - GnuCashApplication.PASSCODE_SESSION_INIT_TIME
+        get() = (System.currentTimeMillis() - GnuCashApplication.PASSCODE_SESSION_INIT_TIME
                 < GnuCashApplication.SESSION_TIMEOUT)
 
     companion object {

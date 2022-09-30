@@ -173,6 +173,7 @@ class AccountsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCallba
         refresh()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
         mAccountSelectedListener = try {
@@ -240,10 +241,10 @@ class AccountsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCallba
 
     /**
      * Refresh the account list as a sublist of another account
-     * @param parentAccountUID GUID of the parent account
+     * @param uid GUID of the parent account
      */
-    override fun refresh(parentAccountUID: String?) {
-        arguments!!.putString(UxArgument.PARENT_ACCOUNT_UID, parentAccountUID)
+    override fun refresh(uid: String?) {
+        arguments!!.putString(UxArgument.PARENT_ACCOUNT_UID, uid)
         refresh()
     }
 
@@ -365,10 +366,9 @@ class AccountsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCallba
             mFilter = filter
         }
 
-        override fun loadInBackground(): Cursor? {
+        override fun loadInBackground(): Cursor {
             mDatabaseAdapter = AccountsDbAdapter.instance
-            val cursor: Cursor
-            cursor = if (mFilter != null) {
+            val cursor: Cursor = if (mFilter != null) {
                 (mDatabaseAdapter as AccountsDbAdapter)
                     .fetchAccounts(
                         DatabaseSchema.AccountEntry.COLUMN_HIDDEN + "= 0 AND "
@@ -376,7 +376,7 @@ class AccountsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCallba
                         null, null
                     )
             } else {
-                if (mParentAccountUID != null && mParentAccountUID!!.length > 0) (mDatabaseAdapter as AccountsDbAdapter).fetchSubAccounts(
+                if (mParentAccountUID != null && mParentAccountUID!!.isNotEmpty()) (mDatabaseAdapter as AccountsDbAdapter).fetchSubAccounts(
                     mParentAccountUID!!
                 ) else {
                     when (mDisplayMode) {
@@ -387,7 +387,7 @@ class AccountsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCallba
                     }
                 }
             }
-            if (cursor != null) registerContentObserver(cursor)
+            registerContentObserver(cursor)
             return cursor
         }
     }
@@ -536,7 +536,7 @@ class AccountsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCallba
         /**
          * Logging tag
          */
-        protected const val TAG = "AccountsListFragment"
+        private const val TAG = "AccountsListFragment"
 
         /**
          * Tag to save [AccountsListFragment.mDisplayMode] to fragment state

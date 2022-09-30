@@ -84,6 +84,7 @@ class KeyboardFragment : Fragment() {
         return rootView
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
         listener = try {

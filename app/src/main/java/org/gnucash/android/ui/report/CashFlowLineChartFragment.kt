@@ -48,8 +48,8 @@ import java.util.*
  */
 class CashFlowLineChartFragment : BaseReportFragment() {
     private val mAccountsDbAdapter = AccountsDbAdapter.instance
-    private val mEarliestTimestampsMap: MutableMap<AccountType, Long> = HashMap()
-    private val mLatestTimestampsMap: MutableMap<AccountType, Long> = HashMap()
+    private val mEarliestTimestampsMap: MutableMap<AccountType, Long> = EnumMap(AccountType::class.java)
+    private val mLatestTimestampsMap: MutableMap<AccountType, Long> = EnumMap(AccountType::class.java)
     private var mEarliestTransactionTimestamp: Long = 0
     private var mLatestTransactionTimestamp: Long = 0
     private var mChartDataPresent = true
@@ -150,7 +150,7 @@ class CashFlowLineChartFragment : BaseReportFragment() {
      * @return a `LineData` instance for situation when no user data available
      */
     private val emptyData: LineData
-        private get() {
+        get() {
             val xValues: MutableList<String> = ArrayList()
             val yValues: MutableList<Entry> = ArrayList()
             for (i in 0 until NO_DATA_BAR_COUNTS) {
@@ -174,7 +174,7 @@ class CashFlowLineChartFragment : BaseReportFragment() {
         val accountUIDList: MutableList<String?> = ArrayList()
         for (account in mAccountsDbAdapter.simpleAccountList) {
             if (account.mAccountType === accountType && !account.isPlaceholderAccount
-                && account.getMCommodity().equals(mCommodity)
+                && account.getMCommodity() == mCommodity
             ) {
                 accountUIDList.add(account.mUID)
             }
@@ -255,7 +255,7 @@ class CashFlowLineChartFragment : BaseReportFragment() {
         }
         val timestamps: MutableList<Long> = ArrayList(mEarliestTimestampsMap.values)
         timestamps.addAll(mLatestTimestampsMap.values)
-        Collections.sort(timestamps)
+        timestamps.sort()
         mEarliestTransactionTimestamp = timestamps[0]
         mLatestTransactionTimestamp = timestamps[timestamps.size - 1]
     }
@@ -265,8 +265,8 @@ class CashFlowLineChartFragment : BaseReportFragment() {
     }
 
     override fun generateReport() {
-        val lineData = getData(ArrayList(Arrays.asList(AccountType.INCOME, AccountType.EXPENSE)))
-        if (lineData != null) {
+        val lineData = getData(ArrayList(listOf(AccountType.INCOME, AccountType.EXPENSE)))
+        if (lineData != null) { // TODO: always true? XJ
             mChart!!.data = lineData
             mChartDataPresent = true
         } else {
@@ -293,7 +293,7 @@ class CashFlowLineChartFragment : BaseReportFragment() {
             mReportPeriodEnd = end
             mChart!!.data = getData(
                 ArrayList(
-                    Arrays.asList(
+                    listOf(
                         AccountType.INCOME,
                         AccountType.EXPENSE
                     )
@@ -308,7 +308,7 @@ class CashFlowLineChartFragment : BaseReportFragment() {
             mGroupInterval = groupInterval
             mChart!!.data = getData(
                 ArrayList(
-                    Arrays.asList(
+                    listOf(
                         AccountType.INCOME,
                         AccountType.EXPENSE
                     )
@@ -356,7 +356,6 @@ class CashFlowLineChartFragment : BaseReportFragment() {
     }
 
     override fun onValueSelected(e: Entry, dataSetIndex: Int, h: Highlight) {
-        if (e == null) return
         val label = mChart!!.data.xVals[e.xIndex]
         val value = e.getVal().toDouble()
         val sum = mChart!!.data.getDataSetByIndex(dataSetIndex).yValueSum.toDouble()

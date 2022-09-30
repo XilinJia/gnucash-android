@@ -19,9 +19,6 @@ import android.content.Context
 import androidx.annotation.ColorRes
 import org.gnucash.android.R
 import org.gnucash.android.app.GnuCashApplication
-import org.gnucash.android.ui.report.CashFlowLineChartFragment
-import org.gnucash.android.ui.report.PieChartFragment
-import org.gnucash.android.ui.report.StackedBarChartFragment
 
 /**
  * Different types of reports

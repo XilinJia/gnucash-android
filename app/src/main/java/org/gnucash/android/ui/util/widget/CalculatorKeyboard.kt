@@ -66,6 +66,7 @@ class CalculatorKeyboard(
 ) {
     private val hapticFeedback = false
     private val mOnKeyboardActionListener: OnKeyboardActionListener = object : OnKeyboardActionListener {
+        @Deprecated("Deprecated in Java")
         override fun onKey(primaryCode: Int, keyCodes: IntArray) {
             val focusCurrent = (context as Activity).window.currentFocus!! as? CalculatorEditText ?: return
 
@@ -73,10 +74,9 @@ class CalculatorKeyboard(
             if (focusCurrent == null || focusCurrent.getClass() != EditText.class)
                 return;
             */
-            val calculatorEditText = focusCurrent
-            val editable = calculatorEditText.text
-            val start = calculatorEditText.selectionStart
-            val end = calculatorEditText.selectionEnd
+            val editable = focusCurrent.text
+            val start = focusCurrent.selectionStart
+            val end = focusCurrent.selectionEnd
 
             // FIXME: use replace() down
             // delete the selection, if chars are selected:
@@ -85,7 +85,7 @@ class CalculatorKeyboard(
                 KEY_CODE_DECIMAL_SEPARATOR -> editable!!.insert(start, LOCALE_DECIMAL_SEPARATOR)
                 42, 43, 45, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57 ->                     //editable.replace(start, end, Character.toString((char) primaryCode));
                     // XXX: could be android:keyOutputText attribute used instead of this?
-                    editable!!.insert(start, Character.toString(primaryCode.toChar()))
+                    editable!!.insert(start, primaryCode.toChar().toString())
 
                 -5 -> {
                     val deleteStart = if (start > 0) start - 1 else 0
@@ -93,23 +93,30 @@ class CalculatorKeyboard(
                 }
 
                 1003 -> editable!!.clear()
-                1001 -> calculatorEditText.evaluate()
+                1001 -> focusCurrent.evaluate()
                 1002 -> {
-                    calculatorEditText.focusSearch(View.FOCUS_DOWN).requestFocus()
+                    focusCurrent.focusSearch(View.FOCUS_DOWN).requestFocus()
                     hideCustomKeyboard()
                 }
             }
         }
 
+        @Deprecated("Deprecated in Java")
         override fun onPress(primaryCode: Int) {
             if (isHapticFeedbackEnabled && primaryCode != 0) mKeyboardView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
         }
 
+        @Deprecated("Deprecated in Java")
         override fun onRelease(primaryCode: Int) {}
+        @Deprecated("Deprecated in Java")
         override fun onText(text: CharSequence) {}
+        @Deprecated("Deprecated in Java")
         override fun swipeLeft() {}
+        @Deprecated("Deprecated in Java")
         override fun swipeRight() {}
+        @Deprecated("Deprecated in Java")
         override fun swipeDown() {}
+        @Deprecated("Deprecated in Java")
         override fun swipeUp() {}
     }
 
@@ -119,7 +126,7 @@ class CalculatorKeyboard(
      * @return true if the haptic feedback is enabled in the system settings.
      */
     private val isHapticFeedbackEnabled: Boolean
-        private get() {
+        get() {
             val value = Settings.System.getInt(
                 mKeyboardView.context.contentResolver,
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 0
@@ -181,6 +188,6 @@ class CalculatorKeyboard(
 
     companion object {
         const val KEY_CODE_DECIMAL_SEPARATOR = 46
-        val LOCALE_DECIMAL_SEPARATOR = Character.toString(DecimalFormatSymbols.getInstance().decimalSeparator)
+        val LOCALE_DECIMAL_SEPARATOR = DecimalFormatSymbols.getInstance().decimalSeparator.toString()
     }
 }

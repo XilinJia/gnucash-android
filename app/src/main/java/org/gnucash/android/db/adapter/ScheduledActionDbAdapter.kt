@@ -57,21 +57,21 @@ class ScheduledActionDbAdapter(db: SQLiteDatabase?, private val mRecurrenceDbAda
         LOG_TAG = "ScheduledActionDbAdapter"
     }
 
-    override fun addRecord(scheduledAction: ScheduledAction, updateMethod: UpdateMethod) {
-        mRecurrenceDbAdapter.addRecord(scheduledAction.mRecurrence!!, updateMethod)
-        super.addRecord(scheduledAction, updateMethod)
+    override fun addRecord(model: ScheduledAction, updateMethod: UpdateMethod) {
+        mRecurrenceDbAdapter.addRecord(model.mRecurrence!!, updateMethod)
+        super.addRecord(model, updateMethod)
     }
 
-    override fun bulkAddRecords(scheduledActions: List<ScheduledAction>, updateMethod: UpdateMethod): Long {
-        val recurrenceList: MutableList<Recurrence> = ArrayList(scheduledActions.size)
-        for (scheduledAction in scheduledActions) {
+    override fun bulkAddRecords(modelList: List<ScheduledAction>, updateMethod: UpdateMethod): Long {
+        val recurrenceList: MutableList<Recurrence> = ArrayList(modelList.size)
+        for (scheduledAction in modelList) {
             recurrenceList.add(scheduledAction.mRecurrence!!)
         }
 
         //first add the recurrences, they have no dependencies (foreign key constraints)
         val nRecurrences = mRecurrenceDbAdapter.bulkAddRecords(recurrenceList.toList(), updateMethod)
         Log.d(LOG_TAG, String.format("Added %d recurrences for scheduled actions", nRecurrences))
-        return super.bulkAddRecords(scheduledActions, updateMethod)
+        return super.bulkAddRecords(modelList, updateMethod)
     }
 
     /**
@@ -105,25 +105,25 @@ class ScheduledActionDbAdapter(db: SQLiteDatabase?, private val mRecurrenceDbAda
         return mDb.update(ScheduledActionEntry.TABLE_NAME, contentValues, where, whereArgs).toLong()
     }
 
-    protected override fun setBindings(stmt: SQLiteStatement, schedxAction: ScheduledAction): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: ScheduledAction): SQLiteStatement {
         stmt.clearBindings()
-        stmt.bindString(1, schedxAction.getMActionUID())
-        stmt.bindString(2, schedxAction.mActionType.name)
-        stmt.bindLong(3, schedxAction.mStartTime)
-        stmt.bindLong(4, schedxAction.getMEndDate())
-        stmt.bindLong(5, schedxAction.mLastRun)
-        stmt.bindLong(6, (if (schedxAction.isEnabled) 1 else 0).toLong())
-        stmt.bindString(7, schedxAction.mCreatedTimestamp.toString())
-        if (schedxAction.mTag == null) stmt.bindNull(8) else stmt.bindString(8, schedxAction.mTag)
-        stmt.bindString(9, Integer.toString(schedxAction.mTotalFrequency))
-        stmt.bindString(10, schedxAction.mRecurrence!!.mUID)
-        stmt.bindLong(11, (if (schedxAction.shouldAutoCreate()) 1 else 0).toLong())
-        stmt.bindLong(12, (if (schedxAction.shouldAutoNotify()) 1 else 0).toLong())
-        stmt.bindLong(13, schedxAction.mAdvanceCreateDays.toLong())
-        stmt.bindLong(14, schedxAction.mAdvanceNotifyDays.toLong())
-        stmt.bindString(15, schedxAction.mTemplateAccountUID)
-        stmt.bindString(16, Integer.toString(schedxAction.mExecutionCount))
-        stmt.bindString(17, schedxAction.mUID)
+        stmt.bindString(1, model.getMActionUID())
+        stmt.bindString(2, model.mActionType.name)
+        stmt.bindLong(3, model.mStartTime)
+        stmt.bindLong(4, model.getMEndDate())
+        stmt.bindLong(5, model.mLastRun)
+        stmt.bindLong(6, (if (model.isEnabled) 1 else 0).toLong())
+        stmt.bindString(7, model.mCreatedTimestamp.toString())
+        if (model.mTag == null) stmt.bindNull(8) else stmt.bindString(8, model.mTag)
+        stmt.bindString(9, model.mTotalFrequency.toString())
+        stmt.bindString(10, model.mRecurrence!!.mUID)
+        stmt.bindLong(11, (if (model.shouldAutoCreate()) 1 else 0).toLong())
+        stmt.bindLong(12, (if (model.shouldAutoNotify()) 1 else 0).toLong())
+        stmt.bindLong(13, model.mAdvanceCreateDays.toLong())
+        stmt.bindLong(14, model.mAdvanceNotifyDays.toLong())
+        stmt.bindString(15, model.mTemplateAccountUID)
+        stmt.bindString(16, model.mExecutionCount.toString())
+        stmt.bindString(17, model.mUID)
         return stmt
     }
 

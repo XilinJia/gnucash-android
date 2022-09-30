@@ -47,34 +47,34 @@ class BudgetsDbAdapter
         BudgetEntry.COLUMN_NUM_PERIODS
     )
 ) {
-    override fun addRecord(budget: Budget, updateMethod: UpdateMethod) {
-        require(budget.getMBudgetAmounts().size != 0) { "Budgets must have budget amounts" }
-        mRecurrenceDbAdapter.addRecord(budget.mRecurrence!!, updateMethod)
-        super.addRecord(budget, updateMethod)
-        mBudgetAmountsDbAdapter.deleteBudgetAmountsForBudget(budget.mUID!!)
-        for (budgetAmount in budget.getMBudgetAmounts()) {
+    override fun addRecord(model: Budget, updateMethod: UpdateMethod) {
+        require(model.getMBudgetAmounts().isNotEmpty()) { "Budgets must have budget amounts" }
+        mRecurrenceDbAdapter.addRecord(model.mRecurrence!!, updateMethod)
+        super.addRecord(model, updateMethod)
+        mBudgetAmountsDbAdapter.deleteBudgetAmountsForBudget(model.mUID!!)
+        for (budgetAmount in model.getMBudgetAmounts()) {
             mBudgetAmountsDbAdapter.addRecord(budgetAmount, updateMethod)
         }
     }
 
-    override fun bulkAddRecords(budgetList: List<Budget>, updateMethod: UpdateMethod): Long {
-        val budgetAmountList: MutableList<BudgetAmount> = ArrayList(budgetList.size * 2)
-        for (budget in budgetList) {
+    override fun bulkAddRecords(modelList: List<Budget>, updateMethod: UpdateMethod): Long {
+        val budgetAmountList: MutableList<BudgetAmount> = ArrayList(modelList.size * 2)
+        for (budget in modelList) {
             budgetAmountList.addAll(budget.getMBudgetAmounts())
         }
 
         //first add the recurrences, they have no dependencies (foreign key constraints)
-        val recurrenceList: MutableList<Recurrence> = ArrayList(budgetList.size)
-        for (budget in budgetList) {
+        val recurrenceList: MutableList<Recurrence> = ArrayList(modelList.size)
+        for (budget in modelList) {
             recurrenceList.add(budget.mRecurrence!!)
         }
         mRecurrenceDbAdapter.bulkAddRecords(recurrenceList.toList(), updateMethod)
 
         //now add the budgets themselves
-        val nRow = super.bulkAddRecords(budgetList, updateMethod)
+        val nRow = super.bulkAddRecords(modelList, updateMethod)
 
         //then add the budget amounts, they require the budgets to exist
-        if (nRow > 0 && !budgetAmountList.isEmpty()) {
+        if (nRow > 0 && budgetAmountList.isNotEmpty()) {
             mBudgetAmountsDbAdapter.bulkAddRecords(budgetAmountList, updateMethod)
         }
         return nRow
@@ -94,13 +94,13 @@ class BudgetsDbAdapter
         return budget
     }
 
-    protected override fun setBindings(stmt: SQLiteStatement, budget: Budget): SQLiteStatement {
+    override fun setBindings(stmt: SQLiteStatement, model: Budget): SQLiteStatement {
         stmt.clearBindings()
-        stmt.bindString(1, budget.mName)
-        if (budget.mDescription != null) stmt.bindString(2, budget.mDescription)
-        stmt.bindString(3, budget.mRecurrence!!.mUID)
-        stmt.bindLong(4, budget.mNumberOfPeriods)
-        stmt.bindString(5, budget.mUID)
+        stmt.bindString(1, model.mName)
+        if (model.mDescription != null) stmt.bindString(2, model.mDescription)
+        stmt.bindString(3, model.mRecurrence!!.mUID)
+        stmt.bindLong(4, model.mNumberOfPeriods)
+        stmt.bindString(5, model.mUID)
         return stmt
     }
 

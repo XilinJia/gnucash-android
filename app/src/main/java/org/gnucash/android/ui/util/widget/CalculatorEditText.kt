@@ -125,15 +125,13 @@ class CalculatorEditText : AppCompatEditText {
     fun bindListeners(calculatorKeyboard: CalculatorKeyboard) {
         this.calculatorKeyboard = calculatorKeyboard
         mContext = calculatorKeyboard.context
-        onFocusChangeListener = object : OnFocusChangeListener {
-            override fun onFocusChange(v: View, hasFocus: Boolean) {
-                if (hasFocus) {
-                    setSelection(text!!.length)
-                    calculatorKeyboard.showCustomKeyboard(v)
-                } else {
-                    calculatorKeyboard.hideCustomKeyboard()
-                    evaluate()
-                }
+        onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                setSelection(text!!.length)
+                calculatorKeyboard.showCustomKeyboard(v)
+            } else {
+                calculatorKeyboard.hideCustomKeyboard()
+                evaluate()
             }
         }
         setOnClickListener(OnClickListener { v ->
@@ -154,13 +152,10 @@ class CalculatorEditText : AppCompatEditText {
 
         // Although this handler doesn't make sense, if removed, the standard keyboard
         // shows up in addition to the calculator one when the EditText gets a touch event.
-        setOnTouchListener(object : OnTouchListener {
-            override fun onTouch(v: View, event: MotionEvent): Boolean {
-                // XXX: Use dispatchTouchEvent()?
-                onTouchEvent(event)
-                return false
-            }
-        })
+        setOnTouchListener { _, event -> // XXX: Use dispatchTouchEvent()?
+            onTouchEvent(event)
+            false
+        }
         (mContext as FormActivity?)!!.setOnBackListener(this.calculatorKeyboard)
     }
 
@@ -235,7 +230,7 @@ class CalculatorEditText : AppCompatEditText {
     val isInputValid: Boolean
         get() {
             val text = evaluate()
-            return !text.isEmpty() && error == null
+            return text.isNotEmpty() && error == null
         }
 
     /**
@@ -254,13 +249,13 @@ class CalculatorEditText : AppCompatEditText {
      */
     fun getValue(): BigDecimal? {
             evaluate()
-            try { //catch any exceptions in the conversion e.g. if a string with only "-" is entered
-                return AmountParser.parse(text.toString())
-            } catch (e: ParseException) {
-                val msg = "Error parsing amount string " + text + " from CalculatorEditText"
-                Log.i(javaClass.simpleName, msg, e)
-                return null
-            }
+        return try { //catch any exceptions in the conversion e.g. if a string with only "-" is entered
+            AmountParser.parse(text.toString())
+        } catch (e: ParseException) {
+            val msg = "Error parsing amount string $text from CalculatorEditText"
+            Log.i(javaClass.simpleName, msg, e)
+            null
+        }
         }
 
     /**

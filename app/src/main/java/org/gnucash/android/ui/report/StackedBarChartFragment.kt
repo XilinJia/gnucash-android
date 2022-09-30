@@ -40,6 +40,7 @@ import org.gnucash.android.ui.report.ReportsActivity.GroupInterval
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import java.util.*
+import kotlin.math.abs
 
 /**
  * Activity used for drawing a bar chart
@@ -91,8 +92,8 @@ class StackedBarChartFragment : BaseReportFragment() {
      * Returns a data object that represents a user data of the specified account types
      * @return a `BarData` instance that represents a user data
      */
-    protected val data: BarData
-        protected get() {
+    private val data: BarData
+        get() {
             val values: MutableList<BarEntry> = ArrayList()
             val labels: MutableList<String?> = ArrayList()
             val colors: MutableList<Int?> = ArrayList()
@@ -136,7 +137,7 @@ class StackedBarChartFragment : BaseReportFragment() {
                 val stack: MutableList<Float> = ArrayList()
                 for (account in mAccountsDbAdapter.simpleAccountList) {
                     if (account.mAccountType === mAccountType && !account.isPlaceholderAccount
-                        && account.getMCommodity().equals(mCommodity)
+                        && account.getMCommodity() == mCommodity
                     ) {
                         val balance = mAccountsDbAdapter.getAccountsBalance(listOf(account.mUID), start, end).asDouble()
                         if (balance != 0.0) {
@@ -155,8 +156,7 @@ class StackedBarChartFragment : BaseReportFragment() {
                             }
                             labels.add(accountName)
                             if (!accountToColorMap.containsKey(account.mUID)) {
-                                var color: Int
-                                color = if (mUseAccountColor) {
+                                val color: Int = if (mUseAccountColor) {
                                     if (account.getMColor() != Account.DEFAULT_COLOR) account.getMColor() else ReportsActivity.COLORS[accountToColorMap.size % ReportsActivity.COLORS.size]
                                 } else {
                                     ReportsActivity.COLORS[accountToColorMap.size % ReportsActivity.COLORS.size]
@@ -191,7 +191,7 @@ class StackedBarChartFragment : BaseReportFragment() {
      * @return a `BarData` instance for situation when no user data available
      */
     private val emptyData: BarData
-        private get() {
+        get() {
             val xValues: MutableList<String> = ArrayList()
             val yValues: MutableList<BarEntry> = ArrayList()
             for (i in 0 until NO_DATA_BAR_COUNTS) {
@@ -212,8 +212,7 @@ class StackedBarChartFragment : BaseReportFragment() {
     private fun getStartDate(accountType: AccountType): LocalDate {
         val adapter = TransactionsDbAdapter.instance
         val code = mCommodity!!.mMnemonic
-        var startDate: LocalDate
-        startDate = if (mReportPeriodStart == -1L) {
+        var startDate: LocalDate = if (mReportPeriodStart == -1L) {
             LocalDate(adapter.getTimestampOfEarliestTransaction(accountType, code))
         } else {
             LocalDate(mReportPeriodStart)
@@ -231,8 +230,7 @@ class StackedBarChartFragment : BaseReportFragment() {
     private fun getEndDate(accountType: AccountType): LocalDate {
         val adapter = TransactionsDbAdapter.instance
         val code = mCommodity!!.mMnemonic
-        var endDate: LocalDate
-        endDate = if (mReportPeriodEnd == -1L) {
+        var endDate: LocalDate = if (mReportPeriodEnd == -1L) {
             LocalDate(adapter.getTimestampOfLatestTransaction(accountType, code))
         } else {
             LocalDate(mReportPeriodEnd)
@@ -281,7 +279,7 @@ class StackedBarChartFragment : BaseReportFragment() {
     private fun setCustomLegend() {
         val legend = mChart!!.legend
         val dataSet = mChart!!.data.getDataSetByIndex(0)
-        val labels = LinkedHashSet(Arrays.asList(*dataSet.stackLabels))
+        val labels = LinkedHashSet(listOf(*dataSet.stackLabels))
         val colors = LinkedHashSet(dataSet.colors)
         if (ReportsActivity.COLORS.size >= labels.size) {
             legend.setCustom(ArrayList(colors), ArrayList(labels))
@@ -328,21 +326,20 @@ class StackedBarChartFragment : BaseReportFragment() {
     }
 
     override fun onValueSelected(e: Entry, dataSetIndex: Int, h: Highlight) {
-        if (e == null || (e as BarEntry).vals.size == 0) return
-        val entry = e
+        if ((e as BarEntry).vals.isEmpty()) return
         val index = if (h.stackIndex == -1) 0 else h.stackIndex
-        val stackLabels = entry.data.toString()
-        val label = (mChart!!.data.xVals[entry.xIndex] + ", "
+        val stackLabels = e.data.toString()
+        val label = (mChart!!.data.xVals[e.xIndex] + ", "
                 + stackLabels.substring(1, stackLabels.length - 1).split(",".toRegex()).dropLastWhile { it.isEmpty() }
             .toTypedArray()[index])
-        val value = Math.abs(entry.vals[index]).toDouble()
+        val value = abs(e.vals[index]).toDouble()
         var sum = 0.0
         if (mTotalPercentageMode) {
             for (barEntry in mChart!!.data.getDataSetByIndex(dataSetIndex).yVals) {
                 sum += (barEntry.negativeSum + barEntry.positiveSum).toDouble()
             }
         } else {
-            sum = (entry.negativeSum + entry.positiveSum).toDouble()
+            sum = (e.negativeSum + e.positiveSum).toDouble()
         }
         mSelectedValueTextView!!.text =
             String.format(SELECTED_VALUE_PATTERN, label.trim { it <= ' ' }, value, value / sum * 100)

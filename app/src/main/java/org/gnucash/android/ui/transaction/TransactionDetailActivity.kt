@@ -156,7 +156,7 @@ class TransactionDetailActivity : PasscodeLockActivity() {
         } else {
             findViewById<View>(R.id.row_trn_recurrence).visibility = View.GONE
         }
-        if (transaction.mNotes != null && !transaction.mNotes!!.isEmpty()) {
+        if (transaction.mNotes != null && transaction.mNotes!!.isNotEmpty()) {
             mNotes!!.text = transaction.mNotes
             findViewById<View>(R.id.row_trn_notes).visibility = View.VISIBLE
         } else {

@@ -22,7 +22,6 @@ import org.gnucash.android.db.DatabaseSchema.*
 import org.gnucash.android.db.adapter.AccountsDbAdapter
 import org.gnucash.android.export.ExportParams
 import org.gnucash.android.export.Exporter
-import org.gnucash.android.export.Exporter.ExporterException
 import org.gnucash.android.model.Commodity.Companion.getInstance
 import org.gnucash.android.util.FileUtils
 import org.gnucash.android.util.PreferencesHelper
@@ -57,7 +56,7 @@ class QifExporter : Exporter {
     }
 
     @Throws(ExporterException::class)
-    override fun generateExport(): List<String?>? {
+    override fun generateExport(): List<String>? {
         val newLine = "\n"
         val transactionsDbAdapter = mTransactionsDbAdapter!!
         return try {
@@ -164,7 +163,7 @@ class QifExporter : Exporter {
                         .append(cursor.getString(cursor.getColumnIndexOrThrow("acct2_full_name")))
                         .append(newLine)
                     val splitMemo = cursor.getString(cursor.getColumnIndexOrThrow("split_memo"))
-                    if (splitMemo != null && splitMemo.length > 0) {
+                    if (splitMemo != null && splitMemo.isNotEmpty()) {
                         writer.append(QifHelper.SPLIT_MEMO_PREFIX)
                             .append(splitMemo)
                             .append(newLine)
@@ -213,14 +212,16 @@ class QifExporter : Exporter {
             /// export successful
             PreferencesHelper.lastExportTime = TimestampHelper.timestampFromNow
             val exportedFiles = splitQIF(file)
-            if (exportedFiles.isEmpty()) emptyList<String>() else if (exportedFiles.size > 1) zipQifs(exportedFiles) else exportedFiles
+            if (exportedFiles.isEmpty()) emptyList()
+            else if (exportedFiles.size > 1) zipQifs(exportedFiles)
+            else exportedFiles
         } catch (e: IOException) {
             throw ExporterException(mExportParams, e)
         }
     }
 
     @Throws(IOException::class)
-    private fun zipQifs(exportedFiles: List<String?>): List<String?> {
+    private fun zipQifs(exportedFiles: List<String>): List<String> {
         val zipFileName = "$exportCacheFilePath.zip"
         FileUtils.zipFiles(exportedFiles, zipFileName)
         return listOf(zipFileName)
@@ -234,10 +235,10 @@ class QifExporter : Exporter {
      * @throws IOException if something went wrong while splitting the file.
      */
     @Throws(IOException::class)
-    private fun splitQIF(file: File): List<String?> {
+    private fun splitQIF(file: File): List<String> {
         // split only at the last dot
         val pathParts = file.path.split("(?=\\.[^\\.]+$)".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        val splitFiles = ArrayList<String?>()
+        val splitFiles = ArrayList<String>()
         var line: String
         val `in` = BufferedReader(FileReader(file))
         var out: BufferedWriter? = null

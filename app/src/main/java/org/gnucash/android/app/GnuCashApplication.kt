@@ -149,20 +149,19 @@ class GnuCashApplication : MultiDexApplication() {
             if (mDbHelper != null) { //close if open
                 mDbHelper!!.readableDatabase.close()
             }
-            try {
-                mDbHelper = DatabaseHelper(
+            mDbHelper = try {
+                DatabaseHelper(
                     appContext,
                     booksDbAdapter!!.activeBookUID
                 )
             } catch (e: NoActiveBookFoundException) {
                 booksDbAdapter!!.fixBooksDatabase()
-                mDbHelper = DatabaseHelper(
+                DatabaseHelper(
                     appContext,
                     booksDbAdapter!!.activeBookUID
                 )
             }
-            val mainDb: SQLiteDatabase?
-            mainDb = try {
+            val mainDb: SQLiteDatabase? = try {
                 mDbHelper!!.writableDatabase
             } catch (e: SQLException) {
                 Crashlytics.logException(e)
