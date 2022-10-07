@@ -207,7 +207,7 @@ dependencies {
             'com.code-troopers.betterpickers:library:3.1.0',
             'org.jraf:android-switch-backport:2.0.1@aar',
             'com.github.PhilJay:MPAndroidChart:v2.1.3',
-            'joda-time:joda-time:2.11.1',
+            'joda-time:joda-time:2.11.2',
             'com.google.android.gms:play-services-drive:17.0.0',
             'io.github.kobakei:ratethisapp:1.1.3',
             'com.squareup:android-times-square:1.7.11@aar',
@@ -236,14 +236,14 @@ dependencies {
     //  external library org.slf4j:jcl-over-slf4j:1.7.36
     //  was manually edit to remove logging class
 
-    testImplementation 'org.robolectric:robolectric:4.8.2'
+    testImplementation 'org.robolectric:robolectric:4.9'
 
     testImplementation(
             'junit:junit:4.13.2',
-            'joda-time:joda-time:2.11.1',
+            'joda-time:joda-time:2.11.2',
             'org.assertj:assertj-core:3.23.1'
     )
-    testImplementation 'org.robolectric:shadows-multidex:4.8.2'
+    testImplementation 'org.robolectric:shadows-multidex:4.9'
 
     androidTestImplementation (
             'androidx.test.ext:junit:1.1.3',
