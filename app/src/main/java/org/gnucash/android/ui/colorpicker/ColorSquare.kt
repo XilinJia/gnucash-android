@@ -1,12 +1,6 @@
-package org.gnucash.android.ui.colorpicker
-
-import android.content.Context
-import android.util.AttributeSet
-import android.widget.QuickContactBadge
-import org.gnucash.android.R
-
 /*
  * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2022 Xilin Jia https://github.com/XilinJia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +13,17 @@ import org.gnucash.android.R
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /**
+ */
+
+package org.gnucash.android.ui.colorpicker
+
+import android.content.Context
+import android.util.AttributeSet
+import android.widget.QuickContactBadge
+import org.gnucash.android.R
+
+
+/**
  * The color square used as an entry point to launching the [ColorPickerDialog].
  * @author Xilin Jia <https://github.com/XilinJia> [Kotlin code created (Copyright (C) 2022)]
  */

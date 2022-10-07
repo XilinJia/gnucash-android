@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012 - 2014 Ngewi Fet <ngewif@gmail.com>
+ * Copyright (C) 2022 Xilin Jia https://github.com/XilinJia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +75,7 @@ class TransactionsListFragment : Fragment(), Refreshable, LoaderManager.LoaderCa
         setHasOptionsMenu(true)
         val args = arguments
         mAccountUID = args!!.getString(UxArgument.SELECTED_ACCOUNT_UID)
-        mUseCompactView = PreferenceActivity.getActiveBookSharedPreferences()
+        mUseCompactView = PreferenceActivity.activeBookSharedPreferences
             .getBoolean(activity!!.getString(R.string.key_use_compact_list), !GnuCashApplication.isDoubleEntryEnabled)
         //if there was a local override of the global setting, respect it
         if (savedInstanceState != null) mUseCompactView =

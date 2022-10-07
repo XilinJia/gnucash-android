@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015 Alceu Rodrigues Neto <alceurneto@gmail.com>
+ * Copyright (C) 2022 Xilin Jia https://github.com/XilinJia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +70,7 @@ object PreferencesHelper {
     @JvmStatic
     var lastExportTime: Timestamp?
         get() {
-            val utcString = PreferenceActivity.getActiveBookSharedPreferences()
+            val utcString = PreferenceActivity.activeBookSharedPreferences
                 .getString(
                     PREFERENCE_LAST_EXPORT_TIME_KEY,
                     getUtcStringFromTimestamp(timestampFromEpochZero)

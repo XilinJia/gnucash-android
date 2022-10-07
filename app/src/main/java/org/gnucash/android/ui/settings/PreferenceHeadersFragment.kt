@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015 Ngewi Fet <ngewif@gmail.com>
+ * Copyright (C) 2022 Xilin Jia https://github.com/XilinJia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.gnucash.android.ui.settings
 
-package org.gnucash.android.ui.settings;
-
-import android.os.Bundle;
-import androidx.preference.PreferenceFragmentCompat;
-
-import org.gnucash.android.R;
+import android.os.Bundle
+import androidx.preference.PreferenceFragmentCompat
+import org.gnucash.android.R
 
 /**
  * Fragment for displaying preference headers
- * @author Ngewi Fet <ngewif@gmail.com>
+ * @author Ngewi Fet <ngewif></ngewif>@gmail.com>
+ * @author Xilin Jia <https://github.com/XilinJia> [Kotlin code created (Copyright (C) 2022)]
  */
-public class PreferenceHeadersFragment extends PreferenceFragmentCompat {
-
-    @Override
-    public void onCreatePreferences(Bundle bundle, String s) {
-        addPreferencesFromResource(R.xml.preference_fragment_headers);
+class PreferenceHeadersFragment : PreferenceFragmentCompat() {
+    override fun onCreatePreferences(bundle: Bundle, s: String) {
+        addPreferencesFromResource(R.xml.preference_fragment_headers)
     }
-
 }

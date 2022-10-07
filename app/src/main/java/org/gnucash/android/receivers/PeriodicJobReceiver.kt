@@ -1,4 +1,6 @@
-/* Copyright (c) 2018 Àlex Magaz Graça <alexandre.magaz@gmail.com>
+/*
+ * Copyright (c) 2018 Àlex Magaz Graça <alexandre.magaz@gmail.com>
+ * Copyright (C) 2020 Xilin Jia https://github.com/XilinJia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012 - 2015 Ngewi Fet <ngewif@gmail.com>
+ * Copyright (C) 2022 Xilin Jia https://github.com/XilinJia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,7 +265,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         setHasOptionsMenu(true)
-        val sharedPrefs = PreferenceActivity.getActiveBookSharedPreferences()
+        val sharedPrefs = PreferenceActivity.activeBookSharedPreferences
         mUseDoubleEntry = sharedPrefs.getBoolean(getString(R.string.key_use_double_entry), false)
         if (!mUseDoubleEntry) {
             mDoubleEntryLayout!!.visibility = View.GONE
@@ -487,7 +488,7 @@ class TransactionFormFragment : Fragment(), CalendarDatePickerDialogFragment.OnD
         mDate = Calendar.getInstance()
         mTime = mDate
         mTransactionTypeSwitch!!.accountType = mAccountType!!
-        val typePref = PreferenceActivity.getActiveBookSharedPreferences()
+        val typePref = PreferenceActivity.activeBookSharedPreferences
             .getString(getString(R.string.key_default_transaction_type), "DEBIT")
         mTransactionTypeSwitch!!.setChecked(TransactionType.valueOf(typePref!!))
         var code = GnuCashApplication.defaultCurrencyCode

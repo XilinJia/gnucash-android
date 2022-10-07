@@ -1,5 +1,6 @@
 /**
  * Copyright 2013 Maarten Pennings extended by SimplicityApks
+ * Copyright (C) 2022 Xilin Jia https://github.com/XilinJia
  *
  * Modified by:
  * Copyright 2015 Àlex Magaz Graça <rivaldi8></rivaldi8>@gmail.com>

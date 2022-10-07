@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012 - 2015 Ngewi Fet <ngewif@gmail.com>
+ * Copyright (C) 2022 Xilin Jia https://github.com/XilinJia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,7 +208,7 @@ class WidgetConfigurationActivity : Activity() {
          * @param appWidgetId ID of the widget whose configuration to load/save
          */
         private fun loadOldPreferences(context: Context, appWidgetId: Int) {
-            val preferences = PreferenceActivity.getActiveBookSharedPreferences()
+            val preferences = PreferenceActivity.activeBookSharedPreferences
             val accountUID = preferences.getString(UxArgument.SELECTED_ACCOUNT_UID + appWidgetId, null)
             if (accountUID != null) {
                 val bookUID = BooksDbAdapter.instance.activeBookUID
@@ -258,7 +259,7 @@ class WidgetConfigurationActivity : Activity() {
                 views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent)
                 views.setOnClickPendingIntent(R.id.btn_new_transaction, pendingIntent)
                 appWidgetManager.updateAppWidget(appWidgetId, views)
-                val editor = PreferenceActivity.getActiveBookSharedPreferences()
+                val editor = PreferenceActivity.activeBookSharedPreferences
                     .edit() //PreferenceManager.getDefaultSharedPreferences(context).edit();
                 editor.remove(UxArgument.SELECTED_ACCOUNT_UID + appWidgetId)
                 editor.apply()

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2013 Ngewi Fet <ngewif@gmail.com>
+ * Copyright (C) 2022 Xilin Jia https://github.com/XilinJia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -533,7 +534,7 @@ class ExportFormFragment : Fragment(), OnRecurrenceSetListener, CalendarDatePick
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             BackupPreferenceFragment.REQUEST_RESOLVE_CONNECTION -> if (resultCode == Activity.RESULT_OK) {
-                BackupPreferenceFragment.mGoogleApiClient.connect()
+                BackupPreferenceFragment.mGoogleApiClient!!.connect()
             }
 
             REQUEST_EXPORT_FILE -> if (resultCode == Activity.RESULT_OK) {

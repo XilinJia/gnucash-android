@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013 - 2014 Ngewi Fet <ngewif@gmail.com>
+ * Copyright (C) 2020 Xilin Jia https://github.com/XilinJia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,7 +204,7 @@ class GnuCashApplication : MultiDexApplication() {
          */
         val isDoubleEntryEnabled: Boolean
             get() {
-                val sharedPrefs = PreferenceActivity.getActiveBookSharedPreferences()
+                val sharedPrefs = PreferenceActivity.activeBookSharedPreferences
                 return sharedPrefs.getBoolean(appContext!!.getString(R.string.key_use_double_entry), true)
             }
 
@@ -215,7 +216,7 @@ class GnuCashApplication : MultiDexApplication() {
          */
         @JvmStatic
         fun shouldSaveOpeningBalances(defaultValue: Boolean): Boolean {
-            val sharedPrefs = PreferenceActivity.getActiveBookSharedPreferences()
+            val sharedPrefs = PreferenceActivity.activeBookSharedPreferences
             return sharedPrefs.getBoolean(appContext!!.getString(R.string.key_save_opening_balances), defaultValue)
         }//there are some strange locales out there//start with USD as the default
 
