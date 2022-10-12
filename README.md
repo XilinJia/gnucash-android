@@ -12,7 +12,7 @@ There is an issue of duplicate class regarding apache common-logging when buildi
 I manually removed the class from external library org.slf4j:jcl-over-slf4j:1.7.36.  Since the external libraries
 are collected at one's build environment, if anyone clones this package, he needs to do it similarly on his build.
 
-The debug app runs fine so far on my phone.
+The debug app (apk uploaded to releases here) runs fine so far on my phone.
 
 2022-09-26: models codes converted to Kotlin
 
