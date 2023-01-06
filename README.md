@@ -3,7 +3,7 @@
 </a>
 
 ---------------------------------------------------
-This fork is updated to SDK 33, Gradle 7.5.1, Androidx, and all dependencies to current.
+This fork first updates the old project to SDK 33, Gradle 7.5.1, Androidx, and all dependencies to current, then migrates most code base from Java to Kotlin.
 
 Due to compile errors, at the moment a couple OwnCloud functionalities are disabled.  Also, a couple 
 routines under androidTest module are turned off.
